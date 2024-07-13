@@ -75,18 +75,6 @@ struct FooterView: View {
                 
                 Spacer()
                 
-                // Gallery button
-                Button(action: openPhotosApp) {
-                    Label {
-                    } icon: {
-                        Image(systemName: "photo")
-                            .font(.title)
-                    }
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 12)
-                }
-                
                 // Flash button
                 Button(action: {
                     isFlashOn.toggle()
@@ -98,6 +86,18 @@ struct FooterView: View {
                         .foregroundColor(isFlashOn ? .yellow : .gray)
                 }
                 .padding(.trailing, 10)
+                
+                // Gallery button
+                Button(action: openPhotosApp) {
+                    Label {
+                    } icon: {
+                        Image(systemName: "photo")
+                            .font(.title)
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                }
             }
         }
         .preferredColorScheme(.dark)
