@@ -9,59 +9,29 @@ import SwiftUI
 import AVFoundation
 
 struct CameraView: UIViewControllerRepresentable {
+    @ObservedObject var frameHandler: FrameHandler
+
     func makeUIViewController(context: Context) -> UIViewController {
-        return CameraViewController()
+        let controller = CameraViewController()
+        controller.frameHandler = frameHandler
+        return controller
     }
     
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }
 
 class CameraViewController: UIViewController {
-    private let captureSession = AVCaptureSession()
+    var frameHandler: FrameHandler?
     private var previewLayer: AVCaptureVideoPreviewLayer!
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        checkPermissions()
-    }
-    
-    private func checkPermissions() {
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .authorized:
-            setupCaptureSession()
-        case .notDetermined:
-            AVCaptureDevice.requestAccess(for: .video) { granted in
-                if granted {
-                    DispatchQueue.main.async {
-                        self.setupCaptureSession()
-                    }
-                }
-            }
-        default:
-            return
-        }
-    }
-
-    private func setupCaptureSession() {
-        captureSession.beginConfiguration()
-        
-        guard let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else { return }
-        do {
-            let videoDeviceInput = try AVCaptureDeviceInput(device: videoDevice)
-            if captureSession.canAddInput(videoDeviceInput) {
-                captureSession.addInput(videoDeviceInput)
-            }
-        } catch {
-            print("Error setting up video input: \(error)")
-            return
-        }
-        
-        captureSession.commitConfiguration()
-        captureSession.startRunning()
         setupPreviewLayer()
     }
     
     private func setupPreviewLayer() {
+        guard let frameHandler = frameHandler, let captureSession = frameHandler.captureSession else { return }
+        
         previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         previewLayer.frame = view.bounds
         previewLayer.videoGravity = .resizeAspectFill
@@ -70,5 +40,6 @@ class CameraViewController: UIViewController {
 }
 
 #Preview {
-    CameraView()
+    CameraView(frameHandler: FrameHandler())
 }
+

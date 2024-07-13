@@ -10,27 +10,25 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var currentView: ViewType = .content
+    @ObservedObject var frameHandler = FrameHandler()
 
     var body: some View {
         VStack {
             HeaderView()
-
             Spacer()
             
             if currentView == .content {
                 ZStack {
-                    CameraView()
+                    CameraView(frameHandler: frameHandler)
                 }
-                .compositingGroup()
-                .edgesIgnoringSafeArea(.all)
-                FooterView(frameHandler: FrameHandler())
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                FooterView(frameHandler: frameHandler)
             } else if currentView == .videoPreview {
                 VideoPreviewView()
             }
             
             Spacer()
         }
-        
     }
 }
 
