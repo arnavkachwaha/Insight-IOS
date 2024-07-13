@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		050EADE62C42FF7F00C949A6 /* EyeMask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 050EADE52C42FF7F00C949A6 /* EyeMask.swift */; };
 		053F2FDF2C42ECD1007A9BF5 /* InsightApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053F2FDE2C42ECD1007A9BF5 /* InsightApp.swift */; };
 		053F2FE12C42ECD1007A9BF5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053F2FE02C42ECD1007A9BF5 /* ContentView.swift */; };
 		053F2FE32C42ECD2007A9BF5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 053F2FE22C42ECD2007A9BF5 /* Assets.xcassets */; };
@@ -18,6 +19,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		050EADE52C42FF7F00C949A6 /* EyeMask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EyeMask.swift; sourceTree = "<group>"; };
 		053F2FDB2C42ECD1007A9BF5 /* Insight.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Insight.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		053F2FDE2C42ECD1007A9BF5 /* InsightApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightApp.swift; sourceTree = "<group>"; };
 		053F2FE02C42ECD1007A9BF5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -64,6 +66,7 @@
 				053F2FF22C42ED92007A9BF5 /* FooterView.swift */,
 				053F2FEC2C42ED1C007A9BF5 /* FrameHandler.swift */,
 				053F2FF82C42F1BB007A9BF5 /* CameraView.swift */,
+				050EADE52C42FF7F00C949A6 /* EyeMask.swift */,
 				053F2FEE2C42ED41007A9BF5 /* HeaderView.swift */,
 				053F2FE22C42ECD2007A9BF5 /* Assets.xcassets */,
 				053F2FE42C42ECD2007A9BF5 /* Preview Content */,
@@ -149,6 +152,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				050EADE62C42FF7F00C949A6 /* EyeMask.swift in Sources */,
 				053F2FF92C42F1BB007A9BF5 /* CameraView.swift in Sources */,
 				053F2FE12C42ECD1007A9BF5 /* ContentView.swift in Sources */,
 				053F2FDF2C42ECD1007A9BF5 /* InsightApp.swift in Sources */,

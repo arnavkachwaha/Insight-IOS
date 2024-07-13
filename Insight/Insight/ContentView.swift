@@ -15,11 +15,13 @@ struct ContentView: View {
     var body: some View {
         VStack {
             HeaderView()
-            Spacer()
             
+            Spacer()
+    
             if currentView == .content {
                 ZStack {
                     CameraView(frameHandler: frameHandler)
+                    EyeMask(yOffset: 300)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 FooterView(frameHandler: frameHandler)
