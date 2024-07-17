@@ -5,42 +5,23 @@
 //  Created by Arnav Singh Kachwaha on 6/25/24.
 //
 
-
 import SwiftUI
 
 struct ContentView: View {
-    @State private var currentView: ViewType = .content
     @ObservedObject var frameHandler = FrameHandler()
-
+    
     var body: some View {
         VStack {
+            HeaderView()
             Spacer()
-    
-            if currentView == .content {
-                ZStack {
-                    CameraView(frameHandler: frameHandler)
-                    EyeMask(yOffset: 250)
-                    HeaderView()
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                FooterView(frameHandler: frameHandler)
-            } else if currentView == .videoPreview {
-                VideoPreviewView()
+            ZStack {
+                CameraView(frameHandler: frameHandler)
+                EyeMask(yOffset: 200)
             }
-            
+            Spacer()
+            FooterView(frameHandler: frameHandler)
             Spacer()
         }
-    }
-}
-
-enum ViewType {
-    case content
-    case videoPreview
-}
-
-struct VideoPreviewView: View {
-    var body: some View {
-        Text("This is the Video Preview View")
     }
 }
 

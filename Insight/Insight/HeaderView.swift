@@ -10,7 +10,6 @@ import SwiftUI
 
 struct HeaderView: View {
     var body: some View {
-        VStack {
             HStack {
     //            Button(action: {
     //                // No action for now
@@ -26,7 +25,6 @@ struct HeaderView: View {
                     .font(.title)
                     .fontWeight(.bold)
                     .foregroundColor(Color.blue)
-                    .frame(alignment: .top)
                 Spacer()
     //            Button(action: {
     //                // No action for now
@@ -37,8 +35,6 @@ struct HeaderView: View {
     //                    .padding(10)
     //            }
             }.foregroundColor(.clear)
-            Spacer()
-        }
     }
 }
 

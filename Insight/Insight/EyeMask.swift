@@ -37,13 +37,11 @@ struct EyeMask: View {
                         .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
                 )
         }
-        .edgesIgnoringSafeArea(.all)
-        
     }
 }
 
 struct EyeMask_Previews: PreviewProvider {
     static var previews: some View {
-        EyeMask(yOffset: 300)
+        EyeMask(yOffset: 200).background(Color(uiColor: .black))
     }
 }
