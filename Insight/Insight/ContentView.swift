@@ -11,17 +11,12 @@ struct ContentView: View {
     @ObservedObject var frameHandler = FrameHandler()
     
     var body: some View {
-        VStack {
-            HeaderView()
-            Spacer()
             ZStack {
                 CameraView(frameHandler: frameHandler)
                 EyeMask(yOffset: 200)
+                HeaderView()
+                FooterView(frameHandler: frameHandler)
             }
-            Spacer()
-            FooterView(frameHandler: frameHandler)
-            Spacer()
-        }
     }
 }
 

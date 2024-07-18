@@ -16,6 +16,7 @@ struct FooterView: View {
     
     var body: some View {
         VStack {
+            Spacer()
             // Recording button
             Button(action: {
                 isRecording.toggle()
