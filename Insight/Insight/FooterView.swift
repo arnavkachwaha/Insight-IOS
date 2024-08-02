@@ -112,6 +112,12 @@ struct FooterView: View {
     }
 }
 
-#Preview {
-    FooterView(frameHandler: FrameHandler())
+//#Preview {
+//    FooterView(frameHandler: FrameHandler())
+//}
+
+struct FooterView_Previews: PreviewProvider {
+    static var previews: some View {
+        FooterView(frameHandler: FrameHandler())
+    }
 }

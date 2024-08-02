@@ -21,7 +21,7 @@ struct ContentView: View {
             if currentView == .content {
                 ZStack {
                     CameraView(frameHandler: frameHandler)
-                    EyeMask(yOffset: 300)
+//                    EyeMask(yOffset: 300)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 FooterView(frameHandler: frameHandler)
@@ -45,6 +45,12 @@ struct VideoPreviewView: View {
     }
 }
 
-#Preview {
-    ContentView()
+//#Preview {
+//    ContentView()
+//}
+
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView(frameHandler: FrameHandler())
+    }
 }

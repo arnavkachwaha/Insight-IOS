@@ -16,6 +16,7 @@
 		053F2FEF2C42ED41007A9BF5 /* HeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053F2FEE2C42ED41007A9BF5 /* HeaderView.swift */; };
 		053F2FF32C42ED92007A9BF5 /* FooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053F2FF22C42ED92007A9BF5 /* FooterView.swift */; };
 		053F2FF92C42F1BB007A9BF5 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053F2FF82C42F1BB007A9BF5 /* CameraView.swift */; };
+		FBDD28EA2C4A0CB2007166A3 /* cyclops_782_1x.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = FBDD28E92C4A0CB2007166A3 /* cyclops_782_1x.mlpackage */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,6 +30,7 @@
 		053F2FEE2C42ED41007A9BF5 /* HeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderView.swift; sourceTree = "<group>"; };
 		053F2FF22C42ED92007A9BF5 /* FooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FooterView.swift; sourceTree = "<group>"; };
 		053F2FF82C42F1BB007A9BF5 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
+		FBDD28E92C4A0CB2007166A3 /* cyclops_782_1x.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; name = cyclops_782_1x.mlpackage; path = "../../../../cyclops-ml/models/mlpackages/cyclops_782_1x.mlpackage"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,6 +79,7 @@
 		053F2FE42C42ECD2007A9BF5 /* Preview Content */ = {
 			isa = PBXGroup;
 			children = (
+				FBDD28E92C4A0CB2007166A3 /* cyclops_782_1x.mlpackage */,
 				053F2FE52C42ECD2007A9BF5 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
@@ -152,6 +155,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FBDD28EA2C4A0CB2007166A3 /* cyclops_782_1x.mlpackage in Sources */,
 				050EADE62C42FF7F00C949A6 /* EyeMask.swift in Sources */,
 				053F2FF92C42F1BB007A9BF5 /* CameraView.swift in Sources */,
 				053F2FE12C42ECD1007A9BF5 /* ContentView.swift in Sources */,
@@ -292,7 +296,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Insight/Preview Content\"";
-				DEVELOPMENT_TEAM = L7745265ZX;
+				DEVELOPMENT_TEAM = AU5YKC8N9W;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Please allow Camera Access";
@@ -301,6 +305,7 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -322,7 +327,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Insight/Preview Content\"";
-				DEVELOPMENT_TEAM = L7745265ZX;
+				DEVELOPMENT_TEAM = AU5YKC8N9W;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Please allow Camera Access";
@@ -331,6 +336,7 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

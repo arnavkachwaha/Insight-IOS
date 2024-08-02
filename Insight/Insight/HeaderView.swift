@@ -38,6 +38,13 @@ struct HeaderView: View {
     }
 }
 
-#Preview {
-    HeaderView()
+//#Preview {
+//    HeaderView()
+//}
+
+
+struct HeaderView_Previews: PreviewProvider {
+    static var previews: some View {
+        HeaderView()
+    }
 }
