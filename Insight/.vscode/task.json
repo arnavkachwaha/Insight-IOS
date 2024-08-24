@@ -1,0 +1,50 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build iOS",
+            "type": "shell",
+            "command": "xcodebuild",
+            "args": [
+                "-scheme",
+                "Insight",
+                "-destination",
+                "platform=iOS Simulator,name=iPhone 14",
+                "clean",
+                "build"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Run iOS",
+            "type": "shell",
+            "command": "xcrun",
+            "args": [
+                "simctl",
+                "boot",
+                "iPhone 14"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "Launch App on Simulator",
+            "type": "shell",
+            "dependsOrder": "sequence",
+            "dependsOn": ["Build iOS", "Run iOS"],
+            "command": "xcrun",
+            "args": [
+                "simctl",
+                "install",
+                "booted",
+                "/Users/robertmcpherson/Library/Developer/Xcode/DerivedData/Insight-aghjfmfzupvcrndukgupdoqhkajo/Build/Products/Debug-iphonesimulator"
+            ]
+        }
+    ]
+}

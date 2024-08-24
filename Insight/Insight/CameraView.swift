@@ -1,8 +1,13 @@
-import SwiftUI
+import UIKit
 import AVFoundation
+import SwiftUI
 
 struct CameraView: UIViewControllerRepresentable {
     @ObservedObject var frameHandler: FrameHandler
+
+    init(frameHandler: FrameHandler) {
+        self.frameHandler = frameHandler
+    }
 
     func makeUIViewController(context: Context) -> UIViewController {
         let controller = CameraViewController()
@@ -17,11 +22,12 @@ class CameraViewController: UIViewController {
     var frameHandler: FrameHandler?
     private var previewLayer: AVCaptureVideoPreviewLayer!
     private var imageView: UIImageView!
-
+    private var maskView: UIImageView!
+    private let cyclopsProcessor = CyclopsProcessor() // Use the new CyclopsProcessor
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupPreviewLayer()
-        setupImageView()
     }
     
     private func setupPreviewLayer() {
@@ -31,21 +37,6 @@ class CameraViewController: UIViewController {
         previewLayer.frame = view.bounds
         previewLayer.videoGravity = .resizeAspectFill
         view.layer.addSublayer(previewLayer)
-    }
-
-    private func setupImageView() {
-        imageView = UIImageView(image: UIImage(named: "vid10.frame9"))
-        imageView.contentMode = .scaleAspectFit
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(imageView)
-
-        // Constraints to position the image view
-        NSLayoutConstraint.activate([
-            imageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            imageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            imageView.widthAnchor.constraint(equalToConstant: 200),
-            imageView.heightAnchor.constraint(equalToConstant: 200)
-        ])
     }
 }
 

@@ -5,7 +5,6 @@
 //  Created by Arnav Singh Kachwaha on 6/25/24.
 //
 
-
 import SwiftUI
 
 struct ContentView: View {
@@ -21,7 +20,9 @@ struct ContentView: View {
             if currentView == .content {
                 ZStack {
                     CameraView(frameHandler: frameHandler)
-//                    EyeMask(yOffset: 300)
+                    PupilMaskView(frameHandler: frameHandler)
+                    EyeMask(yOffset: 300)
+                    
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 FooterView(frameHandler: frameHandler)

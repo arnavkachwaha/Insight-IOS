@@ -17,6 +17,8 @@
 		053F2FF32C42ED92007A9BF5 /* FooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053F2FF22C42ED92007A9BF5 /* FooterView.swift */; };
 		053F2FF92C42F1BB007A9BF5 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053F2FF82C42F1BB007A9BF5 /* CameraView.swift */; };
 		FBDD28EA2C4A0CB2007166A3 /* cyclops_782_1x.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = FBDD28E92C4A0CB2007166A3 /* cyclops_782_1x.mlpackage */; };
+		FBDD28EE2C5D9CE2007166A3 /* CyclopsProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDD28ED2C5D9CE2007166A3 /* CyclopsProcessor.swift */; };
+		FBDD28F02C79468A007166A3 /* PupilMaskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDD28EF2C79468A007166A3 /* PupilMaskView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +33,8 @@
 		053F2FF22C42ED92007A9BF5 /* FooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FooterView.swift; sourceTree = "<group>"; };
 		053F2FF82C42F1BB007A9BF5 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
 		FBDD28E92C4A0CB2007166A3 /* cyclops_782_1x.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; name = cyclops_782_1x.mlpackage; path = "../../../../cyclops-ml/models/mlpackages/cyclops_782_1x.mlpackage"; sourceTree = "<group>"; };
+		FBDD28ED2C5D9CE2007166A3 /* CyclopsProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyclopsProcessor.swift; sourceTree = "<group>"; };
+		FBDD28EF2C79468A007166A3 /* PupilMaskView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PupilMaskView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,6 +72,8 @@
 				053F2FF22C42ED92007A9BF5 /* FooterView.swift */,
 				053F2FEC2C42ED1C007A9BF5 /* FrameHandler.swift */,
 				053F2FF82C42F1BB007A9BF5 /* CameraView.swift */,
+				FBDD28ED2C5D9CE2007166A3 /* CyclopsProcessor.swift */,
+				FBDD28EF2C79468A007166A3 /* PupilMaskView.swift */,
 				050EADE52C42FF7F00C949A6 /* EyeMask.swift */,
 				053F2FEE2C42ED41007A9BF5 /* HeaderView.swift */,
 				053F2FE22C42ECD2007A9BF5 /* Assets.xcassets */,
@@ -155,10 +161,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FBDD28EE2C5D9CE2007166A3 /* CyclopsProcessor.swift in Sources */,
 				FBDD28EA2C4A0CB2007166A3 /* cyclops_782_1x.mlpackage in Sources */,
 				050EADE62C42FF7F00C949A6 /* EyeMask.swift in Sources */,
 				053F2FF92C42F1BB007A9BF5 /* CameraView.swift in Sources */,
 				053F2FE12C42ECD1007A9BF5 /* ContentView.swift in Sources */,
+				FBDD28F02C79468A007166A3 /* PupilMaskView.swift in Sources */,
 				053F2FDF2C42ECD1007A9BF5 /* InsightApp.swift in Sources */,
 				053F2FED2C42ED1C007A9BF5 /* FrameHandler.swift in Sources */,
 				053F2FF32C42ED92007A9BF5 /* FooterView.swift in Sources */,
