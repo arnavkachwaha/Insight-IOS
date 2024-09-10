@@ -2,7 +2,7 @@ import CoreML
 import UIKit
 
 class CyclopsProcessor {
-    private var model: cyclops_782_1x?
+    private var model: segformer_model_aug8?
 
     init() {
         loadModel()
@@ -10,11 +10,11 @@ class CyclopsProcessor {
 
     private func loadModel() {
         // Initialize the model
-        guard let modelURL = Bundle.main.url(forResource: "cyclops_782_1x", withExtension: "mlmodelc") else {
+        guard let modelURL = Bundle.main.url(forResource: "segformer_model-aug8", withExtension: "mlmodelc") else {
             fatalError("Failed to find model URL.")
         }
         do {
-            self.model = try cyclops_782_1x(contentsOf: modelURL)
+            self.model = try segformer_model_aug8(contentsOf: modelURL)
         } catch {
             fatalError("Failed to load the model: \(error)")
         }
@@ -33,7 +33,7 @@ class CyclopsProcessor {
         }
 
         // Create the model input
-        let input = cyclops_782_1xInput(pixel_values: mlMultiArray)
+        let input = segformer_model_aug8Input(pixel_values: mlMultiArray)
 
         // Make the prediction
         do {

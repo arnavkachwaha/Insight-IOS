@@ -132,7 +132,7 @@ extension FrameHandler: AVCaptureVideoDataOutputSampleBufferDelegate {
         // Get the current frame timestamp
         let currentTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
         
-        // Throttle the frame processing to 10 FPS
+        // Throttle the frame processing to x FPS
         let frameRate: CMTime = CMTime(value: 1, timescale: 30) // FPS
         if currentTime - lastFrameTime < frameRate {
             return

@@ -20,7 +20,7 @@ struct ContentView: View {
             if currentView == .content {
                 ZStack {
                     CameraView(frameHandler: frameHandler)
-                    PupilMaskView(frameHandler: frameHandler)
+//                    PupilMaskView(frameHandler: frameHandler)
                     EyeMask(yOffset: 300)
                     
                 }
