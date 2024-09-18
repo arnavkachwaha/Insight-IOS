@@ -17,6 +17,7 @@ class FrameHandler: NSObject, ObservableObject {
     private let context = CIContext()
     private var movieOutput = AVCaptureMovieFileOutput()
     private var videoDevice: AVCaptureDevice?
+    @Published var recordedVideoURL: URL?
 
     override init() {
         super.init()
@@ -52,10 +53,9 @@ class FrameHandler: NSObject, ObservableObject {
         captureSession.beginConfiguration()
         
         do {
-            // Selecting the default dual camera device
             guard let videoDevice = AVCaptureDevice.default(.builtInDualWideCamera, for: .video, position: .back) else { return }
             let videoDeviceInput = try AVCaptureDeviceInput(device: videoDevice)
-            self.videoDevice = videoDevice // Store the video device for zoom and flash control
+            self.videoDevice = videoDevice
 
             if captureSession.canAddInput(videoDeviceInput) {
                 captureSession.addInput(videoDeviceInput)
@@ -71,6 +71,10 @@ class FrameHandler: NSObject, ObservableObject {
                 captureSession.addOutput(movieOutput)
             }
 
+            try videoDevice.lockForConfiguration()
+            videoDevice.videoZoomFactor = 2.0
+            videoDevice.unlockForConfiguration()
+
             videoOutput.connection(with: .video)?.videoRotationAngle = 90
 
             captureSession.commitConfiguration()
@@ -84,13 +88,35 @@ class FrameHandler: NSObject, ObservableObject {
         guard let captureSession = captureSession, captureSession.isRunning else { return }
         let outputURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString).appendingPathExtension("mov")
         movieOutput.startRecording(to: outputURL, recordingDelegate: self)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            self.setFlash(on: true)
+        }
     }
 
     func stopRecording() {
         if movieOutput.isRecording {
             movieOutput.stopRecording()
         }
+        setFlash(on: false)
+        stopSession()
     }
+    
+    func stopSession() {
+        sessionQueue.async {
+            self.captureSession?.stopRunning() 
+        }
+    }
+
+    
+    func startSession() {
+        sessionQueue.async {
+            if let captureSession = self.captureSession, !captureSession.isRunning {
+                captureSession.startRunning()
+            }
+        }
+    }
+
 
     private func saveVideoToPhotos(url: URL) {
         PHPhotoLibrary.shared().performChanges({
@@ -104,21 +130,6 @@ class FrameHandler: NSObject, ObservableObject {
         }
     }
 
-    // Function to set zoom scale
-    func setZoom(scale: CGFloat) {
-        guard let videoDevice = self.videoDevice else { return }
-        do {
-            try videoDevice.lockForConfiguration()
-            defer { videoDevice.unlockForConfiguration() }
-            
-            let zoomFactor = max(1.0, min(scale, videoDevice.activeFormat.videoMaxZoomFactor))
-            videoDevice.videoZoomFactor = zoomFactor
-        } catch {
-            print("Failed to set zoom factor: \(error.localizedDescription)")
-        }
-    }
-    
-    // Function to set flash
     func setFlash(on: Bool) {
         guard let videoDevice = self.videoDevice, videoDevice.hasTorch else { return }
         do {
@@ -147,10 +158,15 @@ extension FrameHandler: AVCaptureVideoDataOutputSampleBufferDelegate {
 extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
         if let error = error {
-            print("Error recording Video: \(error.localizedDescription)")
+            print("Error recording video: \(error.localizedDescription)")
         } else {
-            print("Video Recording saved at: \(outputFileURL.path)")
             saveVideoToPhotos(url: outputFileURL)
+            recordedVideoURL = outputFileURL
+            NotificationCenter.default.post(name: .recordingFinished, object: nil)
         }
     }
+}
+
+extension Notification.Name {
+    static let recordingFinished = Notification.Name("recordingFinished")
 }
