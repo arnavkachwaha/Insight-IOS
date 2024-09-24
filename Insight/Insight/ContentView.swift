@@ -5,6 +5,13 @@
 //  Created by Arnav Singh Kachwaha on 6/25/24.
 //
 
+//
+//  ContentView.swift
+//  Insight
+//
+//  Created by Arnav Singh Kachwaha on 6/25/24.
+//
+
 import SwiftUI
 
 struct ContentView: View {
@@ -12,21 +19,12 @@ struct ContentView: View {
 
     var body: some View {
         VStack {
-            bodyContent(viewModel.isRecording)
-        }
-    }
-
-    struct RoundedCorners: Shape {
-        var radius: CGFloat = 25.0
-
-        func path(in rect: CGRect) -> Path {
-            let path = UIBezierPath(roundedRect: rect, cornerRadius: radius)
-            return Path(path.cgPath)
+            bodyContent(viewModel.isRecording, viewModel.isFetchingVideo)
         }
     }
 
     @ViewBuilder
-    private func bodyContent(_ isRecording: Bool) -> some View {
+    private func bodyContent(_ isRecording: Bool, _ isFetchingVideo: Bool) -> some View {
         ZStack {
             if isRecording {
                 CameraView(frameHandler: viewModel.frameHandler)
@@ -37,16 +35,15 @@ struct ContentView: View {
                     FooterView(frameHandler: viewModel.frameHandler)
                 }
                 HeaderView()
-            } else if let videoURL = viewModel.videoURL {
-                PlaybackView(videoURL: videoURL, onRedo: {
-                    viewModel.restartSession()
-                }, onUse: {
-                    // Action for Use (navigate to another view later)
-                })
-            } else {
-                Text("No video available")
             }
-            
+            else{
+                PlaybackView(
+                    viewModel: viewModel,
+                    onRedo: {
+                        viewModel.restartSession()
+                    }
+                )
+            }
         }
     }
 }
@@ -54,4 +51,3 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
-

@@ -10,6 +10,7 @@ import Combine
 
 class ContentViewModel: ObservableObject {
     @Published var isRecording: Bool = true
+    @Published var isFetchingVideo: Bool = false
     @Published var videoURL: URL?
 
     var frameHandler: FrameHandler
@@ -28,22 +29,20 @@ class ContentViewModel: ObservableObject {
 
     func stopRecording() {
         frameHandler.stopRecording()
+        isFetchingVideo = true
     }
 
-    func stopSession() {
-        frameHandler.stopSession()
-    }
-    
     func restartSession() {
         frameHandler.startSession()
         isRecording = true
     }
 
     private func setupRecordingFinishedListener() {
-        NotificationCenter.default.publisher(for: .recordingFinished)
+        NotificationCenter.default.publisher(for: .videoFetched)
             .sink { [weak self] _ in
-                self?.videoURL = self?.frameHandler.recordedVideoURL
+                self?.videoURL = self?.frameHandler.fetchedVideoURL
                 self?.isRecording = false
+                self?.isFetchingVideo = false
             }
             .store(in: &cancellables)
     }

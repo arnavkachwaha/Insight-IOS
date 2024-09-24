@@ -8,6 +8,7 @@
 import AVFoundation
 import CoreImage
 import Photos
+import SwiftUI
 
 class FrameHandler: NSObject, ObservableObject {
     @Published var frame: CGImage?
@@ -17,21 +18,21 @@ class FrameHandler: NSObject, ObservableObject {
     private let context = CIContext()
     private var movieOutput = AVCaptureMovieFileOutput()
     private var videoDevice: AVCaptureDevice?
-    @Published var recordedVideoURL: URL?
-
+//    @Published var recordedVideoURL: URL?
+    @Published var fetchedVideoURL: URL?
+    @Published var isSessionReady = false
+    
     override init() {
         super.init()
-        self.checkPermission()
-        sessionQueue.async { [unowned self] in
-            self.setupCaptureSession()
-        }
+        checkPermission()
     }
 
+    // Check for camera permission
     func checkPermission() {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
             case .authorized:
-                self.permissionGranted = true
-                self.setupCaptureSession()
+                permissionGranted = true
+                setupCaptureSession()
             case .notDetermined:
                 AVCaptureDevice.requestAccess(for: .video) { [unowned self] granted in
                     self.permissionGranted = granted
@@ -40,75 +41,104 @@ class FrameHandler: NSObject, ObservableObject {
                     }
                 }
             default:
-                self.permissionGranted = false
+                permissionGranted = false
         }
     }
 
+    // Setup camera session
     func setupCaptureSession() {
         guard permissionGranted else { return }
 
-        captureSession = AVCaptureSession()
-        guard let captureSession = captureSession else { return }
+        sessionQueue.async {
+            self.captureSession = AVCaptureSession()
+            guard let captureSession = self.captureSession else { return }
 
-        captureSession.beginConfiguration()
-        
-        do {
-            guard let videoDevice = AVCaptureDevice.default(.builtInDualWideCamera, for: .video, position: .back) else { return }
-            let videoDeviceInput = try AVCaptureDeviceInput(device: videoDevice)
-            self.videoDevice = videoDevice
+            captureSession.beginConfiguration()
+            
+            do {
+                // Get video device (back camera)
+                guard let videoDevice = AVCaptureDevice.default(.builtInDualWideCamera, for: .video, position: .back) else { return }
+                let videoDeviceInput = try AVCaptureDeviceInput(device: videoDevice)
+                self.videoDevice = videoDevice
 
-            if captureSession.canAddInput(videoDeviceInput) {
-                captureSession.addInput(videoDeviceInput)
+                if captureSession.canAddInput(videoDeviceInput) {
+                    captureSession.addInput(videoDeviceInput)
+                }
+
+                // Setup video output
+                let videoOutput = AVCaptureVideoDataOutput()
+                videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "sampleBufferQueue", qos: .userInitiated))
+                if captureSession.canAddOutput(videoOutput) {
+                    captureSession.addOutput(videoOutput)
+                }
+
+                // Add movie output for recording
+                if captureSession.canAddOutput(self.movieOutput) {
+                    captureSession.addOutput(self.movieOutput)
+                }
+
+                // Configure device settings
+                try videoDevice.lockForConfiguration()
+                videoDevice.videoZoomFactor = 2.0
+                videoDevice.torchMode = .off
+                videoDevice.unlockForConfiguration()
+
+                videoOutput.connection(with: .video)?.videoRotationAngle = 90
+
+                captureSession.commitConfiguration()
+                captureSession.startRunning()
+
+                DispatchQueue.main.async {
+                    self.isSessionReady = true
+                }
+                
+            } catch {
+                print("Failed to set up capture session: \(error)")
             }
-
-            let videoOutput = AVCaptureVideoDataOutput()
-            videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "sampleBufferQueue"))
-            if captureSession.canAddOutput(videoOutput) {
-                captureSession.addOutput(videoOutput)
-            }
-
-            if captureSession.canAddOutput(movieOutput) {
-                captureSession.addOutput(movieOutput)
-            }
-
-            try videoDevice.lockForConfiguration()
-            videoDevice.videoZoomFactor = 2.0
-            videoDevice.unlockForConfiguration()
-
-            videoOutput.connection(with: .video)?.videoRotationAngle = 90
-
-            captureSession.commitConfiguration()
-            captureSession.startRunning()
-        } catch {
-            print("Failed to set up capture session: \(error)")
         }
     }
 
+    // Start video recording
     func startRecording() {
-        guard let captureSession = captureSession, captureSession.isRunning else { return }
+        guard let captureSession = captureSession, captureSession.isRunning else {
+            print("Capture session is not running.")
+            return
+        }
+
+        // Ensure video connection is active before starting recording
+        guard let connection = movieOutput.connection(with: .video), connection.isActive else {
+            print("No active video connection.")
+            return
+        }
+
         let outputURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString).appendingPathExtension("mov")
         movieOutput.startRecording(to: outputURL, recordingDelegate: self)
-
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.setFlash(on: true)
         }
+
     }
 
+    // Stop video recording
     func stopRecording() {
         if movieOutput.isRecording {
             movieOutput.stopRecording()
         }
         setFlash(on: false)
+        
         stopSession()
+        
     }
-    
+
+    // Stop the capture session
     func stopSession() {
         sessionQueue.async {
-            self.captureSession?.stopRunning() 
+            self.captureSession?.stopRunning()
         }
     }
 
-    
+    // Start the capture session
     func startSession() {
         sessionQueue.async {
             if let captureSession = self.captureSession, !captureSession.isRunning {
@@ -117,19 +147,20 @@ class FrameHandler: NSObject, ObservableObject {
         }
     }
 
-
-    private func saveVideoToPhotos(url: URL) {
-        PHPhotoLibrary.shared().performChanges({
-            PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
-        }) { saved, error in
-            if let error = error {
-                print("Error saving video to photo library: \(error.localizedDescription)")
-            } else if saved {
-                print("Video saved to photo library")
-            }
+    // Save recorded video to photo library
+    func saveVideoToPhotos(url: URL) {
+    PHPhotoLibrary.shared().performChanges({
+        PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
+    }) { success, error in
+        if let error = error {
+            print("Error saving video to photo library: \(error.localizedDescription)")
+        } else if success {
+            print("Video saved successfully!")
         }
     }
+}
 
+    // Set flash (torch) on/off
     func setFlash(on: Bool) {
         guard let videoDevice = self.videoDevice, videoDevice.hasTorch else { return }
         do {
@@ -143,30 +174,128 @@ class FrameHandler: NSObject, ObservableObject {
     }
 }
 
+// Handle video output sample buffer (frame processing)
 extension FrameHandler: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
         let ciImage = CIImage(cvPixelBuffer: imageBuffer)
-        guard let cgImage = context.createCGImage(ciImage, from: ciImage.extent) else { return }
-
-        DispatchQueue.main.async { [unowned self] in
-            self.frame = cgImage
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            guard let cgImage = self.context.createCGImage(ciImage, from: ciImage.extent) else { return }
+            DispatchQueue.main.async {
+                self.frame = cgImage
+            }
         }
     }
 }
 
+// Handle video recording delegate
 extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
         if let error = error {
             print("Error recording video: \(error.localizedDescription)")
         } else {
-            saveVideoToPhotos(url: outputFileURL)
-            recordedVideoURL = outputFileURL
-            NotificationCenter.default.post(name: .recordingFinished, object: nil)
+//            saveVideoToPhotos(url: outputFileURL)
+//            recordedVideoURL = outputFileURL
+            uploadVideoToServer(videoURL: outputFileURL)
+//            NotificationCenter.default.post(name: .recordingFinished, object: nil)
+        }
+//        uploadVideoToServer(videoURL: outputFileURL)
+    }
+    
+     func uploadVideoToServer(videoURL: URL) {
+         let serverURL = URL(string: "http://10.243.44.193:8000/cyclops/upload/")!
+//        let serverURL = URL(string: "http://192.168.4.108:8000/cyclops/upload/")!
+        var request = URLRequest(url: serverURL)
+        request.httpMethod = "POST"
+        
+        let boundary = UUID().uuidString
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        
+        let body = NSMutableData()
+        
+        // Append the file as multipart form data
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"videofile\"; filename=\"video.mov\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: video/quicktime\r\n\r\n".data(using: .utf8)!)
+
+        if let videoData = try? Data(contentsOf: videoURL) {
+            body.append(videoData)
+        }
+        body.append("\r\n".data(using: .utf8)!)
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+        request.httpBody = body as Data
+        
+        let task = URLSession.shared.uploadTask(with: request, from: body as Data) { data, response, error in
+            if let error = error {
+                print("Error uploading video: \(error)")
+            } else if let response = response as? HTTPURLResponse, response.statusCode == 200 {
+                print("Upload successful")
+                self.fetchVideo()
+                
+            } else {
+                print("Upload failed with unexpected response")
+            }
+        }
+        
+        task.resume()
+    }
+
+    func fetchVideo() {
+        
+        let serverURL = URL(string: "http://10.243.44.193:8000/cyclops/fetch_processed_video/")!
+//        let serverURL = URL(string: "http://192.168.4.108:8000/cyclops/fetch_processed_video/")!
+        
+        let task = URLSession.shared.downloadTask(with: serverURL) { localURL, response, error in
+            if let error = error {
+                print("Error fetching video: \(error.localizedDescription)")
+                return
+            }
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
+                print("Failed to fetch video: Server returned status code \(httpResponse.statusCode)")
+                return
+            }
+            guard let localURL = localURL else {
+                print("No video downloaded")
+                return
+            }
+
+            if let movedURL = self.moveVideoToDocumentsDirectory(localURL) {
+                DispatchQueue.main.async {
+                    self.fetchedVideoURL = movedURL
+                    print("Video fetched and moved successfully: \(movedURL)")
+                    NotificationCenter.default.post(name: .videoFetched, object: nil)
+                }
+            }
+        }
+        
+        task.resume()
+    }
+
+    func moveVideoToDocumentsDirectory(_ tempURL: URL, desiredFileName: String = "video.mp4") -> URL? {
+        let fileManager = FileManager.default
+
+        let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+
+        let destinationURL = documentsDirectory.appendingPathComponent(desiredFileName)
+
+        do {
+            if fileManager.fileExists(atPath: destinationURL.path) {
+                try fileManager.removeItem(at: destinationURL)
+            }
+
+            try fileManager.moveItem(at: tempURL, to: destinationURL)
+
+            return destinationURL
+        } catch {
+            print("Error moving file to documents directory: \(error)")
+            return nil
         }
     }
+
+
 }
 
 extension Notification.Name {
-    static let recordingFinished = Notification.Name("recordingFinished")
+    static let videoFetched = Notification.Name("videoFetched")
 }
