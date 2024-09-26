@@ -11,7 +11,9 @@ import Combine
 class ContentViewModel: ObservableObject {
     @Published var isRecording: Bool = true
     @Published var isFetchingVideo: Bool = false
-    @Published var videoURL: URL?
+    @Published var isVideoFetched: Bool = false
+    @Published var fetchedVideoURL: URL?
+    @Published var recordedVideoURL: URL?
 
     var frameHandler: FrameHandler
 
@@ -21,6 +23,7 @@ class ContentViewModel: ObservableObject {
         self.frameHandler = frameHandler
         startRecording()
         setupRecordingFinishedListener()
+        fetchingVideoFinishedListener()
     }
 
     func startRecording() {
@@ -28,21 +31,38 @@ class ContentViewModel: ObservableObject {
     }
 
     func stopRecording() {
+        isRecording = false
         frameHandler.stopRecording()
-        isFetchingVideo = true
     }
 
     func restartSession() {
         frameHandler.startSession()
         isRecording = true
+        isVideoFetched = false
+        fetchedVideoURL = nil
+        recordedVideoURL = nil
+    }
+    
+    func uploadAndFetchVideo() {
+        isFetchingVideo = true
+        frameHandler.uploadVideoToServer(videoURL: recordedVideoURL!)
     }
 
     private func setupRecordingFinishedListener() {
+        NotificationCenter.default.publisher(for: .videoRecorded)
+            .sink { [weak self] _ in
+                self?.recordedVideoURL = self?.frameHandler.recordedVideoURL
+                self?.isRecording = false
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func fetchingVideoFinishedListener() {
         NotificationCenter.default.publisher(for: .videoFetched)
             .sink { [weak self] _ in
-                self?.videoURL = self?.frameHandler.fetchedVideoURL
-                self?.isRecording = false
+                self?.fetchedVideoURL = self?.frameHandler.fetchedVideoURL
                 self?.isFetchingVideo = false
+                self?.isVideoFetched = true
             }
             .store(in: &cancellables)
     }

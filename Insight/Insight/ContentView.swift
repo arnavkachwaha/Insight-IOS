@@ -19,31 +19,44 @@ struct ContentView: View {
 
     var body: some View {
         VStack {
-            bodyContent(viewModel.isRecording, viewModel.isFetchingVideo)
-        }
-    }
-
-    @ViewBuilder
-    private func bodyContent(_ isRecording: Bool, _ isFetchingVideo: Bool) -> some View {
-        ZStack {
-            if isRecording {
-                CameraView(frameHandler: viewModel.frameHandler)
-                    .cornerRadius(25)
-                    .overlay(EyeMask(yOffset: 200))
-                VStack {
-                    Spacer()
-                    FooterView(frameHandler: viewModel.frameHandler)
+            ZStack {
+                if viewModel.isRecording && viewModel.isFetchingVideo == false {
+                    CameraView(frameHandler: viewModel.frameHandler)
+                        .cornerRadius(25)
+                        .overlay(EyeMask(yOffset: 200))
+                    VStack {
+                        Spacer()
+                        FooterView(frameHandler: viewModel.frameHandler)
+                    }
+                    
+                } else if viewModel.isRecording == false && viewModel.isFetchingVideo == false && viewModel.isVideoFetched == false {
+                    PlaybackView(
+                        videoUrl: viewModel.recordedVideoURL,
+                        onRedo: {
+                            viewModel.restartSession()
+                        },
+                        onUse:{
+                            viewModel.uploadAndFetchVideo()
+                        }
+                    )
+                    
+                } else if viewModel.isVideoFetched == true && viewModel.isFetchingVideo == false {
+                    PlaybackView(
+                        videoUrl: viewModel.fetchedVideoURL,
+                        onRedo: {
+                            viewModel.restartSession()
+                        },
+                        onUse:{
+                            print("On Use Pressed")
+                        }
+                    )
+                    
+                } else {
+                    LoadingView()
                 }
                 HeaderView()
             }
-            else{
-                PlaybackView(
-                    viewModel: viewModel,
-                    onRedo: {
-                        viewModel.restartSession()
-                    }
-                )
-            }
+
         }
     }
 }

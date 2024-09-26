@@ -12,29 +12,12 @@ struct HeaderView: View {
     var body: some View {
         VStack {
             HStack {
-        //            Button(action: {
-        //                // No action for now
-        //            }) {
-        //                Image(systemName: "chevron.backward.circle")
-        //                    .resizable()
-        //                    .frame(width: 30, height: 30)
-        //                    .padding(10)
-        //            }
-
                     Spacer()
                     Text("INSIGHT")
                         .font(.title)
                         .fontWeight(.bold)
                         .foregroundColor(Color.blue)
                     Spacer()
-        //            Button(action: {
-        //                // No action for now
-        //            }) {
-        //                Image(systemName: "chevron.forward.circle")
-        //                    .resizable()
-        //                    .frame(width: 30, height: 30)
-        //                    .padding(10)
-        //            }
                 }
             .padding(.top, 15)
             .foregroundColor(.clear)

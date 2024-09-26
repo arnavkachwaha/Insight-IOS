@@ -9,48 +9,48 @@ import SwiftUI
 import AVKit
 
 struct PlaybackView: View {
-    
-    @ObservedObject var viewModel: ContentViewModel
     var onRedo: () -> Void
+    var onUse: () -> Void
+    var videoUrl: URL?
 
-    init(viewModel: ContentViewModel, onRedo: @escaping () -> Void) {
-        self.viewModel = viewModel
+    init(videoUrl: URL?, onRedo: @escaping () -> Void, onUse: @escaping () -> Void) {
+        self.videoUrl = videoUrl
         self.onRedo = onRedo
+        self.onUse = onUse
     }
 
     var body: some View {
         ZStack {
-            if let videoURL = viewModel.videoURL {
-                VideoPlayerView(videoURL: videoURL)
-                VStack {
+            VideoPlayerView(videoURL: self.videoUrl!)
+            VStack {
+                Spacer()
+                HStack {
+                    Button(action: {
+                        onRedo()
+                    }) {
+                        Text("Redo")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.red)
+                            .cornerRadius(10)
+                    }
+
                     Spacer()
-                    HStack {
-                        Button(action: {
-                            onRedo()
-                        }) {
-                            Text("Redo")
-                                .font(.headline)
-                                .foregroundColor(.white)
-                                .padding()
-                                .background(Color.red)
-                                .cornerRadius(10)
+
+                    Button(action: {
+                        onUse()
+                    }) {
+                        Text("Use")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.green)
+                            .cornerRadius(10)
                         }
-
-                        Spacer()
-
-                        Button(action: {
-                        }) {
-                            Text("Use")
-                                .font(.headline)
-                                .foregroundColor(.white)
-                                .padding()
-                                .background(Color.green)
-                                .cornerRadius(10)
-                            }
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 40)
-                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 40)
                 }
         }
     }
@@ -80,11 +80,3 @@ struct VideoPlayerView: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {}
 }
 
-struct PlaybackView_Previews: PreviewProvider {
-    static var previews: some View {
-        let mockViewModel = ContentViewModel(frameHandler: FrameHandler())
-        PlaybackView(viewModel: mockViewModel, onRedo: {
-            print("Redo pressed")
-        })
-    }
-}

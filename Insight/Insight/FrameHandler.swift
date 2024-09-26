@@ -18,7 +18,8 @@ class FrameHandler: NSObject, ObservableObject {
     private let context = CIContext()
     private var movieOutput = AVCaptureMovieFileOutput()
     private var videoDevice: AVCaptureDevice?
-//    @Published var recordedVideoURL: URL?
+    private let cropRect = CGRect(x: 10, y: 0, width: 640, height: 480)
+    @Published var recordedVideoURL: URL?
     @Published var fetchedVideoURL: URL?
     @Published var isSessionReady = false
     
@@ -126,9 +127,7 @@ class FrameHandler: NSObject, ObservableObject {
             movieOutput.stopRecording()
         }
         setFlash(on: false)
-        
         stopSession()
-        
     }
 
     // Stop the capture session
@@ -195,16 +194,13 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
         if let error = error {
             print("Error recording video: \(error.localizedDescription)")
         } else {
-//            saveVideoToPhotos(url: outputFileURL)
-//            recordedVideoURL = outputFileURL
-            uploadVideoToServer(videoURL: outputFileURL)
-//            NotificationCenter.default.post(name: .recordingFinished, object: nil)
+            recordedVideoURL = outputFileURL
+            NotificationCenter.default.post(name: .videoRecorded, object: nil)
         }
-//        uploadVideoToServer(videoURL: outputFileURL)
     }
     
      func uploadVideoToServer(videoURL: URL) {
-         let serverURL = URL(string: "http://10.243.44.193:8000/cyclops/upload/")!
+        let serverURL = URL(string: "http://10.243.78.127:8000/cyclops/upload/")!
 //        let serverURL = URL(string: "http://192.168.4.108:8000/cyclops/upload/")!
         var request = URLRequest(url: serverURL)
         request.httpMethod = "POST"
@@ -232,7 +228,6 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
             } else if let response = response as? HTTPURLResponse, response.statusCode == 200 {
                 print("Upload successful")
                 self.fetchVideo()
-                
             } else {
                 print("Upload failed with unexpected response")
             }
@@ -242,8 +237,7 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
     }
 
     func fetchVideo() {
-        
-        let serverURL = URL(string: "http://10.243.44.193:8000/cyclops/fetch_processed_video/")!
+        let serverURL = URL(string: "http://10.243.78.127:8000/cyclops/fetch_processed_video/")!
 //        let serverURL = URL(string: "http://192.168.4.108:8000/cyclops/fetch_processed_video/")!
         
         let task = URLSession.shared.downloadTask(with: serverURL) { localURL, response, error in
@@ -293,9 +287,9 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
         }
     }
 
-
 }
 
 extension Notification.Name {
     static let videoFetched = Notification.Name("videoFetched")
+    static let videoRecorded = Notification.Name("videoRecorded")
 }
