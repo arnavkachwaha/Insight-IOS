@@ -13,6 +13,7 @@ class ContentViewModel: ObservableObject {
     @Published var isFetchingVideo: Bool = false
     @Published var isVideoFetched: Bool = false
     @Published var fetchedVideoURL: URL?
+    @Published var fetchedGraphURL: URL?
     @Published var recordedVideoURL: URL?
 
     var frameHandler: FrameHandler
@@ -36,11 +37,14 @@ class ContentViewModel: ObservableObject {
     }
 
     func restartSession() {
+        resetFlags()
         frameHandler.startSession()
-        isRecording = true
+    }
+    
+    func resetFlags() {
         isVideoFetched = false
-        fetchedVideoURL = nil
-        recordedVideoURL = nil
+        isFetchingVideo = false
+        isRecording = true
     }
     
     func uploadAndFetchVideo() {
@@ -61,6 +65,7 @@ class ContentViewModel: ObservableObject {
         NotificationCenter.default.publisher(for: .videoFetched)
             .sink { [weak self] _ in
                 self?.fetchedVideoURL = self?.frameHandler.fetchedVideoURL
+                self?.fetchedGraphURL = self?.frameHandler.fetchedGraphURL
                 self?.isFetchingVideo = false
                 self?.isVideoFetched = true
             }

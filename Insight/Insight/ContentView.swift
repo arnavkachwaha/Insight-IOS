@@ -18,7 +18,6 @@ struct ContentView: View {
     @StateObject private var viewModel = ContentViewModel(frameHandler: FrameHandler())
 
     var body: some View {
-        VStack {
             ZStack {
                 if viewModel.isRecording && viewModel.isFetchingVideo == false {
                     CameraView(frameHandler: viewModel.frameHandler)
@@ -41,13 +40,14 @@ struct ContentView: View {
                     )
                     
                 } else if viewModel.isVideoFetched == true && viewModel.isFetchingVideo == false {
-                    PlaybackView(
+                    PlrView(
                         videoUrl: viewModel.fetchedVideoURL,
+                        graphUrl: viewModel.fetchedGraphURL,
                         onRedo: {
                             viewModel.restartSession()
                         },
-                        onUse:{
-                            print("On Use Pressed")
+                        onProceed:{
+                            print("Proceeding to Voms")
                         }
                     )
                     
@@ -56,8 +56,6 @@ struct ContentView: View {
                 }
                 HeaderView()
             }
-
-        }
     }
 }
 

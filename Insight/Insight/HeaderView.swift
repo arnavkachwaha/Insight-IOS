@@ -19,8 +19,8 @@ struct HeaderView: View {
                         .foregroundColor(Color.blue)
                     Spacer()
                 }
-            .padding(.top, 15)
             .foregroundColor(.clear)
+            
             Spacer()
         }
     }

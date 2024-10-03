@@ -21,6 +21,7 @@ class FrameHandler: NSObject, ObservableObject {
     private let cropRect = CGRect(x: 10, y: 0, width: 640, height: 480)
     @Published var recordedVideoURL: URL?
     @Published var fetchedVideoURL: URL?
+    @Published var fetchedGraphURL: URL?
     @Published var isSessionReady = false
     
     override init() {
@@ -118,6 +119,10 @@ class FrameHandler: NSObject, ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.setFlash(on: true)
         }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            self.setFlash(on: false)
+        }
 
     }
 
@@ -199,9 +204,8 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
         }
     }
     
-     func uploadVideoToServer(videoURL: URL) {
-        let serverURL = URL(string: "http://10.243.78.127:8000/cyclops/upload/")!
-//        let serverURL = URL(string: "http://192.168.4.108:8000/cyclops/upload/")!
+    func uploadVideoToServer(videoURL: URL) {
+        let serverURL = URL(string: "http://10.243.78.127:8000/videos/")!
         var request = URLRequest(url: serverURL)
         request.httpMethod = "POST"
         
@@ -209,6 +213,8 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         
         let body = NSMutableData()
+        
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
         
         // Append the file as multipart form data
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
@@ -222,25 +228,78 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
         body.append("--\(boundary)--\r\n".data(using: .utf8)!)
         request.httpBody = body as Data
         
-        let task = URLSession.shared.uploadTask(with: request, from: body as Data) { data, response, error in
+        let sessionConfig = URLSessionConfiguration.default
+        sessionConfig.timeoutIntervalForRequest = 500
+        sessionConfig.timeoutIntervalForResource = 500
+        let session = URLSession(configuration: sessionConfig)
+        
+        let task = session.uploadTask(with: request, from: body as Data) { data, response, error in
             if let error = error {
                 print("Error uploading video: \(error)")
-            } else if let response = response as? HTTPURLResponse, response.statusCode == 200 {
+            } else if let response = response as? HTTPURLResponse, response.statusCode == 200, let data = data {
                 print("Upload successful")
-                self.fetchVideo()
+                
+                // Parse the JSON response
+                do {
+                    if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                       let videoDownloadURL = jsonResponse["video_download_url"] as? String,
+                       let graphDownloadURL = jsonResponse["graph_download_url"] as? String {
+
+                        print("Video URL: \(videoDownloadURL)")
+                        print("Graph URL: \(graphDownloadURL)")
+                        
+                        self.handleBackendResponse(videoDownloadURL: videoDownloadURL, graphDownloadURL: graphDownloadURL)
+                    }
+                } catch {
+                    print("Failed to parse JSON response: \(error)")
+                }
             } else {
                 print("Upload failed with unexpected response")
             }
         }
-        
         task.resume()
     }
 
-    func fetchVideo() {
-        let serverURL = URL(string: "http://10.243.78.127:8000/cyclops/fetch_processed_video/")!
-//        let serverURL = URL(string: "http://192.168.4.108:8000/cyclops/fetch_processed_video/")!
-        
-        let task = URLSession.shared.downloadTask(with: serverURL) { localURL, response, error in
+    func handleBackendResponse(videoDownloadURL: String, graphDownloadURL: String) {
+        if let graphUrl = URL(string: graphDownloadURL){
+            DispatchQueue.main.async {
+                self.fetchGraph(downloadURL: graphUrl)
+            }
+        }
+        if let videoURL = URL(string: videoDownloadURL) {
+            DispatchQueue.main.async {
+                self.fetchVideo(downloadURL: videoURL)
+            }
+        }
+    }
+
+    func fetchGraph(downloadURL : URL) {
+        let task = URLSession.shared.downloadTask(with: downloadURL) { localURL, response, error in
+            if let error = error {
+                print("Error fetching graph: \(error.localizedDescription)")
+                return
+            }
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
+                print("Failed to fetch graph: Server returned status code \(httpResponse.statusCode)")
+                return
+            }
+            guard let localURL = localURL else {
+                print("No graph downloaded")
+                return
+            }
+
+            if let movedURL = self.moveMediaToDocumentsDirectory(localURL, desiredFileName: "graph.png") {
+                DispatchQueue.main.async {
+                    self.fetchedGraphURL = movedURL
+                    print("Graph fetched and moved successfully: \(movedURL)")
+                }
+            }
+        }
+        task.resume()
+    }
+    
+    func fetchVideo(downloadURL : URL) {
+        let task = URLSession.shared.downloadTask(with: downloadURL) { localURL, response, error in
             if let error = error {
                 print("Error fetching video: \(error.localizedDescription)")
                 return
@@ -254,7 +313,7 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
                 return
             }
 
-            if let movedURL = self.moveVideoToDocumentsDirectory(localURL) {
+            if let movedURL = self.moveMediaToDocumentsDirectory(localURL, desiredFileName: "video.mp4") {
                 DispatchQueue.main.async {
                     self.fetchedVideoURL = movedURL
                     print("Video fetched and moved successfully: \(movedURL)")
@@ -262,11 +321,11 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
                 }
             }
         }
-        
         task.resume()
     }
 
-    func moveVideoToDocumentsDirectory(_ tempURL: URL, desiredFileName: String = "video.mp4") -> URL? {
+    func moveMediaToDocumentsDirectory(_ tempURL: URL, desiredFileName: String = "video.mp4") -> URL? {
+
         let fileManager = FileManager.default
 
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
@@ -279,7 +338,7 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
             }
 
             try fileManager.moveItem(at: tempURL, to: destinationURL)
-
+            
             return destinationURL
         } catch {
             print("Error moving file to documents directory: \(error)")
