@@ -16,6 +16,8 @@
 		053F2FEF2C42ED41007A9BF5 /* HeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053F2FEE2C42ED41007A9BF5 /* HeaderView.swift */; };
 		053F2FF32C42ED92007A9BF5 /* FooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053F2FF22C42ED92007A9BF5 /* FooterView.swift */; };
 		053F2FF92C42F1BB007A9BF5 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053F2FF82C42F1BB007A9BF5 /* CameraView.swift */; };
+		05A648472CACDAAD00ABF8F6 /* VideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05A648462CACDAAD00ABF8F6 /* VideoPlayerView.swift */; };
+		05A648492CACDADF00ABF8F6 /* PlrView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05A648482CACDADF00ABF8F6 /* PlrView.swift */; };
 		05A742082CA254CE00C5FEC2 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05A742072CA254CE00C5FEC2 /* LoadingView.swift */; };
 		05F110422C990245007B16A0 /* PlaybackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F110412C990245007B16A0 /* PlaybackView.swift */; };
 		05F110452C9906C1007B16A0 /* ContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F110442C9906C1007B16A0 /* ContentViewModel.swift */; };
@@ -33,6 +35,8 @@
 		053F2FEE2C42ED41007A9BF5 /* HeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderView.swift; sourceTree = "<group>"; };
 		053F2FF22C42ED92007A9BF5 /* FooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FooterView.swift; sourceTree = "<group>"; };
 		053F2FF82C42F1BB007A9BF5 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
+		05A648462CACDAAD00ABF8F6 /* VideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerView.swift; sourceTree = "<group>"; };
+		05A648482CACDADF00ABF8F6 /* PlrView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlrView.swift; sourceTree = "<group>"; };
 		05A742072CA254CE00C5FEC2 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		05F110412C990245007B16A0 /* PlaybackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackView.swift; sourceTree = "<group>"; };
 		05F110442C9906C1007B16A0 /* ContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewModel.swift; sourceTree = "<group>"; };
@@ -72,6 +76,8 @@
 				053F2FDE2C42ECD1007A9BF5 /* InsightApp.swift */,
 				053F2FE02C42ECD1007A9BF5 /* ContentView.swift */,
 				05F110412C990245007B16A0 /* PlaybackView.swift */,
+				05A648482CACDADF00ABF8F6 /* PlrView.swift */,
+				05A648462CACDAAD00ABF8F6 /* VideoPlayerView.swift */,
 				05F1104A2C9C74D7007B16A0 /* PlaybackViewModel.swift */,
 				053F2FF22C42ED92007A9BF5 /* FooterView.swift */,
 				053F2FEC2C42ED1C007A9BF5 /* FrameHandler.swift */,
@@ -168,6 +174,7 @@
 				053F2FF92C42F1BB007A9BF5 /* CameraView.swift in Sources */,
 				053F2FE12C42ECD1007A9BF5 /* ContentView.swift in Sources */,
 				05A742082CA254CE00C5FEC2 /* LoadingView.swift in Sources */,
+				05A648492CACDADF00ABF8F6 /* PlrView.swift in Sources */,
 				053F2FDF2C42ECD1007A9BF5 /* InsightApp.swift in Sources */,
 				053F2FED2C42ED1C007A9BF5 /* FrameHandler.swift in Sources */,
 				05F110452C9906C1007B16A0 /* ContentViewModel.swift in Sources */,
@@ -175,6 +182,7 @@
 				053F2FEF2C42ED41007A9BF5 /* HeaderView.swift in Sources */,
 				05F110422C990245007B16A0 /* PlaybackView.swift in Sources */,
 				05F1104B2C9C74D7007B16A0 /* PlaybackViewModel.swift in Sources */,
+				05A648472CACDAAD00ABF8F6 /* VideoPlayerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -309,7 +317,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Insight/Preview Content\"";
-				DEVELOPMENT_TEAM = L7745265ZX;
+				DEVELOPMENT_TEAM = AU5YKC8N9W;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Please allow Camera Access";
@@ -324,7 +332,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.Insight.Innovations.Insight-1";
+				PRODUCT_BUNDLE_IDENTIFIER = AU5YKC8N9W;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
