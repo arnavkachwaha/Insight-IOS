@@ -16,6 +16,7 @@
 		053F2FEF2C42ED41007A9BF5 /* HeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053F2FEE2C42ED41007A9BF5 /* HeaderView.swift */; };
 		053F2FF32C42ED92007A9BF5 /* FooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053F2FF22C42ED92007A9BF5 /* FooterView.swift */; };
 		053F2FF92C42F1BB007A9BF5 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053F2FF82C42F1BB007A9BF5 /* CameraView.swift */; };
+		0558405C2CB46B6500B51938 /* FormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0558405B2CB46B6500B51938 /* FormView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,6 +30,7 @@
 		053F2FEE2C42ED41007A9BF5 /* HeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderView.swift; sourceTree = "<group>"; };
 		053F2FF22C42ED92007A9BF5 /* FooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FooterView.swift; sourceTree = "<group>"; };
 		053F2FF82C42F1BB007A9BF5 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
+		0558405B2CB46B6500B51938 /* FormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +65,7 @@
 			children = (
 				053F2FDE2C42ECD1007A9BF5 /* InsightApp.swift */,
 				053F2FE02C42ECD1007A9BF5 /* ContentView.swift */,
+				0558405B2CB46B6500B51938 /* FormView.swift */,
 				053F2FF22C42ED92007A9BF5 /* FooterView.swift */,
 				053F2FEC2C42ED1C007A9BF5 /* FrameHandler.swift */,
 				053F2FF82C42F1BB007A9BF5 /* CameraView.swift */,
@@ -152,6 +155,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0558405C2CB46B6500B51938 /* FormView.swift in Sources */,
 				050EADE62C42FF7F00C949A6 /* EyeMask.swift in Sources */,
 				053F2FF92C42F1BB007A9BF5 /* CameraView.swift in Sources */,
 				053F2FE12C42ECD1007A9BF5 /* ContentView.swift in Sources */,
@@ -289,6 +293,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Insight/Preview Content\"";
@@ -300,14 +305,16 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Insight.Innovations.Insight;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.Insight.Innovations.Insight-1";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -319,6 +326,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Insight/Preview Content\"";
@@ -330,14 +338,16 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Insight.Innovations.Insight;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.Insight.Innovations.Insight-1";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

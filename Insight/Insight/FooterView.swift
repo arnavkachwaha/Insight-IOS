@@ -16,6 +16,7 @@ struct FooterView: View {
     
     var body: some View {
         VStack {
+            Spacer()
             // Recording button
             Button(action: {
                 isRecording.toggle()
@@ -23,6 +24,9 @@ struct FooterView: View {
                     frameHandler.startRecording()
                 } else {
                     frameHandler.stopRecording()
+                    if isFlashOn{
+                        isFlashOn.toggle()
+                    }
                 }
             }) {
                 Image(systemName: isRecording ? "stop.circle" : "record.circle")
@@ -78,7 +82,7 @@ struct FooterView: View {
                 // Flash button
                 Button(action: {
                     isFlashOn.toggle()
-                    frameHandler.setFlash(on: isFlashOn)
+                    frameHandler.setFlash(state: isFlashOn)
                 }) {
                     Image(systemName: isFlashOn ? "bolt.fill" : "bolt.slash.fill")
                         .resizable()

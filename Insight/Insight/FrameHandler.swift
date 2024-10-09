@@ -17,6 +17,8 @@ class FrameHandler: NSObject, ObservableObject {
     private let context = CIContext()
     private var movieOutput = AVCaptureMovieFileOutput()
     private var videoDevice: AVCaptureDevice?
+    private var videoUrl: URL?
+    var isRecording: Bool = true
 
     override init() {
         super.init()
@@ -89,20 +91,45 @@ class FrameHandler: NSObject, ObservableObject {
     func stopRecording() {
         if movieOutput.isRecording {
             movieOutput.stopRecording()
+            self.setFlash(state: false)
+            self.isRecording = false
         }
     }
 
-    private func saveVideoToPhotos(url: URL) {
-        PHPhotoLibrary.shared().performChanges({
-            PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
-        }) { saved, error in
-            if let error = error {
-                print("Error saving video to photo library: \(error.localizedDescription)")
-            } else if saved {
-                print("Video saved to photo library")
+    func saveVideoToPhotos(age: String, sex: String, history: String) {
+        guard let videoUrl = self.videoUrl else { return }
+        
+        // Extract the original file name without the extension
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
+        let dateTimeString = dateFormatter.string(from: Date())
+        let fileExtension = videoUrl.pathExtension
+        
+        // Create a new file name by appending the metadata
+        let newFileName = "\(dateTimeString)_\(sex)_\(age)_\(history).\(fileExtension)"
+        let newUrl = videoUrl.deletingLastPathComponent().appendingPathComponent(newFileName)
+        
+        do {
+            // Rename the video file by moving it to the new URL
+            try FileManager.default.moveItem(at: videoUrl, to: newUrl)
+            
+            // Save the renamed video to the Photos library
+            PHPhotoLibrary.shared().performChanges({
+                PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: newUrl)
+            }) { saved, error in
+                if let error = error {
+                    print("Error saving video to photo library: \(error.localizedDescription)")
+                } else if saved {
+                    print("Video saved to photo library with name: \(newFileName)")
+                }
             }
+        } catch {
+            print("Error renaming video file: \(error.localizedDescription)")
         }
+        
+        isRecording = true
     }
+
 
     // Function to set zoom scale
     func setZoom(scale: CGFloat) {
@@ -119,13 +146,13 @@ class FrameHandler: NSObject, ObservableObject {
     }
     
     // Function to set flash
-    func setFlash(on: Bool) {
+    func setFlash(state: Bool) {
         guard let videoDevice = self.videoDevice, videoDevice.hasTorch else { return }
         do {
             try videoDevice.lockForConfiguration()
             defer { videoDevice.unlockForConfiguration() }
             
-            videoDevice.torchMode = on ? .on : .off
+            videoDevice.torchMode = state ? .on : .off
         } catch {
             print("Failed to set flash: \(error.localizedDescription)")
         }
@@ -149,8 +176,8 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
         if let error = error {
             print("Error recording Video: \(error.localizedDescription)")
         } else {
-            print("Video Recording saved at: \(outputFileURL.path)")
-            saveVideoToPhotos(url: outputFileURL)
+            print("Video Recorded at Url: \(outputFileURL.path)")
+            videoUrl = outputFileURL
         }
     }
 }
