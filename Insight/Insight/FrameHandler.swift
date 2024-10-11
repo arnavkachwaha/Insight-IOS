@@ -18,7 +18,7 @@ class FrameHandler: NSObject, ObservableObject {
     private let context = CIContext()
     private var movieOutput = AVCaptureMovieFileOutput()
     private var videoDevice: AVCaptureDevice?
-    private let cropRect = CGRect(x: 10, y: 0, width: 640, height: 480)
+    @Published var currentView = "PLR"
     @Published var recordedVideoURL: URL?
     @Published var fetchedVideoURL: URL?
     @Published var fetchedGraphURL: URL?
@@ -156,14 +156,25 @@ class FrameHandler: NSObject, ObservableObject {
     PHPhotoLibrary.shared().performChanges({
         PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
     }) { success, error in
-        if let error = error {
-            print("Error saving video to photo library: \(error.localizedDescription)")
-        } else if success {
-            print("Video saved successfully!")
+            if let error = error {
+                print("Error saving video to photo library: \(error.localizedDescription)")
+            } else if success {
+                print("Video saved successfully!")
+            }
         }
     }
-}
-
+    
+    func saveGraphToPhotos(url: URL) {
+    PHPhotoLibrary.shared().performChanges({
+        PHAssetChangeRequest.creationRequestForAssetFromImage(atFileURL: url)
+    }) { success, error in
+            if let error = error {
+                print("Error saving graph to photo library: \(error.localizedDescription)")
+            } else if success {
+                print("Graph saved successfully!")
+            }
+        }
+    }
     // Set flash (torch) on/off
     func setFlash(on: Bool) {
         guard let videoDevice = self.videoDevice, videoDevice.hasTorch else { return }
@@ -204,8 +215,8 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
         }
     }
     
-    func uploadVideoToServer(videoURL: URL) {
-        let serverURL = URL(string: "http://10.243.78.127:8000/videos/")!
+    func uploadVideoToServer(videoURL: URL, currentView: String) {
+        let serverURL = URL(string: "http://192.168.4.108:8000/cyclops/upload/")!
         var request = URLRequest(url: serverURL)
         request.httpMethod = "POST"
         
@@ -214,23 +225,28 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
         
         let body = NSMutableData()
         
+        // Append videoType as a form field
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"videoType\"\r\n\r\n".data(using: .utf8)!)
+        body.append("\(currentView)\r\n".data(using: .utf8)!)
         
         // Append the file as multipart form data
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
         body.append("Content-Disposition: form-data; name=\"videofile\"; filename=\"video.mov\"\r\n".data(using: .utf8)!)
         body.append("Content-Type: video/quicktime\r\n\r\n".data(using: .utf8)!)
-
+        
+        // Append the video data
         if let videoData = try? Data(contentsOf: videoURL) {
             body.append(videoData)
         }
         body.append("\r\n".data(using: .utf8)!)
         body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+        
         request.httpBody = body as Data
         
         let sessionConfig = URLSessionConfiguration.default
-        sessionConfig.timeoutIntervalForRequest = 500
-        sessionConfig.timeoutIntervalForResource = 500
+        sessionConfig.timeoutIntervalForRequest = 120
+        sessionConfig.timeoutIntervalForResource = 120
         let session = URLSession(configuration: sessionConfig)
         
         let task = session.uploadTask(with: request, from: body as Data) { data, response, error in
@@ -292,6 +308,7 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
                 DispatchQueue.main.async {
                     self.fetchedGraphURL = movedURL
                     print("Graph fetched and moved successfully: \(movedURL)")
+                    self.saveGraphToPhotos(url: movedURL)
                 }
             }
         }
@@ -318,6 +335,7 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
                     self.fetchedVideoURL = movedURL
                     print("Video fetched and moved successfully: \(movedURL)")
                     NotificationCenter.default.post(name: .videoFetched, object: nil)
+                    self.saveVideoToPhotos(url: movedURL)
                 }
             }
         }

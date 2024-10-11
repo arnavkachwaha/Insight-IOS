@@ -8,16 +8,21 @@
 import SwiftUI
 import Combine
 
+enum CaptureState {
+    case recording
+    case playback(videoURL: URL)
+    case output(videoURL: URL, graphURL: URL)
+    case loading
+}
+
 class ContentViewModel: ObservableObject {
-    @Published var isRecording: Bool = true
-    @Published var isFetchingVideo: Bool = false
-    @Published var isVideoFetched: Bool = false
+    @Published var captureState: CaptureState = .loading
+    @Published var currentView: String = "PLR"
+    @Published var recordedVideoURL: URL?
     @Published var fetchedVideoURL: URL?
     @Published var fetchedGraphURL: URL?
-    @Published var recordedVideoURL: URL?
 
     var frameHandler: FrameHandler
-
     private var cancellables = Set<AnyCancellable>()
 
     init(frameHandler: FrameHandler) {
@@ -29,34 +34,30 @@ class ContentViewModel: ObservableObject {
 
     func startRecording() {
         frameHandler.startRecording()
+        captureState = .recording
     }
 
     func stopRecording() {
-        isRecording = false
         frameHandler.stopRecording()
     }
 
     func restartSession() {
-        resetFlags()
         frameHandler.startSession()
-    }
-    
-    func resetFlags() {
-        isVideoFetched = false
-        isFetchingVideo = false
-        isRecording = true
+        captureState = .recording
     }
     
     func uploadAndFetchVideo() {
-        isFetchingVideo = true
-        frameHandler.uploadVideoToServer(videoURL: recordedVideoURL!)
+        frameHandler.uploadVideoToServer(videoURL: recordedVideoURL!, currentView: currentView)
+        captureState = .loading
     }
 
     private func setupRecordingFinishedListener() {
         NotificationCenter.default.publisher(for: .videoRecorded)
             .sink { [weak self] _ in
-                self?.recordedVideoURL = self?.frameHandler.recordedVideoURL
-                self?.isRecording = false
+                if let recordedURL = self?.frameHandler.recordedVideoURL {
+                    self?.recordedVideoURL = recordedURL
+                    self?.captureState = .playback(videoURL: recordedURL)
+                }
             }
             .store(in: &cancellables)
     }
@@ -64,10 +65,9 @@ class ContentViewModel: ObservableObject {
     private func fetchingVideoFinishedListener() {
         NotificationCenter.default.publisher(for: .videoFetched)
             .sink { [weak self] _ in
-                self?.fetchedVideoURL = self?.frameHandler.fetchedVideoURL
-                self?.fetchedGraphURL = self?.frameHandler.fetchedGraphURL
-                self?.isFetchingVideo = false
-                self?.isVideoFetched = true
+                if let videoURL = self?.frameHandler.fetchedVideoURL, let graphURL = self?.frameHandler.fetchedGraphURL {
+                    self?.captureState = .output(videoURL: videoURL, graphURL: graphURL)
+                }
             }
             .store(in: &cancellables)
     }

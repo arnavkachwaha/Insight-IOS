@@ -9,7 +9,7 @@ import AVKit
 import UIKit
 import SwiftUI
 
-struct PlrView: View {
+struct OutputView: View {
     var onRedo: () -> Void
     var onProceed: () -> Void
     var videoUrl: URL?
@@ -81,7 +81,7 @@ struct PlrView: View {
 }
 
 #Preview {
-    PlrView(
+    OutputView(
         videoUrl: URL(string: "https://example.com/video.mov"),
         graphUrl: URL(string: "https://example.com/graph.png"),
         onRedo: {

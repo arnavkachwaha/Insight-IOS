@@ -40,27 +40,3 @@ struct FooterView: View {
 #Preview {
     FooterView(frameHandler: FrameHandler())
 }
-
-
-// Gallery button
-//            HStack {
-//                Spacer()
-//                Button(action: openPhotosApp) {
-//                    Label {
-//                    } icon: {
-//                        Image(systemName: "photo")
-//                            .font(.title)
-//                    }
-//                    .foregroundColor(.white)
-//                    .padding(.horizontal, 20)
-//                    .padding(.vertical, 12)
-//                }
-//            }
-
-
-// Function to open the Photos app
-//    func openPhotosApp() {
-//        if let url = URL(string: "photos-redirect://") {
-//            UIApplication.shared.open(url, options: [:], completionHandler: nil)
-//        }
-//    }

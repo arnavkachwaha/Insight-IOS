@@ -12,7 +12,6 @@ struct LoadingView: View {
     
     var body: some View {
             VStack {
-
                 Image(systemName: "eye")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
