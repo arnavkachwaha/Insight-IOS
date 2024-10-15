@@ -83,6 +83,10 @@ class FrameHandler: NSObject, ObservableObject {
                 try videoDevice.lockForConfiguration()
                 videoDevice.videoZoomFactor = 2.0
                 videoDevice.torchMode = .off
+                videoDevice.whiteBalanceMode = .autoWhiteBalance
+                videoDevice.automaticallyEnablesLowLightBoostWhenAvailable = true
+                videoDevice.automaticallyAdjustsVideoHDREnabled = true
+                videoDevice.automaticallyAdjustsFaceDrivenAutoExposureEnabled = true
                 videoDevice.unlockForConfiguration()
 
                 videoOutput.connection(with: .video)?.videoRotationAngle = 90
