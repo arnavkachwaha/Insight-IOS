@@ -18,44 +18,14 @@ struct ContentView: View {
     @StateObject private var viewModel = ContentViewModel(frameHandler: FrameHandler())
 
     var body: some View {
-            ZStack {
-                if viewModel.isRecording && viewModel.isFetchingVideo == false {
-                    CameraView(frameHandler: viewModel.frameHandler)
-                        .cornerRadius(25)
-                        .overlay(EyeMask(yOffset: 200))
-                    VStack {
-                        Spacer()
-                        FooterView(frameHandler: viewModel.frameHandler)
-                    }
-                    
-                } else if viewModel.isRecording == false && viewModel.isFetchingVideo == false && viewModel.isVideoFetched == false {
-                    PlaybackView(
-                        videoUrl: viewModel.recordedVideoURL,
-                        onRedo: {
-                            viewModel.restartSession()
-                        },
-                        onUse:{
-                            viewModel.uploadAndFetchVideo()
-                        }
-                    )
-                    
-                } else if viewModel.isVideoFetched == true && viewModel.isFetchingVideo == false {
-                    PlrView(
-                        videoUrl: viewModel.fetchedVideoURL,
-                        graphUrl: viewModel.fetchedGraphURL,
-                        onRedo: {
-                            viewModel.restartSession()
-                        },
-                        onProceed:{
-                            print("Proceeding to Voms")
-                        }
-                    )
-                    
-                } else {
-                    LoadingView()
-                }
-                HeaderView()
-            }
+        switch viewModel.currentView {
+        case "PLR", "VOMS":
+            CaptureView(viewModel: viewModel)
+        case "SCAT6":
+            SCAT6View()
+        default:
+            LoadingView()
+        }
     }
 }
 
