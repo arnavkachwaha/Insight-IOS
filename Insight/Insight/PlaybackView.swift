@@ -21,7 +21,7 @@ struct PlaybackView: View {
 
     var body: some View {
         ZStack {
-            VideoPlayerView(videoURL: self.videoUrl!)
+            VideoPlayer(videoURL: self.videoUrl!)
             VStack {
                 Spacer()
                 

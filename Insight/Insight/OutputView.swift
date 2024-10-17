@@ -24,7 +24,7 @@ struct OutputView: View {
     var body: some View {
         ZStack {
             VStack {
-                VideoPlayerView(videoURL: self.videoUrl!)
+                VideoPlayer(videoURL: self.videoUrl!)
                     .frame(width: 430, height: 315)
                     .padding(.bottom, 0.5)
                 

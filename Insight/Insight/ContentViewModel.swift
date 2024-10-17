@@ -46,6 +46,12 @@ class ContentViewModel: ObservableObject {
         captureState = .recording
     }
     
+    func switchViews(view: String) {
+        currentView = view
+        frameHandler.currentView = view
+        restartSession()
+    }
+    
     func uploadAndFetchVideo() {
         frameHandler.uploadVideoToServer(videoURL: recordedVideoURL!, currentView: currentView)
         captureState = .loading

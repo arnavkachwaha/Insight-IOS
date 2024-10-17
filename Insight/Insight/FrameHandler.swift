@@ -84,10 +84,6 @@ class FrameHandler: NSObject, ObservableObject {
                 videoDevice.videoZoomFactor = 2.0
                 videoDevice.torchMode = .off
                 videoDevice.focusMode = .continuousAutoFocus
-                videoDevice.whiteBalanceMode = .autoWhiteBalance
-                videoDevice.automaticallyEnablesLowLightBoostWhenAvailable = true
-                videoDevice.automaticallyAdjustsVideoHDREnabled = true
-                videoDevice.automaticallyAdjustsFaceDrivenAutoExposureEnabled = true
                 videoDevice.unlockForConfiguration()
 
                 videoOutput.connection(with: .video)?.videoRotationAngle = 90
@@ -121,14 +117,14 @@ class FrameHandler: NSObject, ObservableObject {
         let outputURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString).appendingPathExtension("mov")
         movieOutput.startRecording(to: outputURL, recordingDelegate: self)
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            self.setFlash(on: true)
+        if currentView == "PLR"{
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                self.setFlash(on: true)
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                self.setFlash(on: false)
+            }
         }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-            self.setFlash(on: false)
-        }
-
     }
 
     // Stop video recording
@@ -221,7 +217,7 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
     }
     
     func uploadVideoToServer(videoURL: URL, currentView: String) {
-        let serverURL = URL(string: "http://192.168.4.108:8000/cyclops/upload/")!
+        let serverURL = URL(string: "http://10.243.79.16:8000/cyclops/upload/")!
         var request = URLRequest(url: serverURL)
         request.httpMethod = "POST"
         

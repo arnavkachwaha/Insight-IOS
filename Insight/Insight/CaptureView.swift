@@ -48,9 +48,7 @@ struct CaptureView: View {
                         onProceed: {
                             switch viewModel.currentView {
                                 case "PLR":
-                                    viewModel.currentView = "VOMS"
-                                    viewModel.restartSession()
-
+                                viewModel.switchViews(view: "VOMS")
                                 case "VOMS":
                                     viewModel.currentView = "SCAT6"
                                 default:

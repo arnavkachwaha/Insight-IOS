@@ -8,7 +8,7 @@
 import SwiftUI
 import AVKit
 
-struct VideoPlayerView: UIViewControllerRepresentable {
+struct VideoPlayer: UIViewControllerRepresentable {
     let videoURL: URL
 
     func makeUIViewController(context: Context) -> AVPlayerViewController {
@@ -33,5 +33,5 @@ struct VideoPlayerView: UIViewControllerRepresentable {
 }
 
 #Preview {
-    VideoPlayerView(videoURL: .init(string: "videod.mp4")!)
+    VideoPlayer(videoURL: .init(string: "videod.mp4")!)
 }
