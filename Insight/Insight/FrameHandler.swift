@@ -81,9 +81,45 @@ class FrameHandler: NSObject, ObservableObject {
 
                 // Configure device settings
                 try videoDevice.lockForConfiguration()
+                var selectedFormat: AVCaptureDevice.Format?
+                var selectedFrameRateRange: AVFrameRateRange?
+                let desiredResolution = CMVideoDimensions(width: 1920, height: 1080)
+
+                for format in videoDevice.formats {
+                    let formatDescription = format.formatDescription
+                    let resolution = CMVideoFormatDescriptionGetDimensions(formatDescription)
+
+                    if resolution.width == desiredResolution.width && resolution.height == desiredResolution.height {
+                        let frameRateRanges = format.videoSupportedFrameRateRanges
+
+                        for range in frameRateRanges {
+                            if range.maxFrameRate >= 60 && range.minFrameRate <= 60 {
+                                selectedFormat = format
+                                selectedFrameRateRange = range
+                                break
+                            }
+                        }
+
+                        if selectedFormat != nil {
+                            break
+                        }
+                    }
+                }
+
+                if let selectedFormat = selectedFormat, let frameRateRange = selectedFrameRateRange {
+                    videoDevice.activeFormat = selectedFormat
+                    videoDevice.activeVideoMinFrameDuration = CMTimeMake(value: 1, timescale: Int32(frameRateRange.maxFrameRate))
+                    videoDevice.activeVideoMaxFrameDuration = CMTimeMake(value: 1, timescale: Int32(frameRateRange.maxFrameRate))
+                } else {
+                    print("No format supports 60 fps at the desired resolution.")
+                }
                 videoDevice.videoZoomFactor = 2.0
                 videoDevice.torchMode = .off
                 videoDevice.focusMode = .continuousAutoFocus
+                if videoDevice.isLowLightBoostSupported{
+                    videoDevice.automaticallyEnablesLowLightBoostWhenAvailable = true
+                }
+                videoDevice.automaticallyAdjustsVideoHDREnabled = true
                 videoDevice.unlockForConfiguration()
 
                 videoOutput.connection(with: .video)?.videoRotationAngle = 90
@@ -217,7 +253,7 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
     }
     
     func uploadVideoToServer(videoURL: URL, currentView: String) {
-        let serverURL = URL(string: "http://10.243.79.16:8000/cyclops/upload/")!
+        let serverURL = URL(string: uRL)!
         var request = URLRequest(url: serverURL)
         request.httpMethod = "POST"
         
