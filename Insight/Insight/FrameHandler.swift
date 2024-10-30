@@ -23,6 +23,7 @@ class FrameHandler: NSObject, ObservableObject {
     @Published var fetchedVideoURL: URL?
     @Published var fetchedGraphURL: URL?
     @Published var isSessionReady = false
+    @Published var uRL = "http://10.243.79.16:8000/cyclops/upload/"
     
     override init() {
         super.init()
@@ -56,6 +57,7 @@ class FrameHandler: NSObject, ObservableObject {
             guard let captureSession = self.captureSession else { return }
 
             captureSession.beginConfiguration()
+            captureSession.sessionPreset = .inputPriority
             
             do {
                 // Get video device (back camera)
