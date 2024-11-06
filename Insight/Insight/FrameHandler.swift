@@ -18,6 +18,8 @@ class FrameHandler: NSObject, ObservableObject {
     private let context = CIContext()
     private var movieOutput = AVCaptureMovieFileOutput()
     private var videoDevice: AVCaptureDevice?
+    private var AWS_URL = "http://ec2-3-227-254-146.compute-1.amazonaws.com:8000/cyclops/upload/"
+    private var LOCAL_URL = "http://10.0.0.127:8000/cyclops/upload/"
     @Published var currentView = "PLR"
     @Published var recordedVideoURL: URL?
     @Published var fetchedVideoURL: URL?
@@ -57,6 +59,9 @@ class FrameHandler: NSObject, ObservableObject {
 
             captureSession.beginConfiguration()
             
+            // set the session to 4:3 aspect ratio
+//            captureSession.sessionPreset = .cif352x288 //.vga640x480
+            
             do {
                 // Get video device (back camera)
                 guard let videoDevice = AVCaptureDevice.default(.builtInDualWideCamera, for: .video, position: .back) else { return }
@@ -83,6 +88,7 @@ class FrameHandler: NSObject, ObservableObject {
                 try videoDevice.lockForConfiguration()
                 videoDevice.videoZoomFactor = 2.0
                 videoDevice.torchMode = .off
+
 //                videoDevice.focusMode = .continuousAutoFocus
 //                videoDevice.whiteBalanceMode = .autoWhiteBalance
 //                videoDevice.automaticallyEnablesLowLightBoostWhenAvailable = true
@@ -211,17 +217,94 @@ extension FrameHandler: AVCaptureVideoDataOutputSampleBufferDelegate {
 
 // Handle video recording delegate
 extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
+//    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
+//        if let error = error {
+//            print("Error recording video: \(error.localizedDescription)")
+//        } else {
+//            recordedVideoURL = outputFileURL
+//            NotificationCenter.default.post(name: .videoRecorded, object: nil)
+//        }
+//    }
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
         if let error = error {
             print("Error recording video: \(error.localizedDescription)")
         } else {
+            // Original recorded video URL
             recordedVideoURL = outputFileURL
-            NotificationCenter.default.post(name: .videoRecorded, object: nil)
+            
+            // Crop the video after recording
+            cropVideo(at: outputFileURL) { [weak self] croppedURL in
+                guard let self = self else { return }
+                
+                if let croppedURL = croppedURL {
+                    // Save or use the cropped URL as needed
+                    self.recordedVideoURL = croppedURL
+                    // Notify that the cropped video is ready, if necessary
+                    NotificationCenter.default.post(name: .videoRecorded, object: nil)
+                    
+                    // Optionally save to Photos
+                    self.saveVideoToPhotos(url: croppedURL)
+                } else {
+                    print("Failed to crop video")
+                }
+            }
+        }
+    }
+    
+    func cropVideo(at url: URL, completion: @escaping (URL?) -> Void) {
+        let asset = AVAsset(url: url)
+        let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality)
+        
+        // Define the output URL
+        let outputURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString).appendingPathExtension("mov")
+        exportSession?.outputURL = outputURL
+        exportSession?.outputFileType = .mov
+        
+        // Create a composition and set the render size to 640x480
+        let composition = AVMutableVideoComposition(asset: asset) { request in
+            let ciImage = request.sourceImage
+//            let ciHeight = ciImage.extent.height
+//            let ciWidth = ciImage.extent.width
+//
+//            // Define the crop area
+//            let cropHeight = ciWidth * 0.75
+//            let cropRect = CGRect(x: 0, y: ciHeight - cropHeight, width: ciWidth, height: cropHeight)
+//            let croppedImage = ciImage.cropped(to: cropRect)
+//
+//            // Scale the cropped image to fit within 640x480
+//            let scaleTransform = CGAffineTransform(scaleX: 640 / croppedImage.extent.width, y: 480 / croppedImage.extent.height)
+//            let resizedImage = croppedImage.transformed(by: scaleTransform)
+//
+//            // Move the image to the bottom of the 640x480 frame
+//            let finalImage = resizedImage.transformed(by: CGAffineTransform(translationX: 0, y: -656))
+
+            // Finish the request with the final image
+            request.finish(with: ciImage, context: nil)
+        }
+
+        // Set the render size and frame duration
+        composition.renderSize = CGSize(width: 640, height: 480)
+        composition.frameDuration = CMTime(value: 1, timescale: 30) // 30 FPS (adjust as needed)
+
+        
+        // Assign the video composition to the export session
+        exportSession?.videoComposition = composition
+        
+        // Export the video
+        exportSession?.exportAsynchronously {
+            DispatchQueue.main.async {
+                if exportSession?.status == .completed {
+                    completion(outputURL)
+                } else {
+                    print("Failed to crop video: \(exportSession?.error?.localizedDescription ?? "Unknown error")")
+                    completion(nil)
+                }
+            }
         }
     }
     
     func uploadVideoToServer(videoURL: URL, currentView: String) {
-        let serverURL = URL(string: "http://ec2-3-227-254-146.compute-1.amazonaws.com:8000/cyclops/upload/")!
+        let serverURL = URL(string: AWS_URL)!
         var request = URLRequest(url: serverURL)
         request.httpMethod = "POST"
         
@@ -244,6 +327,7 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
         if let videoData = try? Data(contentsOf: videoURL) {
             body.append(videoData)
         }
+        
         body.append("\r\n".data(using: .utf8)!)
         body.append("--\(boundary)--\r\n".data(using: .utf8)!)
         

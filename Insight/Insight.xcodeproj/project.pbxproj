@@ -43,6 +43,7 @@
 		05C2ECB52CB9DC0C0086C260 /* CaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureView.swift; sourceTree = "<group>"; };
 		05F110412C990245007B16A0 /* PlaybackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackView.swift; sourceTree = "<group>"; };
 		05F110442C9906C1007B16A0 /* ContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewModel.swift; sourceTree = "<group>"; };
+		FB0AEF4B2CD6DDED00259A68 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +76,7 @@
 		053F2FDD2C42ECD1007A9BF5 /* Insight */ = {
 			isa = PBXGroup;
 			children = (
+				FB0AEF4B2CD6DDED00259A68 /* Info.plist */,
 				053F2FDE2C42ECD1007A9BF5 /* InsightApp.swift */,
 				053F2FE02C42ECD1007A9BF5 /* ContentView.swift */,
 				05F110442C9906C1007B16A0 /* ContentViewModel.swift */,
@@ -324,13 +326,14 @@
 				DEVELOPMENT_TEAM = AU5YKC8N9W;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Insight/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Please allow Camera Access";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Allow Access to Photo Library";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -361,13 +364,14 @@
 				DEVELOPMENT_TEAM = AU5YKC8N9W;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Insight/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Please allow Camera Access";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Allow Access to Photo Library";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
