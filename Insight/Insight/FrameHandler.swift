@@ -23,7 +23,7 @@ class FrameHandler: NSObject, ObservableObject {
     @Published var fetchedVideoURL: URL?
     @Published var fetchedGraphURL: URL?
     @Published var isSessionReady = false
-    @Published var uRL = "http://a8a175088b809630c.awsglobalaccelerator.com:8000/cyclops/upload/a"
+    @Published var uRL = "http://a8a175088b809630c.awsglobalaccelerator.com:8000/cyclops/upload/"
 //    @Published var uRL = "http://10.243.79.16:8000/cyclops/upload/"
     
     override init() {
@@ -291,7 +291,7 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
         
         let task = session.uploadTask(with: request, from: body as Data) { data, response, error in
             if let error = error {
-                NotificationCenter.default.post(name: .uploadTimeoutOccurred, object: nil)
+                NotificationCenter.default.post(name: .uploadTimeoutOccurred, object: nil, userInfo: ["message": "\(error.localizedDescription)"])
                 print("Error uploading video: \(error)")
             } else if let response = response as? HTTPURLResponse, response.statusCode == 200, let data = data {
                 print("Upload successful")
@@ -308,9 +308,11 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
                         self.handleBackendResponse(videoDownloadURL: videoDownloadURL, graphDownloadURL: graphDownloadURL)
                     }
                 } catch {
+                    NotificationCenter.default.post(name: .uploadTimeoutOccurred, object: nil, userInfo: ["message": "\(error.localizedDescription)"])
                     print("Failed to parse JSON response: \(error)")
                 }
             } else {
+                NotificationCenter.default.post(name: .uploadTimeoutOccurred, object: nil, userInfo: ["message": "Upload failed with unexpected response"])
                 print("Upload failed with unexpected response")
             }
         }

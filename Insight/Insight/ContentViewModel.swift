@@ -84,8 +84,15 @@ class ContentViewModel: ObservableObject {
     func setupTimeoutListener() {
         NotificationCenter.default.publisher(for: .uploadTimeoutOccurred)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.alertMessage = "Internal server error: restarting last session."
+            .sink { [weak self] notification in
+                // Extract the message from userInfo if it exists
+                if let message = notification.userInfo?["message"] as? String {
+                    self?.alertMessage = message
+                } else {
+                    // Fallback to a default message if no message is found in userInfo
+                    self?.alertMessage = "An unknown error occurred. Please try again."
+                }
+                // Show the alert
                 self?.showAlert = true
             }
             .store(in: &cancellables)
