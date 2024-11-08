@@ -10,7 +10,7 @@ import CoreImage
 import Photos
 import SwiftUI
 
-class FrameHandler: NSObject, ObservableObject {
+class FrameHandler: NSObject, ObservableObject, AVCaptureVideoDataOutputSampleBufferDelegate {
     @Published var frame: CGImage?
     var captureSession: AVCaptureSession?
     private var permissionGranted = false
