@@ -50,7 +50,8 @@ struct CaptureView: View {
                                 case "PLR":
                                 viewModel.switchViews(view: "VOMS")
                                 case "VOMS":
-                                    viewModel.currentView = "SCAT6"
+//                                Restarting the view form the beginning for now.
+                                viewModel.switchViews(view: "PLR")
                                 default:
                                     break
                             }
@@ -61,6 +62,14 @@ struct CaptureView: View {
                     LoadingView()
                 }
                 HeaderView()
+            }.alert(isPresented: $viewModel.showAlert) {
+                Alert(
+                    title: Text("Error"),
+                    message: Text(viewModel.alertMessage),
+                    dismissButton: .default(Text("OK"), action: {
+                        viewModel.restartSession()
+                    })
+                )
             }
         }
 }

@@ -36,6 +36,7 @@
 		053F2FEE2C42ED41007A9BF5 /* HeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderView.swift; sourceTree = "<group>"; };
 		053F2FF22C42ED92007A9BF5 /* FooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FooterView.swift; sourceTree = "<group>"; };
 		053F2FF82C42F1BB007A9BF5 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
+		059A88712CD6F0D800CA9C2E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		05A648462CACDAAD00ABF8F6 /* VideoPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayer.swift; sourceTree = "<group>"; };
 		05A648482CACDADF00ABF8F6 /* OutputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputView.swift; sourceTree = "<group>"; };
 		05A742072CA254CE00C5FEC2 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
@@ -75,6 +76,7 @@
 		053F2FDD2C42ECD1007A9BF5 /* Insight */ = {
 			isa = PBXGroup;
 			children = (
+				059A88712CD6F0D800CA9C2E /* Info.plist */,
 				053F2FDE2C42ECD1007A9BF5 /* InsightApp.swift */,
 				053F2FE02C42ECD1007A9BF5 /* ContentView.swift */,
 				05F110442C9906C1007B16A0 /* ContentViewModel.swift */,
@@ -318,12 +320,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Insight/Preview Content\"";
-				DEVELOPMENT_TEAM = AU5YKC8N9W;
+				DEVELOPMENT_TEAM = L7745265ZX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Insight/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Please allow Camera Access";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Allow Access to Photo Library";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -331,13 +335,15 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = AU5YKC8N9W;
+				PRODUCT_BUNDLE_IDENTIFIER = .com.Insight.Innovations.Insight;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -358,9 +364,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Insight/Preview Content\"";
-				DEVELOPMENT_TEAM = AU5YKC8N9W;
+				DEVELOPMENT_TEAM = L7745265ZX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Insight/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Please allow Camera Access";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Allow Access to Photo Library";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -368,12 +375,13 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = AU5YKC8N9W;
+				PRODUCT_BUNDLE_IDENTIFIER = .com.Insight.Innovations.Insight;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

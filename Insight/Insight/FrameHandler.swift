@@ -23,7 +23,8 @@ class FrameHandler: NSObject, ObservableObject {
     @Published var fetchedVideoURL: URL?
     @Published var fetchedGraphURL: URL?
     @Published var isSessionReady = false
-    @Published var uRL = "http://10.243.79.16:8000/cyclops/upload/"
+    @Published var uRL = "http://a8a175088b809630c.awsglobalaccelerator.com:8000/cyclops/upload/a"
+//    @Published var uRL = "http://10.243.79.16:8000/cyclops/upload/"
     
     override init() {
         super.init()
@@ -95,7 +96,7 @@ class FrameHandler: NSObject, ObservableObject {
                         let frameRateRanges = format.videoSupportedFrameRateRanges
 
                         for range in frameRateRanges {
-                            if range.maxFrameRate >= 60 && range.minFrameRate <= 60 {
+                            if range.maxFrameRate >= 30 && range.minFrameRate <= 30 {
                                 selectedFormat = format
                                 selectedFrameRateRange = range
                                 break
@@ -113,7 +114,7 @@ class FrameHandler: NSObject, ObservableObject {
                     videoDevice.activeVideoMinFrameDuration = CMTimeMake(value: 1, timescale: Int32(frameRateRange.maxFrameRate))
                     videoDevice.activeVideoMaxFrameDuration = CMTimeMake(value: 1, timescale: Int32(frameRateRange.maxFrameRate))
                 } else {
-                    print("No format supports 60 fps at the desired resolution.")
+                    print("No format supports 30 fps at the desired resolution.")
                 }
                 videoDevice.videoZoomFactor = 2.0
                 videoDevice.torchMode = .off
@@ -284,12 +285,13 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
         request.httpBody = body as Data
         
         let sessionConfig = URLSessionConfiguration.default
-        sessionConfig.timeoutIntervalForRequest = 120
-        sessionConfig.timeoutIntervalForResource = 120
+        sessionConfig.timeoutIntervalForRequest = 60
+        sessionConfig.timeoutIntervalForResource = 60
         let session = URLSession(configuration: sessionConfig)
         
         let task = session.uploadTask(with: request, from: body as Data) { data, response, error in
             if let error = error {
+                NotificationCenter.default.post(name: .uploadTimeoutOccurred, object: nil)
                 print("Error uploading video: \(error)")
             } else if let response = response as? HTTPURLResponse, response.statusCode == 200, let data = data {
                 print("Upload successful")
@@ -408,4 +410,5 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
 extension Notification.Name {
     static let videoFetched = Notification.Name("videoFetched")
     static let videoRecorded = Notification.Name("videoRecorded")
+    static let uploadTimeoutOccurred = Notification.Name("uploadTimeoutOccurred")
 }
