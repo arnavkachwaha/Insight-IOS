@@ -23,7 +23,9 @@ class FrameHandler: NSObject, ObservableObject {
     @Published var fetchedVideoURL: URL?
     @Published var fetchedGraphURL: URL?
     @Published var isSessionReady = false
-    @Published var uRL = "http://10.243.79.16:8000/cyclops/upload/"
+    @Published var uRL = "http://a8a175088b809630c.awsglobalaccelerator.com:8000/cyclops/upload/"
+    // "http://10.243.79.16:8000/cyclops/upload/"
+
     
     override init() {
         super.init()
@@ -95,7 +97,7 @@ class FrameHandler: NSObject, ObservableObject {
                         let frameRateRanges = format.videoSupportedFrameRateRanges
 
                         for range in frameRateRanges {
-                            if range.maxFrameRate >= 60 && range.minFrameRate <= 60 {
+                            if range.maxFrameRate >= 30 && range.minFrameRate <= 30 {
                                 selectedFormat = format
                                 selectedFrameRateRange = range
                                 break
@@ -113,7 +115,7 @@ class FrameHandler: NSObject, ObservableObject {
                     videoDevice.activeVideoMinFrameDuration = CMTimeMake(value: 1, timescale: Int32(frameRateRange.maxFrameRate))
                     videoDevice.activeVideoMaxFrameDuration = CMTimeMake(value: 1, timescale: Int32(frameRateRange.maxFrameRate))
                 } else {
-                    print("No format supports 60 fps at the desired resolution.")
+                    print("No format supports 30 fps at the desired resolution.")
                 }
                 videoDevice.videoZoomFactor = 2.0
                 videoDevice.torchMode = .off
