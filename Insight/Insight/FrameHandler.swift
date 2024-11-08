@@ -117,10 +117,9 @@ class FrameHandler: NSObject, ObservableObject {
                 }
                 videoDevice.videoZoomFactor = 2.0
                 videoDevice.torchMode = .off
-                videoDevice.focusMode = .continuousAutoFocus
-                if videoDevice.isLowLightBoostSupported{
-                    videoDevice.automaticallyEnablesLowLightBoostWhenAvailable = true
-                }
+//                videoDevice.focusMode = .continuousAutoFocus
+//                videoDevice.whiteBalanceMode = .autoWhiteBalance
+//                videoDevice.automaticallyEnablesLowLightBoostWhenAvailable = true
                 videoDevice.automaticallyAdjustsVideoHDREnabled = true
                 videoDevice.unlockForConfiguration()
 
