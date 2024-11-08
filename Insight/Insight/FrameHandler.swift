@@ -29,6 +29,7 @@ class FrameHandler: NSObject, ObservableObject {
     override init() {
         super.init()
         checkPermission()
+        
     }
 
     // Check for camera permission
@@ -199,22 +200,6 @@ class FrameHandler: NSObject, ObservableObject {
         }
     }
 }
-
-// Handle video output sample buffer (frame processing)
-extension FrameHandler: AVCaptureVideoDataOutputSampleBufferDelegate {
-//    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-//        guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-//        let ciImage = CIImage(cvPixelBuffer: imageBuffer)
-//        
-//        DispatchQueue.global(qos: .userInitiated).async {
-//            print("Dispatching cgImage")
-//            guard let cgImage = self.context.createCGImage(ciImage, from: ciImage.extent) else { return }
-//            DispatchQueue.main.async {
-//                self.frame = cgImage
-//            }
-//        }
-    }
-//}
 
 // Handle video recording delegate
 extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
