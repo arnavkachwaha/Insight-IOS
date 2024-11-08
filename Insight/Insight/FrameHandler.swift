@@ -221,7 +221,7 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
     }
     
     func uploadVideoToServer(videoURL: URL, currentView: String) {
-        let serverURL = URL(string: "http://ec2-3-227-254-146.compute-1.amazonaws.com:8000/cyclops/upload/")!
+        let serverURL = URL(string: "http://a8a175088b809630c.awsglobalaccelerator.com:8000/cyclops/upload/")!
         var request = URLRequest(url: serverURL)
         request.httpMethod = "POST"
         
