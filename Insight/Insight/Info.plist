@@ -6,14 +6,14 @@
 	<dict>
 		<key>NSExceptionDomains</key>
 		<dict>
-			<key>ec2-3-227-254-146.compute-1.amazonaws.com</key>
+			<key>a8a175088b809630c.awsglobalaccelerator.com</key>
 			<dict>
 				<key>NSIncludesSubdomains</key>
 				<true/>
 				<key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>
 				<true/>
 			</dict>
-			<key>a8a175088b809630c.awsglobalaccelerator.com</key>
+			<key>ec2-3-227-254-146.compute-1.amazonaws.com</key>
 			<dict>
 				<key>NSIncludesSubdomains</key>
 				<true/>
