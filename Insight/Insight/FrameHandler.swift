@@ -52,6 +52,7 @@ class FrameHandler: NSObject, ObservableObject {
         guard let captureSession = captureSession else { return }
 
         captureSession.beginConfiguration()
+        captureSession.sessionPreset = .inputPriority
         
         do {
             // Selecting the default dual camera device
@@ -72,7 +73,47 @@ class FrameHandler: NSObject, ObservableObject {
             if captureSession.canAddOutput(movieOutput) {
                 captureSession.addOutput(movieOutput)
             }
+            try videoDevice.lockForConfiguration()
+            videoDevice.focusMode = .continuousAutoFocus
+            var selectedFormat: AVCaptureDevice.Format?
+            var selectedFrameRateRange: AVFrameRateRange?
+            let desiredResolution = CMVideoDimensions(width: 1920, height: 1080)
 
+            for format in videoDevice.formats {
+                let formatDescription = format.formatDescription
+                let resolution = CMVideoFormatDescriptionGetDimensions(formatDescription)
+
+                if resolution.width == desiredResolution.width && resolution.height == desiredResolution.height {
+                    let frameRateRanges = format.videoSupportedFrameRateRanges
+
+                    for range in frameRateRanges {
+                        if range.maxFrameRate >= 60 && range.minFrameRate <= 60 {
+                            selectedFormat = format
+                            selectedFrameRateRange = range
+                            break
+                        }
+                    }
+
+                    if selectedFormat != nil {
+                        break
+                    }
+                }
+            }
+
+            if let selectedFormat = selectedFormat, let frameRateRange = selectedFrameRateRange {
+                videoDevice.activeFormat = selectedFormat
+                videoDevice.activeVideoMinFrameDuration = CMTimeMake(value: 1, timescale: Int32(frameRateRange.maxFrameRate))
+                videoDevice.activeVideoMaxFrameDuration = CMTimeMake(value: 1, timescale: Int32(frameRateRange.maxFrameRate))
+            } else {
+                print("No format supports 60 fps at the desired resolution.")
+            }
+            videoDevice.torchMode = .off
+            videoDevice.focusMode = .continuousAutoFocus
+            if videoDevice.isLowLightBoostSupported{
+                videoDevice.automaticallyEnablesLowLightBoostWhenAvailable = true
+            }
+            videoDevice.automaticallyAdjustsVideoHDREnabled = true
+            videoDevice.unlockForConfiguration()
             videoOutput.connection(with: .video)?.videoRotationAngle = 90
 
             captureSession.commitConfiguration()
