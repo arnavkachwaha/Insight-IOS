@@ -12,13 +12,13 @@ struct PlaybackView: View {
     var onRedo: () -> Void
     var onUse: () -> Void
     var videoUrl: URL?
-
+    
     init(videoUrl: URL?, onRedo: @escaping () -> Void, onUse: @escaping () -> Void) {
         self.videoUrl = videoUrl
         self.onRedo = onRedo
         self.onUse = onUse
     }
-
+    
     var body: some View {
         ZStack {
             VideoPlayer(videoURL: self.videoUrl!)
@@ -51,7 +51,7 @@ struct PlaybackView: View {
                             .cornerRadius(20)
                     }.padding(.trailing, 20)
                         .padding(.bottom, 25)
-
+                    
                 }
             }
         }

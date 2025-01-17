@@ -23,27 +23,32 @@ class ContentViewModel: ObservableObject {
     @Published var fetchedGraphURL: URL?
     @Published var showAlert: Bool = false
     @Published var alertMessage: String = "Internal Server Error: Restarting the current Session"
-
+    
     var frameHandler: FrameHandler
     private var cancellables = Set<AnyCancellable>()
-
+    
     init(frameHandler: FrameHandler) {
         self.frameHandler = frameHandler
+        $currentView
+            .sink { [weak self] newView in
+                self?.frameHandler.currentView = newView
+            }
+            .store(in: &cancellables)
         startRecording()
         setupRecordingFinishedListener()
         fetchingVideoFinishedListener()
         setupTimeoutListener()
     }
-
+    
     func startRecording() {
         frameHandler.startRecording()
         captureState = .recording
     }
-
+    
     func stopRecording() {
         frameHandler.stopRecording()
     }
-
+    
     func restartSession() {
         frameHandler.startSession()
         captureState = .recording
@@ -59,7 +64,7 @@ class ContentViewModel: ObservableObject {
         frameHandler.uploadVideoToServer(videoURL: recordedVideoURL!, currentView: currentView)
         captureState = .loading
     }
-
+    
     private func setupRecordingFinishedListener() {
         NotificationCenter.default.publisher(for: .videoRecorded)
             .sink { [weak self] _ in

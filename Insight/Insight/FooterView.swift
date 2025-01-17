@@ -10,7 +10,8 @@ import SwiftUI
 struct FooterView: View {
     @ObservedObject var frameHandler: FrameHandler
     @State private var isRecording = false
-
+    var onRecordingStateChanged: (Bool) -> Void
+    
     var body: some View {
         VStack {
             Spacer()
@@ -22,6 +23,7 @@ struct FooterView: View {
                 } else {
                     frameHandler.stopRecording()
                 }
+                onRecordingStateChanged(isRecording)
             }) {
                 Image(systemName: isRecording ? "stop.circle" : "record.circle")
                     .resizable()
@@ -38,5 +40,5 @@ struct FooterView: View {
 }
 
 #Preview {
-    FooterView(frameHandler: FrameHandler())
+    FooterView(frameHandler: FrameHandler(), onRecordingStateChanged: { _ in })
 }

@@ -20,7 +20,7 @@ struct OutputView: View {
         self.onRedo = onRedo
         self.onProceed = onProceed
     }
-
+    
     var body: some View {
         ZStack {
             VStack {
@@ -76,8 +76,8 @@ struct OutputView: View {
             }.padding(.top, 45)
             HeaderView()
         }
-
-        }
+        
+    }
 }
 
 #Preview {

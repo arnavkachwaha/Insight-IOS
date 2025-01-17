@@ -10,7 +10,7 @@ import AVFoundation
 
 struct CameraView: View {
     @ObservedObject var frameHandler: FrameHandler
-
+    
     var body: some View {
         ZStack {
             if frameHandler.isSessionReady {
@@ -27,25 +27,25 @@ struct CameraView: View {
 
 struct CameraFeedView: UIViewControllerRepresentable {
     @ObservedObject var frameHandler: FrameHandler
-
+    
     func makeUIViewController(context: Context) -> UIViewController {
         let controller = CameraViewController()
         controller.frameHandler = frameHandler
         return controller
     }
-
+    
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }
 
 class CameraViewController: UIViewController {
     var frameHandler: FrameHandler?
     private var previewLayer: AVCaptureVideoPreviewLayer!
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupPreviewLayer()
     }
-
+    
     private func setupPreviewLayer() {
         guard let frameHandler = frameHandler, let captureSession = frameHandler.captureSession else { return }
         

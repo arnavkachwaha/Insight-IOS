@@ -15,14 +15,17 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var results = NeuroScreenResults()
     @StateObject private var viewModel = ContentViewModel(frameHandler: FrameHandler())
-
+    
     var body: some View {
         switch viewModel.currentView {
         case "PLR", "VOMS":
             CaptureView(viewModel: viewModel)
         case "SCAT6":
-            SCAT6View()
+            NavigationStack {
+                ObservableSignsView(results: results)
+            }
         default:
             LoadingView()
         }

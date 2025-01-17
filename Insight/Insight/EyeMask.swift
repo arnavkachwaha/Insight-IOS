@@ -13,7 +13,7 @@ struct EyeShape: Shape {
         var path = Path()
         let width = rect.width
         let height = rect.height / 2
-
+        
         path.move(to: CGPoint(x: 0, y: yOffset))
         path.addQuadCurve(to: CGPoint(x: width, y: yOffset), control: CGPoint(x: width / 2, y: yOffset - height / 2))
         path.addQuadCurve(to: CGPoint(x: 0, y: yOffset), control: CGPoint(x: width / 2, y: yOffset + height / 2))

@@ -12,13 +12,13 @@ struct HeaderView: View {
     var body: some View {
         VStack {
             HStack {
-                    Spacer()
-                    Text("INSIGHT")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundColor(Color.blue)
-                    Spacer()
-                }
+                Spacer()
+                Text("INSIGHT")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color.blue)
+                Spacer()
+            }
             .foregroundColor(.clear)
             
             Spacer()

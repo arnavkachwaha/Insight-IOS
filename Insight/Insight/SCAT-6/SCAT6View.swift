@@ -9,7 +9,9 @@ import SwiftUI
 
 struct SCAT6View: View {
     var body: some View {
-        Text("SCAT6 View")
+        NavigationStack {
+            Text("SCAT6")
+        }
     }
 }
 
