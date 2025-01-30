@@ -17,14 +17,14 @@ class FrameHandler: NSObject, ObservableObject {
     private let context = CIContext()
     private var movieOutput = AVCaptureMovieFileOutput()
     private var videoDevice: AVCaptureDevice?
-    @Published var currentView: String = "PLR" 
+    @Published var currentView: String = ""
     @Published var recordedVideoURL: URL?
     @Published var fetchedVideoURL: URL?
     @Published var fetchedGraphURL: URL?
     @Published var isSessionReady = false
     @Published var frame: CGImage?
     @Published var uRL = "http://a8a175088b809630c.awsglobalaccelerator.com:8000/cyclops/upload/"
-    //    @Published var uRL = "http://10.243.79.16:8000/cyclops/upload/"
+//    @Published var uRL = "http://192.168.4.108:8000/cyclops/upload/"
     
     override init() {
         super.init()
@@ -49,6 +49,16 @@ class FrameHandler: NSObject, ObservableObject {
         }
     }
     
+    //To select the desired camera
+    func bestDevice(deviceTypes: [AVCaptureDevice.DeviceType], position: AVCaptureDevice.Position) -> AVCaptureDevice? {
+        let discoverySession = AVCaptureDevice.DiscoverySession(
+            deviceTypes: deviceTypes,
+            mediaType: .video,
+            position: position
+        )
+        return discoverySession.devices.first(where: { $0.position == position })
+    }
+    
     // Setup camera session
     func setupCaptureSession() {
         guard permissionGranted else { return }
@@ -58,14 +68,29 @@ class FrameHandler: NSObject, ObservableObject {
             guard let captureSession = self.captureSession else { return }
             
             captureSession.beginConfiguration()
-            captureSession.sessionPreset = .inputPriority
+            captureSession.sessionPreset = .high // Adjust as needed
             
             do {
-                // Get video device (back camera)
-                guard let videoDevice = AVCaptureDevice.default(.builtInDualWideCamera, for: .video, position: .back) else { return }
-                let videoDeviceInput = try AVCaptureDeviceInput(device: videoDevice)
+                // Determine desired camera based on currentView
+                let deviceTypes: [AVCaptureDevice.DeviceType]
+                let position: AVCaptureDevice.Position
+//                if self.currentView == "VOMS" {
+//                    deviceTypes = [.builtInTrueDepthCamera, .builtInWideAngleCamera]
+//                    position = .front
+//                } else{
+//                    deviceTypes = [.builtInWideAngleCamera, .builtInDualCamera, .builtInDualWideCamera, .builtInTelephotoCamera, .builtInTripleCamera, .builtInUltraWideCamera]
+//                    position = .back
+//                }
+                deviceTypes = [.builtInUltraWideCamera, .builtInDualWideCamera, .builtInWideAngleCamera]
+                position = .back
+                
+                guard let videoDevice = self.bestDevice(deviceTypes: deviceTypes, position: position) else {
+                    print("Desired camera not available")
+                    return
+                }
                 self.videoDevice = videoDevice
                 
+                let videoDeviceInput = try AVCaptureDeviceInput(device: videoDevice)
                 if captureSession.canAddInput(videoDeviceInput) {
                     captureSession.addInput(videoDeviceInput)
                 }
@@ -82,18 +107,20 @@ class FrameHandler: NSObject, ObservableObject {
                     captureSession.addOutput(self.movieOutput)
                 }
                 
-                // Configure device settings
+                // Configure device settings if PLR (back camera)
+                
                 try videoDevice.lockForConfiguration()
-                videoDevice.videoZoomFactor = 2.25
+                if self.currentView == "PLR" {
+                    videoDevice.videoZoomFactor = 2.0
+                }
                 videoDevice.torchMode = .off
                 videoDevice.focusMode = .continuousAutoFocus
-                if videoDevice.isLowLightBoostSupported{
+                if videoDevice.isLowLightBoostSupported {
                     videoDevice.automaticallyEnablesLowLightBoostWhenAvailable = true
                 }
                 videoDevice.automaticallyAdjustsVideoHDREnabled = true
                 videoDevice.unlockForConfiguration()
                 
-                videoOutput.connection(with: .video)?.videoRotationAngle = 90
                 
                 captureSession.commitConfiguration()
                 captureSession.startRunning()
@@ -130,6 +157,9 @@ class FrameHandler: NSObject, ObservableObject {
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
                 self.setFlash(on: false)
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 6.25) {
+                self.stopRecording()
             }
         }
     }
@@ -218,101 +248,111 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
         if let error = error {
             print("Error recording video: \(error.localizedDescription)")
         } else {
-            // Crop the video after recording
-            cropVideo(at: outputFileURL) { [weak self] croppedURL in
-                guard let self = self else { return }
-                print("cropVideo finished")
-                if let croppedURL = croppedURL {
-                    // Save or use the cropped URL as needed
-                    self.recordedVideoURL = croppedURL
-                    
-                    // Notify that the cropped video is ready
-                    NotificationCenter.default.post(name: .videoRecorded, object: nil)
-                    
-                    // Optionally save to Photos
-                    self.saveVideoToPhotos(url: croppedURL)
-                } else {
-                    print("Failed to crop video")
+            if self.currentView == "VOMS"{
+                self.recordedVideoURL = outputFileURL
+                // Notify that the  video is ready
+                NotificationCenter.default.post(name: .videoRecorded, object: nil)
+                
+                // Optionally save to Photos
+                self.saveVideoToPhotos(url: outputFileURL)
+            }
+            else{
+                // Crop the video after recording for VOMS
+                cropVideo(at: outputFileURL) { [weak self] croppedURL in
+                    guard let self = self else { return }
+                    print("cropVideo finished")
+                    if let croppedURL = croppedURL {
+                        // Save or use the cropped URL as needed
+                        self.recordedVideoURL = croppedURL
+                        
+                        // Notify that the cropped video is ready
+                        NotificationCenter.default.post(name: .videoRecorded, object: nil)
+                        
+                        // Optionally save to Photos
+                        self.saveVideoToPhotos(url: croppedURL)
+                    } else {
+                        print("Failed to crop video")
+                    }
                 }
             }
         }
     }
     
     func cropVideo(at url: URL, completion: @escaping (URL?) -> Void) {
-         // Run the cropping process on a background thread
-         let asset = AVAsset(url: url)
-         
-         let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality)
-     
-         // Define the output URL
-         let outputURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString).appendingPathExtension("mov")
-         exportSession?.outputURL = outputURL
-         exportSession?.outputFileType = .mov
-         exportSession?.timeRange = CMTimeRange(start: .zero, duration: asset.duration)
- //        exportSession?.shouldOptimizeForNetworkUse = true
-         
-         // Create a composition and set the render size to 640x480
-         let composition = AVMutableVideoComposition(asset: asset) { request in
-             print("Running crop composition")
-             
-             let ciImage = request.sourceImage
-             let ciHeight = ciImage.extent.height
-             let ciWidth = ciImage.extent.width
-             
-             // Define the crop area (you can adjust this crop size)
-             let cropHeight = ciWidth * 0.75
-             let cropRect = CGRect(x: 0, y: ciHeight - cropHeight, width: ciWidth, height: cropHeight)
-             let croppedImage = ciImage.cropped(to: cropRect)
-             
-             // reize image to 640x480
-             let scaleFactor: CGFloat = 640.0 / ciWidth
-             let scaledImage = croppedImage.transformed(by: CGAffineTransform(scaleX: scaleFactor, y: scaleFactor))
-             
-             // Translate the final image down to focus on the top part of the image
-             let translateY = 659.0
-             let translateTransform = CGAffineTransform(translationX: 0, y: -translateY)
-             let translatedImage = scaledImage.transformed(by: translateTransform)
-              
-              // Finish the request with the translated image
-             request.finish(with: translatedImage, context: nil)
-             
-         }
-
-         // Set the renderSize to match the desired output size (e.g., 640x480)
-         composition.renderSize = CGSize(width: 640, height: 480)
-
-         exportSession?.videoComposition = composition
-         
-         // Ensure exportSession is properly initialized
-         guard let exportSession = exportSession else {
-             print("Export session is nil")
-             completion(nil)
-             return
-         }
-         // Check the export session's status before starting
-         if exportSession.status == .waiting || exportSession.status == .unknown {
-             print("exportSession Status", exportSession.status.rawValue)
-             // Start exporting
-             exportSession.exportAsynchronously {
-                 // Once the export finishes, execute the completion handler on the main thread
-                 DispatchQueue.main.async {
-                     if exportSession.status == .completed {
-                         print("Export completed successfully")
-                         completion(outputURL)
-                     } else if let error = exportSession.error {
-                         print("Error exporting video: \(error.localizedDescription)")
-                         completion(nil)
-                     } else {
-                         print("Export failed with status: \(exportSession.status.rawValue)")
-                         completion(nil)
-                     }
-                 }
-             }
-         } else {
-             print("Export session is not in a valid state to start exporting: \(exportSession.status.rawValue)")
-             completion(nil)
-         }
-     }
+        // Run the cropping process on a background thread
+        let asset = AVAsset(url: url)
+        
+        let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality)
+        
+        // Define the output URL
+        let outputURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString).appendingPathExtension("mov")
+        exportSession?.outputURL = outputURL
+        exportSession?.outputFileType = .mov
+        exportSession?.timeRange = CMTimeRange(start: .zero, duration: asset.duration)
+        //        exportSession?.shouldOptimizeForNetworkUse = true
+        
+        // Create a composition and set the render size to 640x480
+        let composition = AVMutableVideoComposition(asset: asset) { request in
+            print("Running crop composition")
+            
+            let ciImage = request.sourceImage
+            let ciHeight = ciImage.extent.height
+            let ciWidth = ciImage.extent.width
+            
+            // Define the crop area (you can adjust this crop size)
+            let cropHeight = ciWidth * 0.75
+            let cropRect = CGRect(x: 0, y: ciHeight - cropHeight, width: ciWidth, height: cropHeight)
+            let croppedImage = ciImage.cropped(to: cropRect)
+            
+            // reize image to 640x480
+            let scaleFactor: CGFloat = 640.0 / ciWidth
+            let scaledImage = croppedImage.transformed(by: CGAffineTransform(scaleX: scaleFactor, y: scaleFactor))
+            
+            // Translate the final image down to focus on the top part of the image
+            let translateY = 659.0
+            let translateTransform = CGAffineTransform(translationX: 0, y: -translateY)
+            let translatedImage = scaledImage.transformed(by: translateTransform)
+            
+            // Finish the request with the translated image
+            request.finish(with: translatedImage, context: nil)
+            
+        }
+        
+        // Set the renderSize to match the desired output size (e.g., 640x480)
+        composition.renderSize = CGSize(width: 640, height: 480)
+        
+        exportSession?.videoComposition = composition
+        
+        // Ensure exportSession is properly initialized
+        guard let exportSession = exportSession else {
+            print("Export session is nil")
+            completion(nil)
+            return
+        }
+        // Check the export session's status before starting
+        if exportSession.status == .waiting || exportSession.status == .unknown {
+            print("exportSession Status", exportSession.status.rawValue)
+            // Start exporting
+            exportSession.exportAsynchronously {
+                // Once the export finishes, execute the completion handler on the main thread
+                DispatchQueue.main.async {
+                    if exportSession.status == .completed {
+                        print("Export completed successfully")
+                        completion(outputURL)
+                    } else if let error = exportSession.error {
+                        print("Error exporting video: \(error.localizedDescription)")
+                        completion(nil)
+                    } else {
+                        print("Export failed with status: \(exportSession.status.rawValue)")
+                        completion(nil)
+                    }
+                }
+            }
+        } else {
+            print("Export session is not in a valid state to start exporting: \(exportSession.status.rawValue)")
+            completion(nil)
+        }
+    }
     
     func uploadVideoToServer(videoURL: URL, currentView: String) {
         let serverURL = URL(string: uRL)!
@@ -344,8 +384,8 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
         request.httpBody = body as Data
         
         let sessionConfig = URLSessionConfiguration.default
-        sessionConfig.timeoutIntervalForRequest = 60
-        sessionConfig.timeoutIntervalForResource = 60
+        sessionConfig.timeoutIntervalForRequest = 120
+        sessionConfig.timeoutIntervalForResource = 120
         let session = URLSession(configuration: sessionConfig)
         
         let task = session.uploadTask(with: request, from: body as Data) { data, response, error in
@@ -450,7 +490,12 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
         
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
         
-        let destinationURL = documentsDirectory.appendingPathComponent(desiredFileName)
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyyMMdd_HHmmss"
+        let timestamp = dateFormatter.string(from: Date())
+        let uniqueFileName = "\(timestamp)_\(desiredFileName)"
+        
+        let destinationURL = documentsDirectory.appendingPathComponent(uniqueFileName)
         
         do {
             if fileManager.fileExists(atPath: destinationURL.path) {

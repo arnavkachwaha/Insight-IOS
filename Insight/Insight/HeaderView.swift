@@ -20,6 +20,7 @@ struct HeaderView: View {
                 Spacer()
             }
             .foregroundColor(.clear)
+            .padding(.top, 10)
             
             Spacer()
         }

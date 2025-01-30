@@ -9,7 +9,7 @@ import SwiftUI
 
 struct MotorScreenView: View {
     @ObservedObject var results: NeuroScreenResults
-    @Environment(\.presentationMode) var presentationMode
+    @Binding var navigationPath: NavigationPath
     @State private var isFingerToNoseNormal: Bool = false
     @State private var canLookWithoutDoubleVision: Bool = false
     @State private var areEyeMovementsNormal: Bool = false
@@ -17,6 +17,7 @@ struct MotorScreenView: View {
     
     var body: some View {
         ZStack {
+            Color(red: 240/255, green: 240/255, blue: 240/255).edgesIgnoringSafeArea(.all)
             VStack {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
@@ -66,7 +67,7 @@ struct MotorScreenView: View {
                             Spacer()
                             PrimaryButton1(
                                 text: "Continue",
-                                destination: MemoryAssessmentView(results: results)
+                                destination: MemoryAssessmentView(results: results, navigationPath: $navigationPath)
                             )
                             
                             .padding(.trailing, 20)
@@ -86,5 +87,6 @@ struct MotorScreenView: View {
 }
 
 #Preview {
-    MotorScreenView(results: NeuroScreenResults())
+    @Previewable @State var navigationPath = NavigationPath()
+    MotorScreenView(results: NeuroScreenResults(), navigationPath: $navigationPath)
 }

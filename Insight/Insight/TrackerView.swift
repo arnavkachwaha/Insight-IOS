@@ -10,6 +10,7 @@ import SwiftUI
 struct TrackerView: View {
     @State private var offset: CGFloat = 0 
     @Binding var shouldAnimate: Bool
+    var onAnimationEnd: (() -> Void)?
     
     var body: some View {
         GeometryReader { geometry in
@@ -41,30 +42,34 @@ struct TrackerView: View {
         
         DispatchQueue.main.asyncAfter(deadline: .now()) {
             withAnimation(
-                Animation.linear(duration: 0.75).repeatCount(1)
+                Animation.linear(duration: 1.0).repeatCount(1)
             ) {
                 offset = screenWidth - 50
             }
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             withAnimation(
-                Animation.linear(duration: 1.5).repeatCount(3, autoreverses: true)
+                Animation.linear(duration: 2.0).repeatCount(3, autoreverses: true)
             ) {
                 offset = 0
             }
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5.25) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 7) {
             withAnimation(
-                Animation.linear(duration: 0.75).repeatCount(1)
+                Animation.linear(duration: 1.0).repeatCount(1)
             ) {
                 offset = (screenWidth - 70) / 2
             }
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
+            onAnimationEnd?()
         }
     }
 }
 
 #Preview {
-    TrackerView(shouldAnimate: .constant(false))
+    TrackerView(shouldAnimate: .constant(false), onAnimationEnd: nil)
 }

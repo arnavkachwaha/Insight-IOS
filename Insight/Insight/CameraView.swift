@@ -13,15 +13,15 @@ struct CameraView: View {
     
     var body: some View {
         ZStack {
+            Color(.black).edgesIgnoringSafeArea(.all)
             if frameHandler.isSessionReady {
                 CameraFeedView(frameHandler: frameHandler)
             } else {
                 Text("Loading...")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color.black)
                     .foregroundColor(.white)
             }
         }
+        .ignoresSafeArea()
     }
 }
 

@@ -10,7 +10,7 @@ import SwiftUI
 
 struct PrimaryButton1<Destination: View>: View {
     var text: String
-    var destination: Destination
+    var destination: Destination?
     var onPressed: (() -> Void)? = nil // Optional closure to handle custom actions
     
     var body: some View {
@@ -43,5 +43,3 @@ struct PrimaryButton1<Destination: View>: View {
         )
     }
 }
-
-

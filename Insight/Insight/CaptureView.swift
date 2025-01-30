@@ -9,9 +9,12 @@ import SwiftUI
 
 struct CaptureView: View {
     @ObservedObject var viewModel: ContentViewModel
+    @Binding var navigationPath: NavigationPath
     @State private var shouldStartTrackerAnimation = false
+    
     var body: some View {
         ZStack {
+            Color(.black).edgesIgnoringSafeArea(.all)
             switch viewModel.captureState {
             case .recording:
                 CameraView(frameHandler: viewModel.frameHandler)
@@ -21,13 +24,18 @@ struct CaptureView: View {
                             if viewModel.currentView == "PLR" {
                                 EyeMask(yOffset: 200)
                             } else if viewModel.currentView == "VOMS" {
-                                TrackerView(shouldAnimate: $shouldStartTrackerAnimation)
+                                TrackerView(
+                                    shouldAnimate: $shouldStartTrackerAnimation,
+                                    onAnimationEnd: {
+                                        viewModel.stopRecording()
+                                    }
+                                )
                             }
                         }
                     )
                 VStack {
                     Spacer()
-                    FooterView(frameHandler: viewModel.frameHandler,onRecordingStateChanged: { isRecording in
+                    FooterView(frameHandler: viewModel.frameHandler, onRecordingStateChanged: { isRecording in
                         shouldStartTrackerAnimation = isRecording
                     })
                 }
@@ -51,22 +59,17 @@ struct CaptureView: View {
                         viewModel.restartSession()
                     },
                     onProceed: {
-                        switch viewModel.currentView {
-                        case "PLR":
-                            viewModel.switchViews(view: "VOMS")
-                        case "VOMS":
-                            viewModel.switchViews(view: "SCAT6")
-                        default:
-                            break
-                        }
+                        navigationPath.removeLast(navigationPath.count)
                     }
                 )
                 
             case .loading:
                 LoadingView()
             }
+            
             HeaderView()
-        }.alert(isPresented: $viewModel.showAlert) {
+        }
+        .alert(isPresented: $viewModel.showAlert) {
             Alert(
                 title: Text("Error"),
                 message: Text(viewModel.alertMessage),
@@ -79,5 +82,7 @@ struct CaptureView: View {
 }
 
 #Preview {
-    CaptureView(viewModel: ContentViewModel(frameHandler: FrameHandler()))
+    @Previewable @State var navigationPath = NavigationPath()
+    @Previewable @State var testResults = VideoTestResults()
+    return CaptureView(viewModel: ContentViewModel(frameHandler: FrameHandler(), currentView: "PLR", testResults: testResults), navigationPath: $navigationPath)
 }

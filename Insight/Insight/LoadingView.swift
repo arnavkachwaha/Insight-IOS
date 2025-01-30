@@ -28,12 +28,11 @@ struct LoadingView: View {
                 }
             Text("Loading...")
                 .padding(.top, 10)
-                .background(Color.black)
-                .foregroundColor(.white)
+                .foregroundColor(.black)
             
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.black)
+        .background(Color(red: 240/255, green: 240/255, blue: 240/255))
         .edgesIgnoringSafeArea(.all)
     }
 }

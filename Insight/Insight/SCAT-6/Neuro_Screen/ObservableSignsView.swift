@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ObservableSignsView: View {
     @ObservedObject var results: NeuroScreenResults
-    @Environment(\.presentationMode) var presentationMode
+    @Binding var navigationPath: NavigationPath
     @State private var questions = [
         "Have you witnessed the injury in person?",
         "Lying motionless on playing surface",
@@ -25,6 +25,7 @@ struct ObservableSignsView: View {
     
     var body: some View {
         ZStack {
+            
             VStack {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 10) {
@@ -40,7 +41,7 @@ struct ObservableSignsView: View {
                             Spacer()
                             PrimaryButton1(
                                 text: "Continue",
-                                destination: GlasgowComaScaleView(results: results),
+                                destination: GlasgowComaScaleView(results: results, navigationPath: $navigationPath),
                                 onPressed: {
                                     results.observableSignsCount = toggleStates.filter { $0 }.count
                                 }
@@ -59,5 +60,6 @@ struct ObservableSignsView: View {
 }
 
 #Preview {
-    ObservableSignsView(results: NeuroScreenResults())
+    @Previewable @State var navigationPath = NavigationPath()
+    ObservableSignsView(results: NeuroScreenResults(), navigationPath: $navigationPath)
 }

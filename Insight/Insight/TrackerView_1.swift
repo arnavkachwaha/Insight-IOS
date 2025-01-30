@@ -10,26 +10,30 @@ import SwiftUI
 struct TrackerView_1: View {
     @State private var offset: CGFloat = 0
     @Binding var shouldAnimate: Bool
+    var onAnimationEnd: (() -> Void)?
     
     var body: some View {
-        GeometryReader { geometry in
-            ZStack {
-                Image(systemName: "hand.point.right")
-                    .font(.system(size: 300))
-                    .offset(x: 20 , y: offset)
-                
-            }
-            .onAppear {
-                // Set the initial offset to center
-                offset = (geometry.size.height / 3.5)
-            }
-            .onChange(of: shouldAnimate) { oldValue, newValue in
-                if newValue {
-                    startAnimation(screenHeight: geometry.size.height)
+        ZStack {
+            Color(red: 240/255, green: 240/255, blue: 240/255).edgesIgnoringSafeArea(.all)
+            GeometryReader { geometry in
+                ZStack {
+                    Image(systemName: "hand.point.right.fill")
+                        .font(.system(size: 300))
+                        .offset(x: 20 , y: offset)
+                    
+                }
+                .onAppear {
+                    // Set the initial offset to center
+                    offset = (geometry.size.height / 3.5)
+                }
+                .onChange(of: shouldAnimate) { oldValue, newValue in
+                    if newValue {
+                        startAnimation(screenHeight: geometry.size.height)
+                    }
                 }
             }
+            .background(Color.clear)
         }
-        .background(Color.clear)
     }
     
     private func startAnimation(screenHeight: CGFloat) {
@@ -58,9 +62,13 @@ struct TrackerView_1: View {
                 offset = screenHeight / 3.5
             }
         }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
+            onAnimationEnd?()
+        }
     }
 }
 
 #Preview {
-    TrackerView_1(shouldAnimate: .constant(false))
+    TrackerView_1(shouldAnimate: .constant(false), onAnimationEnd: nil)
 }

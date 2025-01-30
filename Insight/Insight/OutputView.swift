@@ -23,9 +23,11 @@ struct OutputView: View {
     
     var body: some View {
         ZStack {
+            Color(red: 240/255, green: 240/255, blue: 240/255)
+                .edgesIgnoringSafeArea(.all)
             VStack {
                 VideoPlayer(videoURL: self.videoUrl!)
-                    .frame(width: 430, height: 315)
+                    .frame(width: 390, height: 320)
                     .padding(.bottom, 0.5)
                 
                 AsyncImage(url: graphUrl) { phase in
@@ -33,11 +35,11 @@ struct OutputView: View {
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .frame(width: 430, height: 300)
+                            .frame(width: 390, height: 315)
                         
                     } else {
                         Color.red
-                            .frame(width: 425, height: 315)
+                            .frame(width: 390, height: 315)
                     }
                 }
                 
@@ -47,7 +49,7 @@ struct OutputView: View {
                     }) {
                         Text("Redo")
                             .font(.headline)
-                            .foregroundColor(.white)
+                            .foregroundColor(.black)
                             .padding()
                             .background(Color.red)
                             .cornerRadius(20)
@@ -62,7 +64,7 @@ struct OutputView: View {
                     }) {
                         Text("Proceed")
                             .font(.headline)
-                            .foregroundColor(.white)
+                            .foregroundColor(.black)
                             .padding()
                             .background(Color.green)
                             .cornerRadius(20)
@@ -92,5 +94,3 @@ struct OutputView: View {
         }
     )
 }
-
-

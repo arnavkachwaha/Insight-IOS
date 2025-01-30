@@ -17,7 +17,7 @@ enum CaptureState {
 
 class ContentViewModel: ObservableObject {
     @Published var captureState: CaptureState = .loading
-    @Published var currentView: String = "PLR"
+    @Published var currentView: String
     @Published var recordedVideoURL: URL?
     @Published var fetchedVideoURL: URL?
     @Published var fetchedGraphURL: URL?
@@ -25,10 +25,14 @@ class ContentViewModel: ObservableObject {
     @Published var alertMessage: String = "Internal Server Error: Restarting the current Session"
     
     var frameHandler: FrameHandler
+    var testResults: VideoTestResults
     private var cancellables = Set<AnyCancellable>()
     
-    init(frameHandler: FrameHandler) {
+    init(frameHandler: FrameHandler, currentView: String, testResults: VideoTestResults) {
         self.frameHandler = frameHandler
+        self.currentView = currentView
+        self.testResults = testResults
+        
         $currentView
             .sink { [weak self] newView in
                 self?.frameHandler.currentView = newView
@@ -80,6 +84,14 @@ class ContentViewModel: ObservableObject {
         NotificationCenter.default.publisher(for: .videoFetched)
             .sink { [weak self] _ in
                 if let videoURL = self?.frameHandler.fetchedVideoURL, let graphURL = self?.frameHandler.fetchedGraphURL {
+                    switch self?.currentView {
+                    case "PLR":
+                        self?.testResults.plrResults = VideoTestResults.PLRResults(videoURL: videoURL, graphURL: graphURL)
+                    case "VOMS":
+                        self?.testResults.vomsResults = VideoTestResults.VOMSResults(videoURL: videoURL, graphURL: graphURL)
+                    default:
+                        break
+                    }
                     self?.captureState = .output(videoURL: videoURL, graphURL: graphURL)
                 }
             }
@@ -90,14 +102,11 @@ class ContentViewModel: ObservableObject {
         NotificationCenter.default.publisher(for: .uploadTimeoutOccurred)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] notification in
-                // Extract the message from userInfo if it exists
                 if let message = notification.userInfo?["message"] as? String {
                     self?.alertMessage = message
                 } else {
-                    // Fallback to a default message if no message is found in userInfo
                     self?.alertMessage = "An unknown error occurred. Please try again."
                 }
-                // Show the alert
                 self?.showAlert = true
             }
             .store(in: &cancellables)

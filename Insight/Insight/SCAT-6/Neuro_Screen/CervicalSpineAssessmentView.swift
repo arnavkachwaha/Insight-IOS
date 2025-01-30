@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CervicalSpineAssessmentView: View {
     @ObservedObject var results: NeuroScreenResults
-    @Environment(\.presentationMode) var presentationMode
+    @Binding var navigationPath: NavigationPath
     @State private var questions = [
         "Does the athlete report neck pain at rest?",
         "Is there tenderness to palpation?",
@@ -20,6 +20,7 @@ struct CervicalSpineAssessmentView: View {
     
     var body: some View {
         ZStack {
+            Color(red: 240/255, green: 240/255, blue: 240/255).edgesIgnoringSafeArea(.all)
             VStack {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 10) {
@@ -45,7 +46,7 @@ struct CervicalSpineAssessmentView: View {
                             Spacer()
                             PrimaryButton1(
                                 text: "Continue",
-                                destination: MotorScreenView(results: results)
+                                destination: MotorScreenView(results: results, navigationPath: $navigationPath)
                             )
                             .padding(.trailing, 20)
                         }
@@ -62,5 +63,6 @@ struct CervicalSpineAssessmentView: View {
 }
 
 #Preview {
-    CervicalSpineAssessmentView(results: NeuroScreenResults())
+    @Previewable @State var navigationPath = NavigationPath()
+    CervicalSpineAssessmentView(results: NeuroScreenResults(), navigationPath: $navigationPath)
 }

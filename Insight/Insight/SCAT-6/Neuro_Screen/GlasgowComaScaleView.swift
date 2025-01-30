@@ -9,13 +9,14 @@ import SwiftUI
 
 struct GlasgowComaScaleView: View {
     @ObservedObject var results: NeuroScreenResults
-    @Environment(\.presentationMode) var presentationMode
+    @Binding var navigationPath: NavigationPath
     @State private var selectedEyeResponse: Int? = nil
     @State private var selectedVerbalResponse: Int? = nil
     @State private var selectedMotorResponse: Int? = nil
     
     var body: some View {
         ZStack {
+            Color(red: 240/255, green: 240/255, blue: 240/255).edgesIgnoringSafeArea(.all)
             VStack {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 10) {
@@ -61,7 +62,7 @@ struct GlasgowComaScaleView: View {
                             Spacer()
                             PrimaryButton1(
                                 text: "Continue",
-                                destination: CervicalSpineAssessmentView(results: results)
+                                destination: CervicalSpineAssessmentView(results: results, navigationPath: $navigationPath)
                             ).padding(.trailing, 20)
                         }
                         .padding(.top, 10)
@@ -79,5 +80,6 @@ struct GlasgowComaScaleView: View {
 }
 
 #Preview {
-    GlasgowComaScaleView(results: NeuroScreenResults())
+    @Previewable @State var navigationPath = NavigationPath()
+    GlasgowComaScaleView(results: NeuroScreenResults(), navigationPath: $navigationPath)
 }

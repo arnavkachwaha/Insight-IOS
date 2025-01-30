@@ -21,7 +21,10 @@ struct PlaybackView: View {
     
     var body: some View {
         ZStack {
+            Color(red: 240/255, green: 240/255, blue: 240/255).edgesIgnoringSafeArea(.all)
             VideoPlayer(videoURL: self.videoUrl!)
+                .frame(width: 390, height: 320)
+                .padding(.bottom, 0.5)
             VStack {
                 Spacer()
                 
@@ -31,7 +34,7 @@ struct PlaybackView: View {
                     }) {
                         Text("Redo")
                             .font(.headline)
-                            .foregroundColor(.white)
+                            .foregroundColor(.black)
                             .padding()
                             .background(Color.red)
                             .cornerRadius(20)
@@ -45,7 +48,7 @@ struct PlaybackView: View {
                     }) {
                         Text("Analyze")
                             .font(.headline)
-                            .foregroundColor(.white)
+                            .foregroundColor(.black)
                             .padding()
                             .background(Color.green)
                             .cornerRadius(20)
@@ -54,6 +57,8 @@ struct PlaybackView: View {
                     
                 }
             }
+            
+            HeaderView()
         }
     }
 }
@@ -69,7 +74,3 @@ struct PlaybackView: View {
         }
     )
 }
-
-
-
-

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct MemoryAssessmentView: View {
     @ObservedObject var results: NeuroScreenResults
-    @Environment(\.presentationMode) var presentationMode
+    @Binding var navigationPath: NavigationPath
     @State private var questions = [
         "What venue are we at today?",
         "Which half is it now?",
@@ -21,6 +21,7 @@ struct MemoryAssessmentView: View {
     
     var body: some View {
         ZStack {
+            Color(red: 240/255, green: 240/255, blue: 240/255).edgesIgnoringSafeArea(.all)
             VStack {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 10) {
@@ -64,7 +65,7 @@ struct MemoryAssessmentView: View {
                             Spacer()
                             PrimaryButton1(
                                 text: "Continue",
-                                destination: NeuroScreenResultView(results: results)
+                                destination: NeuroScreenResultView(results: results, navigationPath: $navigationPath)
                             )
                             .padding(.trailing, 20)
                         }
@@ -81,5 +82,6 @@ struct MemoryAssessmentView: View {
 }
 
 #Preview {
-    MemoryAssessmentView(results: NeuroScreenResults())
+    @Previewable @State var navigationPath = NavigationPath()
+    MemoryAssessmentView(results: NeuroScreenResults(), navigationPath: $navigationPath)
 }
