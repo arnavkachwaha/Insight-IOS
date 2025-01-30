@@ -150,11 +150,11 @@
 			isa = PBXGroup;
 			children = (
 				05B67FDC2D3A0AFF003B8C02 /* PrimaryButton1.swift */,
+				05B67FE62D3AE63A003B8C02 /* SectionContainer.swift */,
+				05B67FCE2D3A06B9003B8C02 /* ScrollableQuestionsView.swift */,
 				05DFAFE72D39FEB50097753B /* QuestionToggleView.swift */,
 				05B67FCC2D3A0598003B8C02 /* ScatHeaderView.swift */,
-				05B67FCE2D3A06B9003B8C02 /* ScrollableQuestionsView.swift */,
 				05B67FDE2D3A1C29003B8C02 /* SingleSelectResponseSection.swift */,
-				05B67FE62D3AE63A003B8C02 /* SectionContainer.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
