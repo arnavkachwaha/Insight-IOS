@@ -72,15 +72,18 @@ class FrameHandler: NSObject, ObservableObject {
             
             do {
                 // Determine desired camera based on currentView
-                let deviceTypes: [AVCaptureDevice.DeviceType]
+                let deviceTypes: [AVCaptureDevice.DeviceType] = [
+                    .builtInUltraWideCamera,  // Highest priority for 0.5x zoom
+                    .builtInWideAngleCamera,  
+                    .builtInDualWideCamera,   
+                    .builtInDualCamera,       
+                    .builtInTripleCamera,     
+                    .builtInTelephotoCamera   
+                ]
                 let position: AVCaptureDevice.Position
-//                if self.currentView == "VOMS" {
-//                    deviceTypes = [.builtInTrueDepthCamera, .builtInWideAngleCamera]
-//                    position = .front
-//                } else{
-//                    deviceTypes = [.builtInWideAngleCamera, .builtInDualCamera, .builtInDualWideCamera, .builtInTelephotoCamera, .builtInTripleCamera, .builtInUltraWideCamera]
-//                    position = .back
-//                }
+                deviceTypes = [.builtInUltraWideCamera, .builtInWideAngleCamera, .builtInDualWideCamera, .builtInTelephotoCamera, .builtInDualCamera, .builtInTripleCamera]
+                position = .back
+
                 deviceTypes = [.builtInUltraWideCamera, .builtInDualWideCamera, .builtInWideAngleCamera]
                 position = .back
                 
