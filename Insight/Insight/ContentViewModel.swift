@@ -23,6 +23,7 @@ class ContentViewModel: ObservableObject {
     @Published var fetchedGraphURL: URL?
     @Published var showAlert: Bool = false
     @Published var alertMessage: String = "Internal Server Error: Restarting the current Session"
+    var boundingBoxLayer = CAShapeLayer()
     
     var frameHandler: FrameHandler
     private var cancellables = Set<AnyCancellable>()
@@ -38,6 +39,7 @@ class ContentViewModel: ObservableObject {
         setupRecordingFinishedListener()
         fetchingVideoFinishedListener()
         setupTimeoutListener()
+
     }
     
     func startRecording() {

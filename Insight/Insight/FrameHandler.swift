@@ -25,10 +25,28 @@ class FrameHandler: NSObject, ObservableObject {
     @Published var frame: CGImage?
     @Published var uRL = "http://a8a175088b809630c.awsglobalaccelerator.com:8000/cyclops/upload/"
     //    @Published var uRL = "http://10.243.79.16:8000/cyclops/upload/"
+    var lastFrameTime: CMTime = CMTimeMake(value: 0, timescale: 1)
+
+    var previewView: UIView? // Add a reference to the view
+    var player: AVPlayer?
+    var playerItemVideoOutput: AVPlayerItemVideoOutput?
+    private var isProcessingFrame = false
+    var boundingBoxRect: CGRect? {
+        didSet {
+            // Notify the view controller when bounding box updates
+            onBoundingBoxUpdated?(boundingBoxRect)
+        }
+    }
+    
+    var onBoundingBoxUpdated: ((CGRect?) -> Void)?
     
     override init() {
         super.init()
         checkPermission()
+        
+        // mock bounding box at top left corner
+        boundingBoxRect = CGRect(x:0, y: 0, width: 100, height: 100)
+        
     }
     
     // Check for camera permission
@@ -49,7 +67,7 @@ class FrameHandler: NSObject, ObservableObject {
         }
     }
     
-    // Setup camera session
+        // Setup camera session
     func setupCaptureSession() {
         guard permissionGranted else { return }
         
@@ -60,9 +78,44 @@ class FrameHandler: NSObject, ObservableObject {
             captureSession.beginConfiguration()
             captureSession.sessionPreset = .inputPriority
             
+            #if targetEnvironment(simulator)
+            // Running on simulator: use local video file
+            guard let videoURL = Bundle.main.url(forResource: "plr_1", withExtension: "mp4") else {
+                print("Video file not found")
+                return
+            }
+            print("videoURL: ", videoURL)
+            let playerItem = AVPlayerItem(url: videoURL)
+            self.player = AVPlayer(playerItem: playerItem)
+            
+            
+            let videoOutput = AVPlayerItemVideoOutput(pixelBufferAttributes: [
+                kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
+            ])
+            playerItem.add(videoOutput)
+            self.playerItemVideoOutput = videoOutput
+            
+            // Start playing the video
+            self.player?.play()
+            
+            // Use a display link to get video frames
+            let displayLink = CADisplayLink(target: self, selector: #selector(self.displayLinkDidRefresh))
+            displayLink.add(to: .main, forMode: .default)
+
+            DispatchQueue.main.async {
+                self.isSessionReady = true
+            }
+
+            #else
+            // Running on device: use camera input
             do {
                 // Get video device (back camera)
-                guard let videoDevice = AVCaptureDevice.default(.builtInDualWideCamera, for: .video, position: .back) else { return }
+                // TODO: iphone XS did not get builtInDualWideCamera.
+                // TODO: look into camera swithing
+                guard let videoDevice = AVCaptureDevice.default(.builtInDualWideCamera, for: .video, position: .back) else {
+                    print("Cannot get videoDevice")
+                    return
+                }
                 let videoDeviceInput = try AVCaptureDeviceInput(device: videoDevice)
                 self.videoDevice = videoDevice
                 
@@ -87,7 +140,7 @@ class FrameHandler: NSObject, ObservableObject {
                 videoDevice.videoZoomFactor = 2.25
                 videoDevice.torchMode = .off
                 videoDevice.focusMode = .continuousAutoFocus
-                if videoDevice.isLowLightBoostSupported{
+                if videoDevice.isLowLightBoostSupported {
                     videoDevice.automaticallyEnablesLowLightBoostWhenAvailable = true
                 }
                 videoDevice.automaticallyAdjustsVideoHDREnabled = true
@@ -105,6 +158,163 @@ class FrameHandler: NSObject, ObservableObject {
             } catch {
                 print("Failed to set up capture session: \(error)")
             }
+            #endif
+        }
+    }
+
+    @objc func displayLinkDidRefresh() {
+        guard let videoOutput = playerItemVideoOutput, let player = player else {
+            print("Player or video output not set up.")
+            return
+        }
+        
+        // Get the current playback time
+        let currentTime = player.currentTime()
+        
+        // Check if there's a new pixel buffer for the current time
+        if videoOutput.hasNewPixelBuffer(forItemTime: currentTime) {
+//            print("Frame available for time: \(currentTime)")
+            
+            // Retrieve the pixel buffer
+            if let pixelBuffer = videoOutput.copyPixelBuffer(forItemTime: currentTime, itemTimeForDisplay: nil) {
+                // Convert to a CGImage for rendering or processing
+                let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+                if let cgImage = context.createCGImage(ciImage, from: ciImage.extent) {
+                    DispatchQueue.main.async {
+                        self.frame = cgImage
+                    }
+                }
+                
+                self.checkForIrisFrame(pixelBuffer: pixelBuffer, currentTime: currentTime)
+            }
+        } else {
+            print("No frame: \(currentTime)")
+            lastFrameTime = .zero
+            self.player?.seek(to: .zero)
+            self.player?.play()
+        }
+    }
+    
+    // Rotate the UIImage 90 degrees clockwise
+    func rotateImage90DegreesClockwise(_ image: UIImage) -> UIImage? {
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: image.size.height, height: image.size.width))
+        return renderer.image { context in
+            let cgContext = context.cgContext
+            
+            // Translate and rotate the context
+            cgContext.translateBy(x: image.size.height / 2, y: image.size.width / 2)
+            cgContext.rotate(by: .pi / 2) // Rotate 90 degrees clockwise
+            
+            // Draw the image centered at (0, 0) with flipped y-axis
+            cgContext.translateBy(x: -image.size.width / 2, y: -image.size.height / 2)
+            image.draw(in: CGRect(x: 0, y: 0, width: image.size.width, height: image.size.height))
+        }
+    }
+    
+    // Crop the top half of the frame to send to iris detector
+    // note this is not the same as video cropping logic
+    func cropTopHalf(_ image: UIImage) -> UIImage? {
+        guard let cgImage = image.cgImage else { return nil }
+        
+        // Account for the scale of the UIImage (e.g., Retina display)
+        let scale = image.scale
+        let pixelHeight = CGFloat(cgImage.height) // Height in pixels
+        let pixelWidth = CGFloat(cgImage.width)  // Width in pixels
+
+        // Define the cropping rectangle in pixel dimensions
+        let cropRect = CGRect(x: 0, y: 0, width: pixelWidth, height: pixelHeight / 2)
+
+        // Perform the cropping
+        guard let croppedCgImage = cgImage.cropping(to: cropRect) else { return nil }
+        
+        // Convert back to UIImage, ensuring the same scale
+        return UIImage(cgImage: croppedCgImage, scale: scale, orientation: image.imageOrientation)
+    }
+    
+    func resizeImage(_ image: UIImage, targetSize: CGSize) -> UIImage? {
+        // Get the scale factor of the image (e.g., for Retina displays, it could be 2.0 or 3.0)
+        // TODO: fix scaling issue. image.scale is = 0.5. Need 1/ scale for conversion. But should be 0.33
+        // need to study pixel vs points and retina screens 
+        let scale = 0.33333
+
+        // Adjust target size based on the scale factor to ensure the target size is in pixels
+        let targetSizeInPixels = CGSize(width: targetSize.width * scale, height: targetSize.height * scale)
+
+        // Use the adjusted target size to resize the image
+        let renderer = UIGraphicsImageRenderer(size: targetSizeInPixels)
+        return renderer.image { context in
+            image.draw(in: CGRect(origin: .zero, size: targetSizeInPixels))
+        }
+    }
+    
+    func checkForIrisFrame(pixelBuffer: CVPixelBuffer, currentTime: CMTime) {
+        let elapsedTime = CMTimeSubtract(currentTime, lastFrameTime)
+
+//        print("lastFrameTime: ", CMTimeGetSeconds(lastFrameTime))
+//        print("elapsedTime: ", CMTimeGetSeconds(elapsedTime))
+
+        // Wait until the last frame has been processed and time condition is met
+        // TODO: fix elapsed time issue. should only really matter for video asset not live camera
+        if !isProcessingFrame && (CMTimeGetSeconds(lastFrameTime) == 0 || CMTimeGetSeconds(elapsedTime) >= 3.0) {
+            isProcessingFrame = true // Set the processing state
+            lastFrameTime = currentTime
+            print("Processing new frame. Updated lastFrameTime: \(CMTimeGetSeconds(lastFrameTime))")
+            
+            // get ciImage from buffer
+            let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+
+            DispatchQueue.global(qos: .userInitiated).async {
+                guard let cgImage = self.context.createCGImage(ciImage, from: ciImage.extent) else {
+                    print("Failed to create CGImage.")
+                    self.isProcessingFrame = false // Reset the state on failure
+                    return
+                }
+
+                // Convert CGImage to UIImage
+                var uiImage = UIImage(cgImage: cgImage)
+
+                // Rotate the UIImage 90 degrees clockwise
+                #if targetEnvironment(simulator)
+                if let rotatedUIImage = self.rotateImage90DegreesClockwise(uiImage) {
+                    uiImage = rotatedUIImage
+                } else {
+                    print("Failed to rotate the image. Aborting capture.")
+                    self.isProcessingFrame = false // Reset the state on failure
+                    return
+                }
+                #endif
+
+                // TODO: Crop top half
+                // Crop the top half of the rotated image
+                if let croppedUIImage = self.cropTopHalf(uiImage) {
+                    // Print height and width of the cropped image
+                    print("Cropped Height: \(croppedUIImage.size.height), Cropped Width: \(croppedUIImage.size.width)")
+                    
+                    uiImage = croppedUIImage
+
+                } else {
+                    print("Failed to crop the image. Aborting capture.")
+                    self.isProcessingFrame = false // Reset the state on failure
+                    return
+                }
+
+                // Print height and width of the cropped image
+                print("Height: \(uiImage.size.height), Width: \(uiImage.size.width)")
+                
+                // resize Image
+                let resizedImage = self.resizeImage(uiImage, targetSize: CGSize(width: 1080, height: 810))
+                if let resizedImage = resizedImage {
+                    print("Resized Height: \(resizedImage.size.height), Resized Width: \(resizedImage.size.width)")
+
+                    // Upload JPEG data to API
+                    self.uploadJPEGToAPI(resizedImage)
+
+                } else {
+                    print("Failed to resize the image. Aborting capture.")
+                }
+            }
+        } else {
+//            print("Skipping frame. Either still processing or time hasn't elapsed.")
         }
     }
     
@@ -197,19 +407,128 @@ class FrameHandler: NSObject, ObservableObject {
     }
 }
 
-// Handle video output sample buffer (frame processing)
+// Handle video output sample buffer and check for iris 
 extension FrameHandler: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-        let ciImage = CIImage(cvPixelBuffer: imageBuffer)
-        
-        DispatchQueue.global(qos: .userInitiated).async {
-            guard let cgImage = self.context.createCGImage(ciImage, from: ciImage.extent) else { return }
-            DispatchQueue.main.async {
-                self.frame = cgImage
+        let currentTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+          
+        self.checkForIrisFrame(pixelBuffer: imageBuffer, currentTime: currentTime)
+      }
+      
+      func uploadJPEGToAPI(_ uiImage: UIImage) {
+        // Load Image and Convert to Base64
+          let imageData = uiImage.jpegData(compressionQuality: 1.0)
+        let fileContent = imageData?.base64EncodedString()
+        let postData = fileContent!.data(using: .utf8)
+          
+      // Convert to JPEG data
+//      if let imageData = uiImage.jpegData(compressionQuality: 1.0) {
+//          // Define the file name
+//          let fileName = "image.jpeg"
+//          
+//          // Get the path to the app's Documents directory
+//          let fileManager = FileManager.default
+//          let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+//          let fileURL = documentsURL.appendingPathComponent(fileName)
+//          
+//          do {
+//              // Save the image data to the Documents directory
+//              try imageData.write(to: fileURL)
+//              print("File saved locally in Documents at: \(fileURL)")
+//          } catch {
+//              print("Error saving file: \(error.localizedDescription)")
+//          }
+//      }
+
+        // Initialize Inference Server Request with API KEY, Model, and Model Version
+        var request = URLRequest(url: URL(string: "https://detect.roboflow.com/video1-ba4g1/2?api_key=rsXNxxW9CvcYI9TSLFpu&name=YOUR_IMAGE.jpg&confidence=20")!,timeoutInterval: Double.infinity)
+        request.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+        request.httpMethod = "POST"
+        request.httpBody = postData
+
+        print("Sending Image to Inference Server...")
+        // Execute Post Request
+        URLSession.shared.dataTask(with: request, completionHandler: { data, response, error in
+
+            // Parse Response to String
+            guard let data = data else {
+                print(String(describing: error))
+                return
             }
+            
+            print("Retrieved response from Inference Server...")
+
+            // Convert Response String to Dictionary
+            do {
+                let dict = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+            } catch {
+                print(error.localizedDescription)
+            }
+
+            // Print String Response
+            print(String(data: data, encoding: .utf8)!)
+            self.processPredictions(responseData: data)
+        }).resume()
+      }
+    
+
+    func processPredictions(responseData: Data) {
+        // Parse JSON Data
+        do {
+            let json = try JSONSerialization.jsonObject(with: responseData, options: []) as! [String: Any]
+
+            if let predictions = json["predictions"] as? [[String: Any]] {
+                if predictions.isEmpty {
+                    self.isProcessingFrame = false
+                    return
+                }
+                if predictions[0]["class"] as! String == "iris" {
+                    let confidence = predictions[0]["confidence"] as! Double
+                    let x = predictions[0]["x"] as! Double
+                    let y = predictions[0]["y"] as! Double
+                    let width = predictions[0]["width"] as! Double
+                    let height = predictions[0]["height"] as! Double
+                    
+                    // Print Iris Prediction
+                    print("IRIS: ", confidence, x, y, width, height)
+                    
+                    // Update bounding box
+                    DispatchQueue.main.async {
+                        
+                        // TODO: fix this distaster
+                        var x = x / 3
+                        var y = y / 3
+                        var width = width / 3
+                        var height = height / 3
+                        
+                        x = x - width / 2
+                        y = y + height
+                        width = width
+                        height = height
+                                          
+                        self.updateBoundingBox(x: x, y: y, width: width, height: height)
+                        // Mark processing as complete
+                        self.isProcessingFrame = false
+                    }
+                }
+            }
+            else {
+                print("Error: 'predictions' is either nil or not in the expected format.")
+                // Mark processing as complete
+                self.isProcessingFrame = false
+                return
+            }
+        } catch {
+            print(error.localizedDescription)
         }
     }
+
+    func updateBoundingBox(x: Double, y: Double, width: Double, height: Double) {
+        // Update the bounding box rect
+        boundingBoxRect = CGRect(x: x, y: y, width: width, height: height)
+    }
+    
 }
 
 // Handle video recording delegate
