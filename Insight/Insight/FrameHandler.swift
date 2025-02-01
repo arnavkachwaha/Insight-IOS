@@ -5,10 +5,11 @@
 //  Created by Arnav Singh Kachwaha on 6/25/24.
 //
 
-import AVFoundation
-import CoreImage
+import Vision
 import Photos
 import SwiftUI
+import CoreImage
+import AVFoundation
 
 class FrameHandler: NSObject, ObservableObject {
     var captureSession: AVCaptureSession?
@@ -74,11 +75,11 @@ class FrameHandler: NSObject, ObservableObject {
                 // Determine desired camera based on currentView
                 var deviceTypes: [AVCaptureDevice.DeviceType] = [
                     .builtInUltraWideCamera,  // Highest priority for 0.5x zoom
-                    .builtInWideAngleCamera,  
-                    .builtInDualWideCamera,   
-                    .builtInDualCamera,       
-                    .builtInTripleCamera,     
-                    .builtInTelephotoCamera   
+                    .builtInWideAngleCamera,
+                    .builtInDualWideCamera,
+                    .builtInDualCamera,
+                    .builtInTripleCamera,
+                    .builtInTelephotoCamera
                 ]
                 let position: AVCaptureDevice.Position
                 deviceTypes = [.builtInUltraWideCamera, .builtInWideAngleCamera, .builtInDualWideCamera, .builtInTelephotoCamera, .builtInDualCamera, .builtInTripleCamera]

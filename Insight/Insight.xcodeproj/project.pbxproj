@@ -35,6 +35,8 @@
 		05B67FE72D3AE63A003B8C02 /* SectionContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05B67FE62D3AE63A003B8C02 /* SectionContainer.swift */; };
 		05C2ECB42CB999EF0086C260 /* SCAT6View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05C2ECB32CB999EF0086C260 /* SCAT6View.swift */; };
 		05C2ECB62CB9DC0C0086C260 /* CaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05C2ECB52CB9DC0C0086C260 /* CaptureView.swift */; };
+		05D2B11C2D4EC9D8009C81DF /* VideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D2B11B2D4EC9D8009C81DF /* VideoPlayerView.swift */; };
+		05D2B11E2D4ECAF1009C81DF /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D2B11D2D4ECAF1009C81DF /* ImageView.swift */; };
 		05DFAFDE2D389A3C0097753B /* TrackerView_1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05DFAFDD2D389A3C0097753B /* TrackerView_1.swift */; };
 		05DFAFE52D39F0650097753B /* ObservableSignsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05DFAFE42D39F0650097753B /* ObservableSignsView.swift */; };
 		05DFAFE82D39FEB50097753B /* QuestionToggleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05DFAFE72D39FEB50097753B /* QuestionToggleView.swift */; };
@@ -74,6 +76,8 @@
 		05B67FE62D3AE63A003B8C02 /* SectionContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionContainer.swift; sourceTree = "<group>"; };
 		05C2ECB32CB999EF0086C260 /* SCAT6View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SCAT6View.swift; sourceTree = "<group>"; };
 		05C2ECB52CB9DC0C0086C260 /* CaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureView.swift; sourceTree = "<group>"; };
+		05D2B11B2D4EC9D8009C81DF /* VideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerView.swift; sourceTree = "<group>"; };
+		05D2B11D2D4ECAF1009C81DF /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
 		05DFAFDD2D389A3C0097753B /* TrackerView_1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerView_1.swift; sourceTree = "<group>"; };
 		05DFAFE42D39F0650097753B /* ObservableSignsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableSignsView.swift; sourceTree = "<group>"; };
 		05DFAFE72D39FEB50097753B /* QuestionToggleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionToggleView.swift; sourceTree = "<group>"; };
@@ -120,9 +124,11 @@
 				053F2FEC2C42ED1C007A9BF5 /* FrameHandler.swift */,
 				05C2ECB52CB9DC0C0086C260 /* CaptureView.swift */,
 				053F2FF82C42F1BB007A9BF5 /* CameraView.swift */,
-				05A648462CACDAAD00ABF8F6 /* VideoPlayer.swift */,
 				05F110412C990245007B16A0 /* PlaybackView.swift */,
 				05A648482CACDADF00ABF8F6 /* OutputView.swift */,
+				05D2B11B2D4EC9D8009C81DF /* VideoPlayerView.swift */,
+				05D2B11D2D4ECAF1009C81DF /* ImageView.swift */,
+				05A648462CACDAAD00ABF8F6 /* VideoPlayer.swift */,
 				0513AE572D18ACB7009BA031 /* TrackerView.swift */,
 				058D00A02D4C0AE600E53342 /* CombinedResultsView.swift */,
 				05DFAFDD2D389A3C0097753B /* TrackerView_1.swift */,
@@ -267,11 +273,13 @@
 				05A648492CACDADF00ABF8F6 /* OutputView.swift in Sources */,
 				05B67FCF2D3A06B9003B8C02 /* ScrollableQuestionsView.swift in Sources */,
 				05B67FE72D3AE63A003B8C02 /* SectionContainer.swift in Sources */,
+				05D2B11C2D4EC9D8009C81DF /* VideoPlayerView.swift in Sources */,
 				053F664D2D3AEDE1008380E9 /* MemoryAssessmentView.swift in Sources */,
 				053F66512D3AF1B8008380E9 /* NeuroScreenResultView.swift in Sources */,
 				053F2FDF2C42ECD1007A9BF5 /* InsightApp.swift in Sources */,
 				05DFAFE52D39F0650097753B /* ObservableSignsView.swift in Sources */,
 				053F66532D3AF66C008380E9 /* NeuroScreenResults.swift in Sources */,
+				05D2B11E2D4ECAF1009C81DF /* ImageView.swift in Sources */,
 				053F2FED2C42ED1C007A9BF5 /* FrameHandler.swift in Sources */,
 				05F110452C9906C1007B16A0 /* ContentViewModel.swift in Sources */,
 				0513AE582D18ACB7009BA031 /* TrackerView.swift in Sources */,
