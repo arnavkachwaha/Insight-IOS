@@ -72,7 +72,7 @@ class FrameHandler: NSObject, ObservableObject {
             
             do {
                 // Determine desired camera based on currentView
-                let deviceTypes: [AVCaptureDevice.DeviceType] = [
+                var deviceTypes: [AVCaptureDevice.DeviceType] = [
                     .builtInUltraWideCamera,  // Highest priority for 0.5x zoom
                     .builtInWideAngleCamera,  
                     .builtInDualWideCamera,   
@@ -84,9 +84,6 @@ class FrameHandler: NSObject, ObservableObject {
                 deviceTypes = [.builtInUltraWideCamera, .builtInWideAngleCamera, .builtInDualWideCamera, .builtInTelephotoCamera, .builtInDualCamera, .builtInTripleCamera]
                 position = .back
 
-                deviceTypes = [.builtInUltraWideCamera, .builtInDualWideCamera, .builtInWideAngleCamera]
-                position = .back
-                
                 guard let videoDevice = self.bestDevice(deviceTypes: deviceTypes, position: position) else {
                     print("Desired camera not available")
                     return
