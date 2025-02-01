@@ -15,6 +15,7 @@ struct CaptureView: View {
     var body: some View {
         ZStack {
             Color(.black).edgesIgnoringSafeArea(.all)
+            
             switch viewModel.captureState {
             case .recording:
                 CameraView(frameHandler: viewModel.frameHandler)
@@ -34,6 +35,7 @@ struct CaptureView: View {
                         }
                     )
                 VStack {
+                    HeaderView()
                     Spacer()
                     FooterView(frameHandler: viewModel.frameHandler, onRecordingStateChanged: { isRecording in
                         shouldStartTrackerAnimation = isRecording
@@ -66,8 +68,7 @@ struct CaptureView: View {
             case .loading:
                 LoadingView()
             }
-            
-            HeaderView()
+        
         }
         .alert(isPresented: $viewModel.showAlert) {
             Alert(

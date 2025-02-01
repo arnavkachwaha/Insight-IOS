@@ -16,7 +16,8 @@ struct GlasgowComaScaleView: View {
     
     var body: some View {
         ZStack {
-            Color(red: 240/255, green: 240/255, blue: 240/255).edgesIgnoringSafeArea(.all)
+            Color(red: 250/255, green: 250/255, blue: 250/255).edgesIgnoringSafeArea(.all)
+            
             VStack {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 10) {

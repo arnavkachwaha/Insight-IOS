@@ -23,37 +23,27 @@ struct OutputView: View {
     
     var body: some View {
         ZStack {
-            Color(red: 240/255, green: 240/255, blue: 240/255)
-                .edgesIgnoringSafeArea(.all)
+            Color(red: 250/255, green: 250/255, blue: 250/255).edgesIgnoringSafeArea(.all)
+            
             VStack {
-                VideoPlayer(videoURL: self.videoUrl!)
-                    .frame(width: 390, height: 320)
-                    .padding(.bottom, 0.5)
+                HeaderView()
+                Spacer()
                 
-                AsyncImage(url: graphUrl) { phase in
-                    if let image = phase.image {
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 390, height: 315)
-                        
-                    } else {
-                        Color.red
-                            .frame(width: 390, height: 315)
-                    }
-                }
+                VideoPlayerView(videoUrl: self.videoUrl)
+                ImageView(imageUrl: self.graphUrl)
                 
+                Spacer()
                 HStack {
                     Button(action: {
                         onRedo()
                     }) {
                         Text("Redo")
                             .font(.headline)
-                            .foregroundColor(.black)
+                            .foregroundColor(.white)
                             .padding()
                             .background(Color.red)
                             .cornerRadius(20)
-                    }.padding(.leading, 25)
+                    }.padding(.leading, 40)
                         .padding(.top, 5)
                         .padding(.bottom, 10)
                     
@@ -64,19 +54,16 @@ struct OutputView: View {
                     }) {
                         Text("Proceed")
                             .font(.headline)
-                            .foregroundColor(.black)
+                            .foregroundColor(.white)
                             .padding()
                             .background(Color.green)
                             .cornerRadius(20)
-                    }.padding(.trailing, 25)
+                    }.padding(.trailing, 40)
                         .padding(.top, 5)
                         .padding(.bottom, 10)
                     
                 }
-                
-                Spacer()
-            }.padding(.top, 45)
-            HeaderView()
+            }
         }
         
     }

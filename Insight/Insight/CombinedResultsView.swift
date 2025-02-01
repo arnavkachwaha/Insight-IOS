@@ -11,95 +11,102 @@ struct CombinedResultsView: View {
     @ObservedObject var videoResults: VideoTestResults
     @ObservedObject var scat6Results: NeuroScreenResults
     @Binding var navigationPath: NavigationPath
-
+    
     var body: some View {
         ZStack {
-            Color(red: 240/255, green: 240/255, blue: 240/255).edgesIgnoringSafeArea(.all)
+            Color(red: 250/255, green: 250/255, blue: 250/255).edgesIgnoringSafeArea(.all)
+            
             ZStack {
                 ScrollView {
-                    HeaderView()
                     VStack() {
                         Text("Combined Results")
                             .font(.title)
                             .fontWeight(.bold)
                             .padding(.all, 10)
                         
+                        Divider()
+                            .background(Color.black.opacity(1))
+                            .padding(.top, 10)
+                        
                         // PLR Section
-                        if let plrResults = videoResults.plrResults {
-                            Section(header: Text("PLR Results")
-                                .font(.title)
+                        VStack {
+                            Text("PLR")
+                                .font(.title2)
                                 .fontWeight(.bold)
-                                .padding(.all, 15)) {
-                                    VideoResultView(videoUrl: plrResults.videoURL, graphUrl: plrResults.graphURL)
-                                }
-                        }
+                            VideoPlayerView(videoUrl: videoResults.plrResults?.videoURL)
+                            ImageView(imageUrl: videoResults.plrResults?.graphURL)
+                        }.padding(.all, 10)
+                        
+                        Divider()
+                            .background(Color.black.opacity(1))
+                            .padding(.top, 10)
                         
                         // VOMS Section
-                        if let vomsResults = videoResults.vomsResults {
-                            Section(header: Text("VOMS Results")
-                                .font(.title)
+                        VStack {
+                            Text("VOMS")
+                                .font(.title2)
                                 .fontWeight(.bold)
-                                .padding(.all, 15)) {
-                                    VideoResultView(videoUrl: vomsResults.videoURL, graphUrl: vomsResults.graphURL)
-                                }
-                        }
+                            VideoPlayerView(videoUrl: videoResults.vomsResults?.videoURL)
+                            ImageView(imageUrl: videoResults.vomsResults?.graphURL)
+                        }.padding(.all, 10)
+                        
+                        Divider()
+                            .background(Color.black.opacity(1))
+                            .padding(.top, 10)
+                        
                         
                         // SCAT6 Section
-                        Section(header: Text("SCAT6 Results")
-                            .font(.title)
-                            .fontWeight(.bold)
-                            .padding(.all, 15)) {
-                                SectionContainer {
-                                    VStack(alignment: .leading, spacing: 10) {
-                                        Text("Summary")
-                                            .font(.system(size: 35, weight: .bold, design: .serif))
-                                            .padding(.bottom, 10)
-                                        VStack(alignment: .leading, spacing: 5) {
-                                            Text("Observable Signs: \(scat6Results.observableSignsCount)")
-                                            Text("Cervical Spine Signs: \(scat6Results.cervicalSpineSignsCount)")
-                                            Text("Ocular/Motor Signs: \(scat6Results.ocularMotorSignsCount)")
-                                            Text("Glasgow Coma Score: \(scat6Results.glasgowComaScore)")
-                                            Text("Maddocks Score: \(scat6Results.maddocksScore)/5")
-                                        }
-                                        .font(.system(size: 28, weight: .medium, design: .serif))
-                                        .multilineTextAlignment(.leading)
+                        VStack {
+                            Text("SCAT6")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                            
+                            SectionContainer {
+                                VStack(alignment: .leading, spacing: 10) {
+                                    Text("Summary")
+                                        .font(.system(size: 35, weight: .bold, design: .serif))
+                                        .padding(.bottom, 10)
+                                    VStack(alignment: .leading, spacing: 5) {
+                                        Text("Observable Signs: \(scat6Results.observableSignsCount)")
+                                        Text("Cervical Spine Signs: \(scat6Results.cervicalSpineSignsCount)")
+                                        Text("Ocular/Motor Signs: \(scat6Results.ocularMotorSignsCount)")
+                                        Text("Glasgow Coma Score: \(scat6Results.glasgowComaScore)")
+                                        Text("Maddocks Score: \(scat6Results.maddocksScore)/5")
                                     }
+                                    .font(.system(size: 28, weight: .medium, design: .serif))
+                                    .multilineTextAlignment(.leading)
+                                    
                                 }
                             }
+                        }.padding(.all, 10)
+
+                        Divider()
+                            .background(Color.black.opacity(1))
+                            .padding(.all, 10)
+                        
+                        HStack {
+                            Spacer()
+                            Button(action:{
+                                navigationPath.removeLast(navigationPath.count)
+                            }){
+                                Text("Proceed")
+                                    .font(.system(size: 20, weight: .bold, design: .serif))
+                                    .foregroundColor(.white)
+                                    .padding()
+                                    .frame(width: 150, height: 50)
+                                    .background(Color.blue)
+                                    .cornerRadius(10)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            Spacer()
+                        }.padding(.all, 10)
                     }
-                    .padding(.all, 1)
                 }
+                .padding(.all, 1)
             }
         }
     }
 }
-
-struct VideoResultView: View {
-    var videoUrl: URL?
-    var graphUrl: URL?
-
-    var body: some View {
-        VStack {
-            VideoPlayer(videoURL: self.videoUrl!)
-                .frame(width: 430, height: 320)
-                .padding(.bottom, 0.5)
-            
-            AsyncImage(url: graphUrl) { phase in
-                if let image = phase.image {
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 430, height: 320)
-                    
-                } else {
-                    Color.red
-                        .frame(width: 435, height: 320)
-                }
-            }
-        }
-    }
-}
-
 
 #Preview {
     @Previewable @State var navigationPath = NavigationPath()

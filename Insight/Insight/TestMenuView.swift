@@ -19,13 +19,14 @@ struct TestMenuView: View {
     
     var body: some View {
         ZStack {
-            Color(red: 240/255, green: 240/255, blue: 240/255)
+            Color(red: 250/255, green: 250/255, blue: 250/255)
                 .edgesIgnoringSafeArea(.all)
+            
             VStack {
                 Text("Assessments")
                     .font(.title)
                     .fontWeight(.bold)
-                    .padding(.top, 50)
+                    .padding(.top, 10)
                 
                 ForEach(tests.indices, id: \.self) { index in
                     Button(action: {
@@ -39,7 +40,7 @@ struct TestMenuView: View {
                                 .padding(.all, 10)
                             Text(tests[index].0)
                                 .font(.headline)
-                                .foregroundColor(tests[index].2 ? .gray : .primary)
+                                .foregroundColor(tests[index].2 ? .gray : .black)
                         }
                         .frame(width: 290, height: 180)
                         .background(tests[index].2 ? Color.gray.opacity(0.2) : Color.blue.opacity(0.2))
@@ -55,10 +56,10 @@ struct TestMenuView: View {
                     }) {
                         Text("Redo Tests")
                             .font(.headline)
-                            .foregroundColor(.black)
+                            .foregroundColor(tests.allSatisfy({ $0.2 }) ? Color.white : Color.accentColor)
                             .padding()
                             .frame(width: 130)
-                            .background(tests.allSatisfy({ $0.2 }) ? Color.red : Color.gray)
+                            .background(tests.allSatisfy({ $0.2 }) ? Color.red : Color.accentColor)
                             .cornerRadius(10)
                     }
                     .padding(.all, 10)
@@ -69,17 +70,17 @@ struct TestMenuView: View {
                     }) {
                         Text("Test Results")
                             .font(.headline)
-                            .foregroundColor(.black)
+                            .foregroundColor(tests.allSatisfy({ $0.2 }) ? Color.white : Color.accentColor)
                             .padding()
                             .frame(width: 130)
-                            .background(tests.allSatisfy({ $0.2 }) ? Color.green : Color.gray)
+                            .background(tests.allSatisfy({ $0.2 }) ? Color.blue : Color.accentColor)
                             .cornerRadius(10)
                     }
                     .padding(.all, 10)
                     .disabled(!tests.allSatisfy({ $0.2 }))
                 }
             }
-            HeaderView()
+
         }
     }
     

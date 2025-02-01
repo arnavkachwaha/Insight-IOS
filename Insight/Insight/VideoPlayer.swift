@@ -10,6 +10,7 @@ import AVKit
 
 struct VideoPlayer: UIViewControllerRepresentable {
     let videoURL: URL
+    var zoomLevel: AVLayerVideoGravity
     
     func makeUIViewController(context: Context) -> AVPlayerViewController {
         let playerViewController = AVPlayerViewController()
@@ -29,9 +30,11 @@ struct VideoPlayer: UIViewControllerRepresentable {
         return playerViewController
     }
     
-    func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {}
+    func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {
+        uiViewController.videoGravity = zoomLevel
+    }
 }
 
 #Preview {
-    VideoPlayer(videoURL: .init(string: "videod.mp4")!)
+    VideoPlayer(videoURL: .init(string: "videod.mp4")!, zoomLevel: AVLayerVideoGravity.resizeAspectFill)
 }

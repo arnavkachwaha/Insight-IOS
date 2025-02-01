@@ -25,6 +25,7 @@ struct ObservableSignsView: View {
     
     var body: some View {
         ZStack {
+            Color(red: 250/255, green: 250/255, blue: 250/255).edgesIgnoringSafeArea(.all)
             
             VStack {
                 ScrollView {
