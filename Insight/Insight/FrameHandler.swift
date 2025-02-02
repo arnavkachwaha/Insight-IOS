@@ -12,20 +12,21 @@ import CoreImage
 import AVFoundation
 
 class FrameHandler: NSObject, ObservableObject {
-    var captureSession: AVCaptureSession?
-    private var permissionGranted = false
-    private let sessionQueue = DispatchQueue(label: "sessionQueue")
     private let context = CIContext()
-    private var movieOutput = AVCaptureMovieFileOutput()
+    private var permissionGranted = false
+    var captureSession: AVCaptureSession?
     private var videoDevice: AVCaptureDevice?
-    @Published var currentView: String = ""
-    @Published var recordedVideoURL: URL?
+    private var movieOutput = AVCaptureMovieFileOutput()
+    private let sessionQueue = DispatchQueue(label: "sessionQueue")
+    
+    @Published var frame: CGImage?
     @Published var fetchedVideoURL: URL?
     @Published var fetchedGraphURL: URL?
+    @Published var recordedVideoURL: URL?
     @Published var isSessionReady = false
-    @Published var frame: CGImage?
+    @Published var currentView: String = ""
     @Published var uRL = "http://a8a175088b809630c.awsglobalaccelerator.com:8000/cyclops/upload/"
-//    @Published var uRL = "http://192.168.4.108:8000/cyclops/upload/"
+    //    @Published var uRL = "http://192.168.4.108:8000/cyclops/upload/" //local server
     
     override init() {
         super.init()
@@ -84,7 +85,7 @@ class FrameHandler: NSObject, ObservableObject {
                 let position: AVCaptureDevice.Position
                 deviceTypes = [.builtInUltraWideCamera, .builtInWideAngleCamera, .builtInDualWideCamera, .builtInTelephotoCamera, .builtInDualCamera, .builtInTripleCamera]
                 position = .back
-
+                
                 guard let videoDevice = self.bestDevice(deviceTypes: deviceTypes, position: position) else {
                     print("Desired camera not available")
                     return
@@ -108,8 +109,7 @@ class FrameHandler: NSObject, ObservableObject {
                     captureSession.addOutput(self.movieOutput)
                 }
                 
-                // Configure device settings if PLR (back camera)
-                
+                // Configure camera settings
                 try videoDevice.lockForConfiguration()
                 if self.currentView == "PLR" {
                     videoDevice.videoZoomFactor = 2.0
@@ -121,7 +121,6 @@ class FrameHandler: NSObject, ObservableObject {
                 }
                 videoDevice.automaticallyAdjustsVideoHDREnabled = true
                 videoDevice.unlockForConfiguration()
-                
                 
                 captureSession.commitConfiguration()
                 captureSession.startRunning()
@@ -190,30 +189,6 @@ class FrameHandler: NSObject, ObservableObject {
         }
     }
     
-    // Save recorded video to photo library
-    func saveVideoToPhotos(url: URL) {
-        PHPhotoLibrary.shared().performChanges({
-            PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
-        }) { success, error in
-            if let error = error {
-                print("Error saving video to photo library: \(error.localizedDescription)")
-            } else if success {
-                print("Video saved successfully!")
-            }
-        }
-    }
-    
-    func saveGraphToPhotos(url: URL) {
-        PHPhotoLibrary.shared().performChanges({
-            PHAssetChangeRequest.creationRequestForAssetFromImage(atFileURL: url)
-        }) { success, error in
-            if let error = error {
-                print("Error saving graph to photo library: \(error.localizedDescription)")
-            } else if success {
-                print("Graph saved successfully!")
-            }
-        }
-    }
     // Set flash (torch) on/off
     func setFlash(on: Bool) {
         guard let videoDevice = self.videoDevice, videoDevice.hasTorch else { return }
@@ -245,6 +220,8 @@ extension FrameHandler: AVCaptureVideoDataOutputSampleBufferDelegate {
 
 // Handle video recording delegate
 extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
+    
+    //Handle recorded video before uploading to server
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
         if let error = error {
             print("Error recording video: \(error.localizedDescription)")
@@ -254,11 +231,11 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
                 // Notify that the  video is ready
                 NotificationCenter.default.post(name: .videoRecorded, object: nil)
                 
-                // Optionally save to Photos
-                self.saveVideoToPhotos(url: outputFileURL)
+                // Optionally save video
+                self.saveVideo(url: outputFileURL)
             }
             else{
-                // Crop the video after recording for VOMS
+                // Crop the video after recording for PLR
                 cropVideo(at: outputFileURL) { [weak self] croppedURL in
                     guard let self = self else { return }
                     print("cropVideo finished")
@@ -269,8 +246,8 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
                         // Notify that the cropped video is ready
                         NotificationCenter.default.post(name: .videoRecorded, object: nil)
                         
-                        // Optionally save to Photos
-                        self.saveVideoToPhotos(url: croppedURL)
+                        // Optionally save videp
+                        self.saveVideo(url: croppedURL)
                     } else {
                         print("Failed to crop video")
                     }
@@ -279,6 +256,7 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
         }
     }
     
+    // Crop video
     func cropVideo(at url: URL, completion: @escaping (URL?) -> Void) {
         // Run the cropping process on a background thread
         let asset = AVAsset(url: url)
@@ -355,6 +333,7 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
         }
     }
     
+    // Upload video to server
     func uploadVideoToServer(videoURL: URL, currentView: String) {
         let serverURL = URL(string: uRL)!
         var request = URLRequest(url: serverURL)
@@ -419,6 +398,7 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
         task.resume()
     }
     
+    // Recieve output from server
     func handleBackendResponse(videoDownloadURL: String, graphDownloadURL: String) {
         if let graphUrl = URL(string: graphDownloadURL){
             DispatchQueue.main.async {
@@ -432,6 +412,7 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
         }
     }
     
+    // Fetch graph from O/P
     func fetchGraph(downloadURL : URL) {
         let task = URLSession.shared.downloadTask(with: downloadURL) { localURL, response, error in
             if let error = error {
@@ -451,13 +432,14 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
                 DispatchQueue.main.async {
                     self.fetchedGraphURL = movedURL
                     print("Graph fetched and moved successfully: \(movedURL)")
-                    self.saveGraphToPhotos(url: movedURL)
+                    self.saveGraph(url: movedURL)
                 }
             }
         }
         task.resume()
     }
     
+    // Fetch video from O/P
     func fetchVideo(downloadURL : URL) {
         let task = URLSession.shared.downloadTask(with: downloadURL) { localURL, response, error in
             if let error = error {
@@ -478,13 +460,40 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
                     self.fetchedVideoURL = movedURL
                     print("Video fetched and moved successfully: \(movedURL)")
                     NotificationCenter.default.post(name: .videoFetched, object: nil)
-                    self.saveVideoToPhotos(url: movedURL)
+                    self.saveVideo(url: movedURL)
                 }
             }
         }
         task.resume()
     }
     
+    // Save recorded video
+    func saveVideo(url: URL) {
+        PHPhotoLibrary.shared().performChanges({
+            PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
+        }) { success, error in
+            if let error = error {
+                print("Error saving video to photo library: \(error.localizedDescription)")
+            } else if success {
+                print("Video saved successfully!")
+            }
+        }
+    }
+    
+    // Save graph
+    func saveGraph(url: URL) {
+        PHPhotoLibrary.shared().performChanges({
+            PHAssetChangeRequest.creationRequestForAssetFromImage(atFileURL: url)
+        }) { success, error in
+            if let error = error {
+                print("Error saving graph to photo library: \(error.localizedDescription)")
+            } else if success {
+                print("Graph saved successfully!")
+            }
+        }
+    }
+    
+    // Save O/P media to photo library
     func moveMediaToDocumentsDirectory(_ tempURL: URL, desiredFileName: String = "video.mp4") -> URL? {
         
         let fileManager = FileManager.default
@@ -514,6 +523,7 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
     
 }
 
+// Notifications
 extension Notification.Name {
     static let videoFetched = Notification.Name("videoFetched")
     static let videoRecorded = Notification.Name("videoRecorded")
