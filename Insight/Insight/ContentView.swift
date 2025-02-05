@@ -28,22 +28,23 @@ struct ContentView: View {
                     case "PLR":
                         let viewModel = ContentViewModel(frameHandler: FrameHandler(), currentView: "PLR", testResults: videoResults)
                         CaptureView(viewModel: viewModel, navigationPath: $navigationPath)
-                            .navigationBarBackButtonHidden(true)
+                            .navigationBarTitleDisplayMode(.inline)
                             .onDisappear {
                                 self.viewModel = nil
                             }
                     case "VOMS":
                         let viewModel = ContentViewModel(frameHandler: FrameHandler(), currentView: "VOMS", testResults: videoResults)
                         CaptureView(viewModel: viewModel, navigationPath: $navigationPath)
-                            .navigationBarBackButtonHidden(true)
+                            .navigationBarTitleDisplayMode(.inline)
                             .onDisappear {
                                 self.viewModel = nil
                             }
                     case "SCAT6":
                         ObservableSignsView(results: scat6Results, navigationPath: $navigationPath)
-                            .navigationBarBackButtonHidden(true)
+                            .navigationBarTitleDisplayMode(.inline)
                     case "CombinedResults":
                         CombinedResultsView(videoResults: videoResults, scat6Results: scat6Results, navigationPath: $navigationPath)
+                            .navigationBarTitleDisplayMode(.inline)
                     default:
                         Text("Unknown View")
                     }

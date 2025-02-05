@@ -23,9 +23,9 @@ struct CaptureView: View {
                     .overlay(
                         Group {
                             if viewModel.currentView == "PLR" {
-                                EyeMask(yOffset: 200)
+                                EyeMask(yOffset: 250)
                             } else if viewModel.currentView == "VOMS" {
-                                TrackerView(
+                                TrackerView_1(
                                     shouldAnimate: $shouldStartTrackerAnimation,
                                     onAnimationEnd: {
                                         viewModel.stopRecording()
@@ -35,8 +35,6 @@ struct CaptureView: View {
                         }
                     )
                 VStack {
-                    HeaderView()
-                    Spacer()
                     FooterView(frameHandler: viewModel.frameHandler, onRecordingStateChanged: { isRecording in
                         shouldStartTrackerAnimation = isRecording
                     })
@@ -45,8 +43,10 @@ struct CaptureView: View {
             case .playback(let videoURL):
                 PlaybackView(
                     videoUrl: videoURL,
+                    shouldRotate: viewModel.currentView == "VOMS",
                     onRedo: {
                         viewModel.restartSession()
+                        self.shouldStartTrackerAnimation = false
                     },
                     onUse: {
                         viewModel.uploadAndFetchVideo()
@@ -57,11 +57,14 @@ struct CaptureView: View {
                 OutputView(
                     videoUrl: videoURL,
                     graphUrl: graphURL,
+                    shouldRotate: viewModel.currentView == "VOMS",
                     onRedo: {
                         viewModel.restartSession()
+                        self.shouldStartTrackerAnimation = false
                     },
                     onProceed: {
                         navigationPath.removeLast(navigationPath.count)
+                        self.shouldStartTrackerAnimation = false
                     }
                 )
                 
@@ -70,6 +73,7 @@ struct CaptureView: View {
             }
         
         }
+        .ignoresSafeArea()
         .alert(isPresented: $viewModel.showAlert) {
             Alert(
                 title: Text("Error"),
@@ -79,6 +83,7 @@ struct CaptureView: View {
                 })
             )
         }
+        
     }
 }
 

@@ -17,14 +17,14 @@ struct TrackerView_1: View {
             Color(red: 240/255, green: 240/255, blue: 240/255).edgesIgnoringSafeArea(.all)
             GeometryReader { geometry in
                 ZStack {
-                    Image(systemName: "hand.point.right.fill")
-                        .font(.system(size: 300))
-                        .offset(x: 20 , y: offset)
+                    Image(systemName: "circle.fill")
+                        .font(.system(size: 80))
+                        .offset(x: 150 , y: offset)
                     
                 }
                 .onAppear {
                     // Set the initial offset to center
-                    offset = (geometry.size.height / 3.5)
+                    offset = (geometry.size.height / 2.4)
                 }
                 .onChange(of: shouldAnimate) { oldValue, newValue in
                     if newValue {
@@ -33,11 +33,11 @@ struct TrackerView_1: View {
                 }
             }
             .background(Color.clear)
-        }
+        }.ignoresSafeArea()
     }
     
     private func startAnimation(screenHeight: CGFloat) {
-        offset = screenHeight / 3.5 // Start at the center
+        offset = screenHeight / 2.4 // Start at the center
         
         DispatchQueue.main.asyncAfter(deadline: .now()) {
             withAnimation(
@@ -59,7 +59,7 @@ struct TrackerView_1: View {
             withAnimation(
                 Animation.linear(duration: 1).repeatCount(1)
             ) {
-                offset = screenHeight / 3.5
+                offset = screenHeight / 2.4
             }
         }
         

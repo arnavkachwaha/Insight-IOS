@@ -84,7 +84,11 @@ class FrameHandler: NSObject, ObservableObject {
                 ]
                 let position: AVCaptureDevice.Position
                 deviceTypes = [.builtInUltraWideCamera, .builtInWideAngleCamera, .builtInDualWideCamera, .builtInTelephotoCamera, .builtInDualCamera, .builtInTripleCamera]
-                position = .back
+                if self.currentView == "VOMS"{
+                    position = .front
+                }else{
+                    position = .back
+                }
                 
                 guard let videoDevice = self.bestDevice(deviceTypes: deviceTypes, position: position) else {
                     print("Desired camera not available")
@@ -114,8 +118,12 @@ class FrameHandler: NSObject, ObservableObject {
                 if self.currentView == "PLR" {
                     videoDevice.videoZoomFactor = 2.0
                 }
-                videoDevice.torchMode = .off
-                videoDevice.focusMode = .continuousAutoFocus
+                if videoDevice.hasTorch{
+                    videoDevice.torchMode = .off
+                }
+                if videoDevice.isFocusModeSupported(.continuousAutoFocus) {
+                    videoDevice.focusMode = .continuousAutoFocus
+                }
                 if videoDevice.isLowLightBoostSupported {
                     videoDevice.automaticallyEnablesLowLightBoostWhenAvailable = true
                 }

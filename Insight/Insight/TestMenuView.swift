@@ -9,12 +9,14 @@ import SwiftUI
 
 struct TestMenuView: View {
     @Binding var navigationPath: NavigationPath
-    @StateObject private var Scat6Results = NeuroScreenResults()
-    @StateObject private var VideoResults = VideoTestResults()
+    @StateObject private var scat6Results = NeuroScreenResults()
+    @StateObject private var videoResults = VideoTestResults()
+    
+    // Removed the Bool flag from each test tuple.
     @State private var tests = [
-        ("PLR", "eye", false),
-        ("VOMS", "hand.point.up", false),
-        ("SCAT6", "doc.text", false)
+        ("PLR", "eye"),
+        ("VOMS", "hand.point.up"),
+        ("SCAT6", "doc.text")
     ]
     
     var body: some View {
@@ -28,26 +30,25 @@ struct TestMenuView: View {
                     .fontWeight(.bold)
                     .padding(.top, 10)
                 
-                ForEach(tests.indices, id: \.self) { index in
+                ForEach(tests, id: \.0) { test in
                     Button(action: {
-                        navigationPath.append(tests[index].0)
-                        tests[index].2 = true
+                        navigationPath.append(test.0)
                     }) {
                         VStack {
-                            Image(systemName: tests[index].1)
+                            Image(systemName: test.1)
                                 .resizable()
-                                .frame(width: index == 0 ? 160 : 80, height: 100)
-                                .padding(.all, 10)
-                            Text(tests[index].0)
+                                .frame(width: test.0 == "PLR" ? 160 : 80, height: 100)
+                                .padding(10)
+                            Text(test.0)
                                 .font(.headline)
-                                .foregroundColor(tests[index].2 ? .gray : .black)
+                                .foregroundColor(isTestCompleted(testName: test.0) ? .gray : .black)
                         }
                         .frame(width: 290, height: 180)
-                        .background(tests[index].2 ? Color.gray.opacity(0.2) : Color.blue.opacity(0.2))
+                        .background(isTestCompleted(testName: test.0) ? Color.gray.opacity(0.2) : Color.blue.opacity(0.2))
                         .cornerRadius(10)
                     }
-                    .disabled(tests[index].2)
-                    .padding(.all, 10)
+                    .disabled(isTestCompleted(testName: test.0))
+                    .padding(10)
                 }
                 
                 HStack {
@@ -56,32 +57,50 @@ struct TestMenuView: View {
                     }) {
                         Text("Redo Tests")
                             .font(.headline)
-                            .foregroundColor(tests.allSatisfy({ $0.2 }) ? Color.white : Color.accentColor)
+                            .foregroundColor(allTestsCompleted ? Color.white : Color.accentColor)
                             .padding()
                             .frame(width: 130)
-                            .background(tests.allSatisfy({ $0.2 }) ? Color.red : Color.accentColor)
+                            .background(allTestsCompleted ? Color.red : Color.accentColor)
                             .cornerRadius(10)
                     }
-                    .padding(.all, 10)
-                    .disabled(!tests.allSatisfy({ $0.2 }))
+                    .padding(10)
+                    .disabled(!allTestsCompleted)
                     
                     Button(action: {
                         navigateToResults()
                     }) {
                         Text("Test Results")
                             .font(.headline)
-                            .foregroundColor(tests.allSatisfy({ $0.2 }) ? Color.white : Color.accentColor)
+                            .foregroundColor(allTestsCompleted ? Color.white : Color.accentColor)
                             .padding()
                             .frame(width: 130)
-                            .background(tests.allSatisfy({ $0.2 }) ? Color.blue : Color.accentColor)
+                            .background(allTestsCompleted ? Color.blue : Color.accentColor)
                             .cornerRadius(10)
                     }
-                    .padding(.all, 10)
-                    .disabled(!tests.allSatisfy({ $0.2 }))
+                    .padding(10)
+                    .disabled(!allTestsCompleted)
                 }
             }
-
         }
+    }
+    
+    /// Returns true if the given test has already been completed.
+    private func isTestCompleted(testName: String) -> Bool {
+        switch testName {
+        case "PLR":
+            return videoResults.plrResults != nil
+        case "VOMS":
+            return videoResults.vomsResults != nil
+        case "SCAT6":
+            return scat6Results.isSCAT6Completed
+        default:
+            return false
+        }
+    }
+    
+    /// Computed property that returns true if all tests are completed.
+    private var allTestsCompleted: Bool {
+        tests.allSatisfy { isTestCompleted(testName: $0.0) }
     }
     
     private func navigateToResults() {
@@ -89,11 +108,8 @@ struct TestMenuView: View {
     }
     
     private func resetTests() {
-        VideoResults.reset()
-        Scat6Results.reset()
-        for index in tests.indices {
-            tests[index].2 = false
-        }
+        videoResults.reset()
+        scat6Results.reset()
     }
 }
 

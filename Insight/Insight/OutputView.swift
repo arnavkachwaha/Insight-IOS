@@ -10,15 +10,18 @@ import UIKit
 import SwiftUI
 
 struct OutputView: View {
-    var onRedo: () -> Void
-    var onProceed: () -> Void
     var videoUrl: URL?
     var graphUrl: URL?
-    init(videoUrl: URL?, graphUrl: URL?, onRedo: @escaping () -> Void, onProceed: @escaping () -> Void) {
+    var onRedo: () -> Void
+    var onProceed: () -> Void
+    var shouldRotate: Bool = false
+    
+    init(videoUrl: URL?, graphUrl: URL?, shouldRotate: Bool = false, onRedo: @escaping () -> Void, onProceed: @escaping () -> Void) {
+        self.onRedo = onRedo
         self.videoUrl = videoUrl
         self.graphUrl = graphUrl
-        self.onRedo = onRedo
         self.onProceed = onProceed
+        self.shouldRotate = shouldRotate
     }
     
     var body: some View {
@@ -29,7 +32,7 @@ struct OutputView: View {
                 HeaderView()
                 Spacer()
                 
-                VideoPlayerView(videoUrl: self.videoUrl)
+                VideoPlayerView(videoUrl: self.videoUrl, shouldRotate: shouldRotate)
                 ImageView(imageUrl: self.graphUrl)
                 
                 Spacer()
@@ -73,6 +76,7 @@ struct OutputView: View {
     OutputView(
         videoUrl: URL(string: "https://example.com/video.mov"),
         graphUrl: URL(string: "https://example.com/graph.png"),
+        shouldRotate: false,
         onRedo: {
             print("Redo pressed")
         },
