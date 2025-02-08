@@ -22,7 +22,7 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
-            TestMenuView(navigationPath: $navigationPath)
+            TestMenuView(navigationPath: $navigationPath, VideoResults: videoResults, Scat6Results: scat6Results )
                 .navigationDestination(for: String.self) { test in
                     switch test {
                     case "PLR":
@@ -43,7 +43,7 @@ struct ContentView: View {
                         ObservableSignsView(results: scat6Results, navigationPath: $navigationPath)
                             .navigationBarTitleDisplayMode(.inline)
                     case "CombinedResults":
-                        CombinedResultsView(videoResults: videoResults, scat6Results: scat6Results, navigationPath: $navigationPath)
+                        CombinedResultsView(navigationPath: $navigationPath, videoResults: videoResults, scat6Results: scat6Results)
                             .navigationBarTitleDisplayMode(.inline)
                     default:
                         Text("Unknown View")

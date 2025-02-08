@@ -8,9 +8,9 @@
 import SwiftUI
 
 struct CombinedResultsView: View {
+    @Binding var navigationPath: NavigationPath
     @ObservedObject var videoResults: VideoTestResults
     @ObservedObject var scat6Results: NeuroScreenResults
-    @Binding var navigationPath: NavigationPath
     
     var body: some View {
         ZStack {
@@ -112,5 +112,5 @@ struct CombinedResultsView: View {
     @Previewable @State var navigationPath = NavigationPath()
     @Previewable @State var videoTestResults = VideoTestResults()
     @Previewable @State var scat6Results = NeuroScreenResults()
-    CombinedResultsView(videoResults: videoTestResults, scat6Results: scat6Results, navigationPath: $navigationPath)
+    CombinedResultsView(navigationPath: $navigationPath, videoResults: videoTestResults, scat6Results: scat6Results)
 }

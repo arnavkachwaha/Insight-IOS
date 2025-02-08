@@ -9,10 +9,9 @@ import SwiftUI
 
 struct TestMenuView: View {
     @Binding var navigationPath: NavigationPath
-    @StateObject private var scat6Results = NeuroScreenResults()
-    @StateObject private var videoResults = VideoTestResults()
+    @ObservedObject var VideoResults: VideoTestResults
+    @ObservedObject var Scat6Results: NeuroScreenResults
     
-    // Removed the Bool flag from each test tuple.
     @State private var tests = [
         ("PLR", "eye"),
         ("VOMS", "hand.point.up"),
@@ -39,6 +38,7 @@ struct TestMenuView: View {
                                 .resizable()
                                 .frame(width: test.0 == "PLR" ? 160 : 80, height: 100)
                                 .padding(10)
+                                .foregroundColor(isTestCompleted(testName: test.0) ? .gray : .blue)
                             Text(test.0)
                                 .font(.headline)
                                 .foregroundColor(isTestCompleted(testName: test.0) ? .gray : .black)
@@ -84,21 +84,19 @@ struct TestMenuView: View {
         }
     }
     
-    /// Returns true if the given test has already been completed.
     private func isTestCompleted(testName: String) -> Bool {
         switch testName {
         case "PLR":
-            return videoResults.plrResults != nil
+            return VideoResults.plrResults != nil
         case "VOMS":
-            return videoResults.vomsResults != nil
+            return VideoResults.vomsResults != nil
         case "SCAT6":
-            return scat6Results.isSCAT6Completed
+            return Scat6Results.isSCAT6Completed
         default:
             return false
         }
     }
     
-    /// Computed property that returns true if all tests are completed.
     private var allTestsCompleted: Bool {
         tests.allSatisfy { isTestCompleted(testName: $0.0) }
     }
@@ -108,14 +106,14 @@ struct TestMenuView: View {
     }
     
     private func resetTests() {
-        videoResults.reset()
-        scat6Results.reset()
+        VideoResults.reset()
+        Scat6Results.reset()
     }
 }
 
 #Preview {
     @Previewable @State var navigationPath = NavigationPath()
-    return NavigationStack {
-        TestMenuView(navigationPath: $navigationPath)
-    }
+    @Previewable @State var videoTestResults = VideoTestResults()
+    @Previewable @State var scat6Results = NeuroScreenResults()
+    TestMenuView(navigationPath: $navigationPath, VideoResults: videoTestResults, Scat6Results: scat6Results)
 }
