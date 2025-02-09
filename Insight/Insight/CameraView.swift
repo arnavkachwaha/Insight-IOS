@@ -8,9 +8,26 @@
 import SwiftUI
 import AVFoundation
 
-struct CameraView: UIViewControllerRepresentable {
+struct CameraView: View {
     @ObservedObject var frameHandler: FrameHandler
+    
+    var body: some View {
+        ZStack {
+            Color(.black).edgesIgnoringSafeArea(.all)
+            if frameHandler.isSessionReady {
+                CameraFeedView(frameHandler: frameHandler)
+            } else {
+                Text("Loading...")
+                    .foregroundColor(.white)
+            }
+        }
+        .ignoresSafeArea()
+    }
+}
 
+struct CameraFeedView: UIViewControllerRepresentable {
+    @ObservedObject var frameHandler: FrameHandler
+    
     func makeUIViewController(context: Context) -> UIViewController {
         let controller = CameraViewController()
         controller.frameHandler = frameHandler
@@ -23,7 +40,7 @@ struct CameraView: UIViewControllerRepresentable {
 class CameraViewController: UIViewController {
     var frameHandler: FrameHandler?
     private var previewLayer: AVCaptureVideoPreviewLayer!
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupPreviewLayer()
@@ -42,4 +59,3 @@ class CameraViewController: UIViewController {
 #Preview {
     CameraView(frameHandler: FrameHandler())
 }
-

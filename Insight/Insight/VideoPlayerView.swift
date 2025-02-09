@@ -1,0 +1,37 @@
+//
+//  VideoPlayerView.swift
+//  Insight
+//
+//  Created by Arnav Singh Kachwaha on 2/1/25.
+//
+
+import SwiftUI
+import AVFoundation
+
+struct VideoPlayerView: View {
+    var videoUrl: URL?
+    var shouldRotate: Bool = false 
+    
+    var body: some View {
+        ZStack {
+            Rectangle()
+                .fill(Color.gray.opacity(0.5))
+                .frame(width: 390, height: shouldRotate ? 400 : 300)
+                .cornerRadius(20)
+            
+            if let videoUrl = videoUrl {
+                VideoPlayer(videoURL: videoUrl, zoomLevel: AVLayerVideoGravity.resizeAspectFill)
+                    .frame(width: 380, height: shouldRotate ? 380 : 280)
+                    .cornerRadius(20)
+            }
+        }
+        .rotationEffect(shouldRotate ? .degrees(90) : .degrees(0))
+        .padding(2.5)
+    }
+}
+
+#Preview {
+    Group {
+        VideoPlayerView(videoUrl: URL(string: "https://example.com/video.mov"), shouldRotate: false)
+    }
+}

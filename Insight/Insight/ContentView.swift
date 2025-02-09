@@ -5,43 +5,51 @@
 //  Created by Arnav Singh Kachwaha on 6/25/24.
 //
 
+//
+//  ContentView.swift
+//  Insight
+//
+//  Created by Arnav Singh Kachwaha on 6/25/24.
+//
 
 import SwiftUI
 
 struct ContentView: View {
-    @State private var currentView: ViewType = .content
-    @ObservedObject var frameHandler = FrameHandler()
+    @State private var navigationPath = NavigationPath()
+    @State private var viewModel: ContentViewModel? = nil
+    @StateObject private var scat6Results = NeuroScreenResults()
+    @StateObject private var videoResults = VideoTestResults()
 
     var body: some View {
-        VStack {
-            HeaderView()
-            
-            Spacer()
-    
-            if currentView == .content {
-                ZStack {
-                    CameraView(frameHandler: frameHandler)
-                    EyeMask(yOffset: 300)
+        NavigationStack(path: $navigationPath) {
+            TestMenuView(navigationPath: $navigationPath, VideoResults: videoResults, Scat6Results: scat6Results )
+                .navigationDestination(for: String.self) { test in
+                    switch test {
+                    case "PLR":
+                        let viewModel = ContentViewModel(frameHandler: FrameHandler(), currentView: "PLR", testResults: videoResults)
+                        CaptureView(viewModel: viewModel, navigationPath: $navigationPath)
+                            .navigationBarTitleDisplayMode(.inline)
+                            .onDisappear {
+                                self.viewModel = nil
+                            }
+                    case "VOMS":
+                        let viewModel = ContentViewModel(frameHandler: FrameHandler(), currentView: "VOMS", testResults: videoResults)
+                        CaptureView(viewModel: viewModel, navigationPath: $navigationPath)
+                            .navigationBarTitleDisplayMode(.inline)
+                            .onDisappear {
+                                self.viewModel = nil
+                            }
+                    case "SCAT6":
+                        ObservableSignsView(results: scat6Results, navigationPath: $navigationPath)
+                            .navigationBarTitleDisplayMode(.inline)
+                    case "CombinedResults":
+                        CombinedResultsView(navigationPath: $navigationPath, videoResults: videoResults, scat6Results: scat6Results)
+                            .navigationBarTitleDisplayMode(.inline)
+                    default:
+                        Text("Unknown View")
+                    }
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                FooterView(frameHandler: frameHandler)
-            } else if currentView == .videoPreview {
-                VideoPreviewView()
-            }
-            
-            Spacer()
         }
-    }
-}
-
-enum ViewType {
-    case content
-    case videoPreview
-}
-
-struct VideoPreviewView: View {
-    var body: some View {
-        Text("This is the Video Preview View")
     }
 }
 
