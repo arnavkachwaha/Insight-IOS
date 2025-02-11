@@ -10,6 +10,8 @@ import SwiftUI
 struct CaptureView: View {
     @ObservedObject var viewModel: ContentViewModel
     @Binding var navigationPath: NavigationPath
+    
+    @State private var detectedBox: CGRect? = nil
     @State private var shouldStartTrackerAnimation = false
     
     var body: some View {
@@ -18,12 +20,12 @@ struct CaptureView: View {
             
             switch viewModel.captureState {
             case .recording:
-                CameraView(frameHandler: viewModel.frameHandler)
+                CameraView(frameHandler: viewModel.frameHandler, detectedBox: $detectedBox)
                     .cornerRadius(25)
                     .overlay(
                         Group {
                             if viewModel.currentView == "PLR" {
-                                EyeMask(yOffset: 250)
+                                EyeCutoutView(yOffset: 250, detectedBox: detectedBox)
                             } else if viewModel.currentView == "VOMS" {
                                 TrackerView_1(
                                     shouldAnimate: $shouldStartTrackerAnimation,

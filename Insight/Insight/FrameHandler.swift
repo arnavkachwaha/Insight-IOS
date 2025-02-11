@@ -14,23 +14,36 @@ import AVFoundation
 class FrameHandler: NSObject, ObservableObject {
     private let context = CIContext()
     private var permissionGranted = false
-    var captureSession: AVCaptureSession?
+    private var visionModel: VNCoreMLModel?
     private var videoDevice: AVCaptureDevice?
     private var movieOutput = AVCaptureMovieFileOutput()
     private let sessionQueue = DispatchQueue(label: "sessionQueue")
     
     @Published var frame: CGImage?
+    @Published var boundingBox: CGRect?
     @Published var fetchedVideoURL: URL?
     @Published var fetchedGraphURL: URL?
     @Published var recordedVideoURL: URL?
     @Published var isSessionReady = false
     @Published var currentView: String = ""
+    @Published var captureSession: AVCaptureSession?
     @Published var uRL = "http://a8a175088b809630c.awsglobalaccelerator.com:8000/cyclops/upload/"
     //    @Published var uRL = "http://192.168.4.108:8000/cyclops/upload/" //local server
     
     override init() {
         super.init()
+        loadModel()
         checkPermission()
+    }
+    
+    func loadModel(){
+        do{
+            let model = try EyeDetector(configuration: MLModelConfiguration()).model
+            visionModel = try VNCoreMLModel(for: model)
+            print("Model loaded successfully")
+        }catch{
+            print("Failed to load model: \(error)")
+        }
     }
     
     // Check for camera permission
@@ -129,6 +142,7 @@ class FrameHandler: NSObject, ObservableObject {
                 }
                 videoDevice.automaticallyAdjustsVideoHDREnabled = true
                 videoDevice.unlockForConfiguration()
+                videoOutput.connection(with: .video)?.videoRotationAngle = 90.0
                 
                 captureSession.commitConfiguration()
                 captureSession.startRunning()
@@ -209,12 +223,61 @@ class FrameHandler: NSObject, ObservableObject {
             print("Failed to set flash: \(error.localizedDescription)")
         }
     }
+    
+    // Detect eyes in the frame using the CoreML model
+    func detectEyes(in pixelBuffer: CVPixelBuffer) {
+        guard let visionModel = visionModel else {
+            print("Vision model not loaded")
+            return
+        }
+        
+        let request = VNCoreMLRequest(model: visionModel) { request, error in
+            if let error = error {
+                print("Error detecting eyes: \(error.localizedDescription)")
+                return
+            }
+            
+            guard let results = request.results as? [VNRecognizedObjectObservation] else {
+                print("No results found")
+                DispatchQueue.main.async {
+                    self.boundingBox = nil // Clear bounding box if no results
+                }
+                return
+            }
+            // Filter results for the "Eye" class
+            for observation in results {
+                if let topLabel = observation.labels.first,
+                   topLabel.identifier == "Eye",
+                   topLabel.confidence >= 0.95 { // Adjust confidence threshold as needed
+                    // Get the bounding box of the detected eye
+                    let boundingBox = observation.boundingBox
+                    
+                    DispatchQueue.main.async {
+                        self.boundingBox = boundingBox // Update bounding box
+                    }
+                    return
+                }
+            }
+            
+            DispatchQueue.main.async {
+                self.boundingBox = nil // Clear bounding box if no eye detected
+            }
+        }
+        
+        let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer,  orientation: .downMirrored, options: [:])
+        do {
+            try handler.perform([request])
+        } catch {
+            print("Failed to perform vision request: \(error)")
+        }
+    }
 }
 
 // Handle video output sample buffer (frame processing)
 extension FrameHandler: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+        self.detectEyes(in: imageBuffer)
         let ciImage = CIImage(cvPixelBuffer: imageBuffer)
         
         DispatchQueue.global(qos: .userInitiated).async {
@@ -236,10 +299,7 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
         } else {
             if self.currentView == "VOMS"{
                 self.recordedVideoURL = outputFileURL
-                // Notify that the  video is ready
                 NotificationCenter.default.post(name: .videoRecorded, object: nil)
-                
-                // Optionally save video
                 self.saveVideo(url: outputFileURL)
             }
             else{
@@ -248,13 +308,8 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
                     guard let self = self else { return }
                     print("cropVideo finished")
                     if let croppedURL = croppedURL {
-                        // Save or use the cropped URL as needed
                         self.recordedVideoURL = croppedURL
-                        
-                        // Notify that the cropped video is ready
                         NotificationCenter.default.post(name: .videoRecorded, object: nil)
-                        
-                        // Optionally save videp
                         self.saveVideo(url: croppedURL)
                     } else {
                         print("Failed to crop video")
