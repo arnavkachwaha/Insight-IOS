@@ -15,25 +15,17 @@ struct ScatHeaderView: View {
     var body: some View {
         VStack {
             // Navigation header with step text
-            HStack {
-                //                Button(action: {
-                //                    onBack?() // Call the back action if provided
-                //                }) {
-                //                    Image(systemName: "chevron.backward.circle")
-                //                        .resizable()
-                //                        .frame(width: 25, height: 25)
-                //                        .padding(.leading, 20)
-                //                }
-                Spacer()
-                if let stepText = stepText {
-                    Text(stepText)
-                        .font(.system(size: 20, weight: .bold, design: .serif))
-                        .multilineTextAlignment(.center)
-                    //                        .padding(.trailing, 50)
-                }
-                Spacer()
-            }
-            .padding(.all, 5)
+//            HStack {
+//                Spacer()
+//                if let stepText = stepText {
+//                    Text(stepText)
+//                        .font(.system(size: 20, weight: .bold, design: .serif))
+//                        .multilineTextAlignment(.center)
+//                    //                        .padding(.trailing, 50)
+//                }
+//                Spacer()
+//            }
+//            .padding(.all, 5)
             
             // Section title
             HStack {

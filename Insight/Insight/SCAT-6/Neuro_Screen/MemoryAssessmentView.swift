@@ -25,8 +25,8 @@ struct MemoryAssessmentView: View {
             
             VStack {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 10) {
-                        ScatHeaderView(stepText: "Step Five", sectionTitle: "Memory Assessment Maddocks Questions")
+                    VStack(alignment: .center, spacing: 10) {
+                        ScatHeaderView(sectionTitle: "Memory Assessment Maddocks Questions")
                         
                         HStack {
                             Spacer()

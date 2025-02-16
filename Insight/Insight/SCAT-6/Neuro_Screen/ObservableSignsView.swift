@@ -29,8 +29,8 @@ struct ObservableSignsView: View {
             
             VStack {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 10) {
-                        ScatHeaderView(stepText: "Step One", sectionTitle: "Observable Signs")
+                    VStack(alignment: .center, spacing: 10) {
+                        ScatHeaderView(sectionTitle: "Observable Signs")
                         
                         SectionContainer {
                             ForEach(questions.indices, id: \.self) { index in

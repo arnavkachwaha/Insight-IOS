@@ -21,8 +21,8 @@ struct MotorScreenView: View {
             
             VStack {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
-                        ScatHeaderView(stepText: "Step Four", sectionTitle: "Coordination & Ocular/Motor Screen")
+                    VStack(alignment: .center, spacing: 20) {
+                        ScatHeaderView(sectionTitle: "Coordination & Ocular/Motor Screen")
                         
                         SectionContainer {
                             Text("CONCUSSION")

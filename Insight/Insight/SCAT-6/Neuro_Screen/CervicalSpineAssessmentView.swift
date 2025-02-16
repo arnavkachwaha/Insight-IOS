@@ -24,8 +24,8 @@ struct CervicalSpineAssessmentView: View {
             
             VStack {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 10) {
-                        ScatHeaderView(stepText: "Step Three", sectionTitle: "Cervical Spine Assessment")
+                    VStack(alignment: .center, spacing: 10) {
+                        ScatHeaderView(sectionTitle: "Cervical Spine Assessment")
                         
                         HStack {
                             Spacer()

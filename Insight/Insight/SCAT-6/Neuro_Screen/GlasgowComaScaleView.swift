@@ -20,9 +20,9 @@ struct GlasgowComaScaleView: View {
             
             VStack {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .center, spacing: 10) {
                         // Header
-                        ScatHeaderView(stepText: "Step Two", sectionTitle: "Glasgow Coma Scale")
+                        ScatHeaderView(sectionTitle: "Glasgow Coma Scale")
                         
                         HStack {
                             Spacer()

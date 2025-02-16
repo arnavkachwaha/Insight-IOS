@@ -18,7 +18,7 @@ struct NeuroScreenResultView: View {
                 ScrollView {
                     VStack(alignment: .center, spacing: 20) {
                         // Header
-                        ScatHeaderView(stepText: nil, sectionTitle: "Neuro Screen Results")
+                        ScatHeaderView(sectionTitle: "Neuro Screen Results")
                         
                         // Summary Section
                         SectionContainer {
