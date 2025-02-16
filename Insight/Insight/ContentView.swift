@@ -29,6 +29,7 @@ struct ContentView: View {
                         let viewModel = ContentViewModel(frameHandler: FrameHandler(), currentView: "PLR", testResults: videoResults)
                         CaptureView(viewModel: viewModel, navigationPath: $navigationPath)
                             .navigationBarTitleDisplayMode(.inline)
+                            .withCustomBackButton()
                             .onDisappear {
                                 self.viewModel = nil
                             }
@@ -36,15 +37,18 @@ struct ContentView: View {
                         let viewModel = ContentViewModel(frameHandler: FrameHandler(), currentView: "VOMS", testResults: videoResults)
                         CaptureView(viewModel: viewModel, navigationPath: $navigationPath)
                             .navigationBarTitleDisplayMode(.inline)
+                            .withCustomBackButton()
                             .onDisappear {
                                 self.viewModel = nil
                             }
                     case "SCAT6":
                         ObservableSignsView(results: scat6Results, navigationPath: $navigationPath)
                             .navigationBarTitleDisplayMode(.inline)
+                            .withCustomBackButton()
                     case "CombinedResults":
                         CombinedResultsView(navigationPath: $navigationPath, videoResults: videoResults, scat6Results: scat6Results)
                             .navigationBarTitleDisplayMode(.inline)
+                            .withCustomBackButton()
                     default:
                         Text("Unknown View")
                     }
