@@ -92,6 +92,7 @@ struct NeuroScreenResultView: View {
                 }
                 .padding(.all, 1)
             }
+            .withCustomBackButton()
         }
     }
 }

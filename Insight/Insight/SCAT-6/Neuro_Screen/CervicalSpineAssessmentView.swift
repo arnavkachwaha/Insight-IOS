@@ -55,7 +55,7 @@ struct CervicalSpineAssessmentView: View {
                     }
                 }
                 .padding(.all, 1)
-            }
+            }.withCustomBackButton()
         }
         .onDisappear {
             results.cervicalSpineSignsCount = toggleStates.filter { $0 }.count

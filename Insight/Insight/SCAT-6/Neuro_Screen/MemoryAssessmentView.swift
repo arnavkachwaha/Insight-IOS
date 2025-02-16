@@ -75,6 +75,7 @@ struct MemoryAssessmentView: View {
                 }
                 .padding(.all, 1)
             }
+            .withCustomBackButton()
         }
         .onDisappear {
             results.maddocksScore = toggleStates.filter { $0 }.count

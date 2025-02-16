@@ -71,6 +71,7 @@ struct GlasgowComaScaleView: View {
                 }
                 .padding(.all, 1)
             }
+            .withCustomBackButton()
         }
         .onDisappear {
             results.glasgowComaScore = (selectedEyeResponse ?? 0) +

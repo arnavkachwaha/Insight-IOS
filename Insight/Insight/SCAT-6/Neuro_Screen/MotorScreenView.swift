@@ -78,6 +78,7 @@ struct MotorScreenView: View {
                 }
                 .padding(.all, 1)
             }
+            .withCustomBackButton()
         }
         .onDisappear {
             results.ocularMotorSignsCount = (isFingerToNoseNormal ? 1 : 0) +
