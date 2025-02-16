@@ -52,18 +52,38 @@ struct EyeCutoutView: View {
                 
                 // If a detected bounding box exists, check for overlap.
                 if let detectedBox = detectedBox {
-                    // Compute the intersection between the eye area and the detected box.
-                    let intersection = eyeRect.intersection(detectedBox)
-                    let eyeArea = eyeRect.width * eyeRect.height
-                    let intersectionArea = intersection.width * intersection.height
+                    // Get the bounding box of the EyeShape's path (the eye cutout).
+                    let eyePath = EyeShape(yOffset: yOffset).path(in: eyeRect)
+                    let eyePathRect = eyePath.cgPath.boundingBox
                     
-                    // If more than 50% of the eye cutout is overlapped, draw a green outline.
-                    if eyeArea > 0, (intersectionArea / eyeArea) > 0.5 {
+                    // Calculate the center points.
+                    let eyeCenter = CGPoint(x: eyePathRect.midX, y: eyePathRect.midY)
+                    let detectedCenter = CGPoint(x: detectedBox.midX, y: detectedBox.midY)
+                    
+                    // Calculate the distance between the centers.
+                    let centerDistance = hypot(eyeCenter.x - detectedCenter.x, eyeCenter.y - detectedCenter.y)
+                    
+                    // Define a threshold for "nearness" of centers (15% of the eye width).
+                    let distanceThreshold = eyeRect.width * 0.15
+                    
+                    // Compute the intersection between the eye cutout and the detected rectangle.
+                    let intersectionRect = eyePathRect.intersection(detectedBox)
+                    let intersectionArea = intersectionRect.width * intersectionRect.height
+                    let detectedArea = detectedBox.width * detectedBox.height
+                    let intersectionRatio = detectedArea > 0 ? intersectionArea / detectedArea : 0
+                    
+                    if centerDistance < distanceThreshold && intersectionRatio > 0.65 {
                         EyeShape(yOffset: yOffset)
                             .stroke(Color.green, lineWidth: 5)
                             .frame(width: geometry.size.width, height: geometry.size.height)
                     }
                 }
+                
+//                Rectangle()
+//                    .stroke(Color.red, lineWidth: 2)
+//                    .frame(width: detectedBox?.width, height: detectedBox?.height)
+//                    .position(x: detectedBox?.midX ?? 100, y: detectedBox?.midY ?? 100)
+                
             }
             .compositingGroup() // Needed for the blend mode.
             .frame(width: geometry.size.width, height: geometry.size.height)
@@ -76,7 +96,7 @@ struct EyeCutout_Previews: PreviewProvider {
     static var previews: some View {
         EyeCutoutView(
             yOffset: 200,
-            detectedBox: CGRect(x: 37.5, y: 66.6, width: 300, height: 266.8)
+            detectedBox: CGRect(x: 30, y: 80, width: 350, height: 240)
         )
     }
 }
