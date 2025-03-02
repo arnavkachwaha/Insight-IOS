@@ -142,6 +142,9 @@ class FrameHandler: NSObject, ObservableObject {
                 if videoDevice.isLowLightBoostSupported {
                     videoDevice.automaticallyEnablesLowLightBoostWhenAvailable = true
                 }
+                if videoDevice.isExposureModeSupported(.continuousAutoExposure) {
+                    videoDevice.exposureMode = .continuousAutoExposure
+                }
                 videoDevice.automaticallyAdjustsVideoHDREnabled = true
                 videoDevice.unlockForConfiguration()
                 videoOutput.connection(with: .video)?.videoRotationAngle = 90.0
@@ -342,20 +345,20 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
         // Create a video composition that crops each frame.
         let composition = AVMutableVideoComposition(asset: asset) { request in
             let ciImage = request.sourceImage
-                        let ciWidth = ciImage.extent.width
-                        let ciHeight = ciImage.extent.height
+            let ciWidth = ciImage.extent.width
+            let ciHeight = ciImage.extent.height
             
             // Define the crop rectangle:- Horizontally centered, Vertically: skip the top 100 pixels
-                        let cropRect = CGRect(x: (ciWidth - 640) / 2,
-                                              y: ciHeight - 100 - 640,
-                                              width: 640,
-                                              height: 640)
+            let cropRect = CGRect(x: (ciWidth - 640) / 2,
+                                  y: ciHeight - 100 - 640,
+                                  width: 640,
+                                  height: 640)
             
-                        // Crop the image.
-                        let croppedImage = ciImage.cropped(to: cropRect)
+            // Crop the image.
+            let croppedImage = ciImage.cropped(to: cropRect)
             
-                        // Shift the cropped image so that its origin is (0,0).
-                        let shiftedImage = croppedImage.transformed(by: CGAffineTransform(translationX: -cropRect.origin.x, y: -cropRect.origin.y))
+            // Shift the cropped image so that its origin is (0,0).
+            let shiftedImage = croppedImage.transformed(by: CGAffineTransform(translationX: -cropRect.origin.x, y: -cropRect.origin.y))
             
             request.finish(with: shiftedImage, context: nil)
         }
