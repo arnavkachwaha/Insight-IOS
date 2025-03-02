@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		050EADE62C42FF7F00C949A6 /* EyeCutoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 050EADE52C42FF7F00C949A6 /* EyeCutoutView.swift */; };
 		0513AE582D18ACB7009BA031 /* TrackerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0513AE572D18ACB7009BA031 /* TrackerView.swift */; };
-		051E95192D58650A00BCAC36 /* EyeDetector.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 051E95182D58650A00BCAC36 /* EyeDetector.mlpackage */; };
 		053F2FDF2C42ECD1007A9BF5 /* InsightApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053F2FDE2C42ECD1007A9BF5 /* InsightApp.swift */; };
 		053F2FE12C42ECD1007A9BF5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053F2FE02C42ECD1007A9BF5 /* ContentView.swift */; };
 		053F2FE32C42ECD2007A9BF5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 053F2FE22C42ECD2007A9BF5 /* Assets.xcassets */; };
@@ -21,6 +20,7 @@
 		053F664D2D3AEDE1008380E9 /* MemoryAssessmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053F664C2D3AEDE1008380E9 /* MemoryAssessmentView.swift */; };
 		053F66512D3AF1B8008380E9 /* NeuroScreenResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053F66502D3AF1B8008380E9 /* NeuroScreenResultView.swift */; };
 		053F66532D3AF66C008380E9 /* NeuroScreenResults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053F66522D3AF66C008380E9 /* NeuroScreenResults.swift */; };
+		055264C62D750A6B00FA7EDC /* EyeDetector.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 055264C52D750A6B00FA7EDC /* EyeDetector.mlpackage */; };
 		058D009F2D4C035E00E53342 /* VideoTestResults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 058D009E2D4C035E00E53342 /* VideoTestResults.swift */; };
 		058D00A12D4C0AE600E53342 /* CombinedResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 058D00A02D4C0AE600E53342 /* CombinedResultsView.swift */; };
 		05A648472CACDAAD00ABF8F6 /* VideoPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05A648462CACDAAD00ABF8F6 /* VideoPlayer.swift */; };
@@ -51,7 +51,6 @@
 /* Begin PBXFileReference section */
 		050EADE52C42FF7F00C949A6 /* EyeCutoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EyeCutoutView.swift; sourceTree = "<group>"; };
 		0513AE572D18ACB7009BA031 /* TrackerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerView.swift; sourceTree = "<group>"; };
-		051E95182D58650A00BCAC36 /* EyeDetector.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = EyeDetector.mlpackage; sourceTree = "<group>"; };
 		053F2FDB2C42ECD1007A9BF5 /* Insight.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Insight.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		053F2FDE2C42ECD1007A9BF5 /* InsightApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightApp.swift; sourceTree = "<group>"; };
 		053F2FE02C42ECD1007A9BF5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -64,6 +63,7 @@
 		053F664C2D3AEDE1008380E9 /* MemoryAssessmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryAssessmentView.swift; sourceTree = "<group>"; };
 		053F66502D3AF1B8008380E9 /* NeuroScreenResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeuroScreenResultView.swift; sourceTree = "<group>"; };
 		053F66522D3AF66C008380E9 /* NeuroScreenResults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeuroScreenResults.swift; sourceTree = "<group>"; };
+		055264C52D750A6B00FA7EDC /* EyeDetector.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = EyeDetector.mlpackage; sourceTree = "<group>"; };
 		058D009E2D4C035E00E53342 /* VideoTestResults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoTestResults.swift; sourceTree = "<group>"; };
 		058D00A02D4C0AE600E53342 /* CombinedResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombinedResultsView.swift; sourceTree = "<group>"; };
 		059A88712CD6F0D800CA9C2E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -145,7 +145,7 @@
 				05A742072CA254CE00C5FEC2 /* LoadingView.swift */,
 				05F8287F2D62646800682C79 /* CustomBackButton.swift */,
 				05F828812D626EF100682C79 /* CustomNavigationTitle .swift */,
-				051E95182D58650A00BCAC36 /* EyeDetector.mlpackage */,
+				055264C52D750A6B00FA7EDC /* EyeDetector.mlpackage */,
 				05DFAFE32D39E58E0097753B /* SCAT-6 */,
 				053F2FE22C42ECD2007A9BF5 /* Assets.xcassets */,
 				053F2FE42C42ECD2007A9BF5 /* Preview Content */,
@@ -272,7 +272,6 @@
 				05B67FCD2D3A0598003B8C02 /* ScatHeaderView.swift in Sources */,
 				058D00A12D4C0AE600E53342 /* CombinedResultsView.swift in Sources */,
 				050EADE62C42FF7F00C949A6 /* EyeCutoutView.swift in Sources */,
-				051E95192D58650A00BCAC36 /* EyeDetector.mlpackage in Sources */,
 				058D009F2D4C035E00E53342 /* VideoTestResults.swift in Sources */,
 				053F2FF92C42F1BB007A9BF5 /* CameraView.swift in Sources */,
 				05DFAFE82D39FEB50097753B /* QuestionToggleView.swift in Sources */,
@@ -287,6 +286,7 @@
 				05B67FE72D3AE63A003B8C02 /* SectionContainer.swift in Sources */,
 				05D2B11C2D4EC9D8009C81DF /* VideoPlayerView.swift in Sources */,
 				053F664D2D3AEDE1008380E9 /* MemoryAssessmentView.swift in Sources */,
+				055264C62D750A6B00FA7EDC /* EyeDetector.mlpackage in Sources */,
 				053F66512D3AF1B8008380E9 /* NeuroScreenResultView.swift in Sources */,
 				053F2FDF2C42ECD1007A9BF5 /* InsightApp.swift in Sources */,
 				05DFAFE52D39F0650097753B /* ObservableSignsView.swift in Sources */,
