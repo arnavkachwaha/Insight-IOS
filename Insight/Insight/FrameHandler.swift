@@ -86,7 +86,7 @@ class FrameHandler: NSObject, ObservableObject {
             guard let captureSession = self.captureSession else { return }
             
             captureSession.beginConfiguration()
-//            captureSession.sessionPreset = .hd1920x1080 // Adjust as needed
+            captureSession.sessionPreset = .hd1920x1080 // Adjust as needed
             do {
                 // Determine desired camera based on currentView
                 var deviceTypes: [AVCaptureDevice.DeviceType] = [
