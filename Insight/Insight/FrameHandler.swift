@@ -12,11 +12,13 @@ import CoreImage
 import AVFoundation
 
 class FrameHandler: NSObject, ObservableObject {
+    private var savedISO: Float?
     private let context = CIContext()
     private var isRecordingVideo = false
     private var permissionGranted = false
     private var visionModel: VNCoreMLModel?
     private var videoDevice: AVCaptureDevice?
+    private var savedExposureDuration: CMTime?
     private var movieOutput = AVCaptureMovieFileOutput()
     private let sessionQueue = DispatchQueue(label: "sessionQueue")
     
@@ -86,7 +88,7 @@ class FrameHandler: NSObject, ObservableObject {
             guard let captureSession = self.captureSession else { return }
             
             captureSession.beginConfiguration()
-//            captureSession.sessionPreset = .hd1920x1080 // Adjust as needed
+            captureSession.sessionPreset = .hd1920x1080 // Adjust recording resolution as needed
             do {
                 // Determine desired camera based on currentView
                 var deviceTypes: [AVCaptureDevice.DeviceType] = [
@@ -142,9 +144,9 @@ class FrameHandler: NSObject, ObservableObject {
                 if videoDevice.isLowLightBoostSupported {
                     videoDevice.automaticallyEnablesLowLightBoostWhenAvailable = true
                 }
-                if videoDevice.isExposureModeSupported(.continuousAutoExposure) {
-                    videoDevice.exposureMode = .continuousAutoExposure
-                }
+//                if videoDevice.isExposureModeSupported(.continuousAutoExposure) {
+//                    videoDevice.exposureMode = .continuousAutoExposure
+//                }
                 videoDevice.automaticallyAdjustsVideoHDREnabled = true
                 videoDevice.unlockForConfiguration()
                 videoOutput.connection(with: .video)?.videoRotationAngle = 90.0
@@ -161,9 +163,38 @@ class FrameHandler: NSObject, ObservableObject {
             }
         }
     }
-    
+
+    func saveCurrentExposure() {
+        guard let device = videoDevice else { return }
+        do {
+            try device.lockForConfiguration()
+            savedExposureDuration = device.exposureDuration
+            savedISO = device.iso
+            device.unlockForConfiguration()
+            print("Exposure saved: duration \(String(describing: savedExposureDuration)) ISO \(String(describing: savedISO))")
+        } catch {
+            print("Error saving exposure: \(error.localizedDescription)")
+        }
+    }
+
+    func restoreExposure() {
+        guard let device = videoDevice,
+              let duration = savedExposureDuration,
+              let iso = savedISO else { return }
+        do {
+            try device.lockForConfiguration()
+            device.setExposureModeCustom(duration: duration, iso: iso, completionHandler: nil)
+            device.unlockForConfiguration()
+            print("Exposure restored to: duration \(duration), ISO \(iso)")
+        } catch {
+            print("Error restoring exposure: \(error.localizedDescription)")
+        }
+    }
+
     // Start video recording
     func startRecording() {
+        self.irisBoundingBoxes = []
+        self.pupilBoundingBoxes = []
         guard let captureSession = captureSession, captureSession.isRunning else {
             print("Capture session is not running.")
             return
@@ -177,18 +208,38 @@ class FrameHandler: NSObject, ObservableObject {
         
         let outputURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString).appendingPathExtension("mov")
         self.isRecordingVideo = true
-        movieOutput.startRecording(to: outputURL, recordingDelegate: self)
         
         if currentView == "PLR"{
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                self.setFlash(on: true)
+            self.setFlash(on: true, intensity: .leastNonzeroMagnitude)
+            DispatchQueue.global(qos: .userInitiated).async {
+                while self.videoDevice?.isTorchActive == false {
+                    usleep(2000)  // 2 ms delay
+                }
+                // Once torch is active, start recording on the main thread.
+                DispatchQueue.main.async {
+                    let outputURL = URL(fileURLWithPath: NSTemporaryDirectory())
+                        .appendingPathComponent(UUID().uuidString)
+                        .appendingPathExtension("mov")
+                    self.isRecordingVideo = true
+                    self.movieOutput.startRecording(to: outputURL, recordingDelegate: self)
+                }
+            }
+            self.saveCurrentExposure()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                self.setFlash(on: true, intensity: 1)
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.85) {
+                self.restoreExposure()
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                self.setFlash(on: false)
+                self.setFlash(on: true, intensity: .leastNonzeroMagnitude)
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 6.25) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 6.0) {
+                self.setFlash(on: false)
                 self.stopRecording()
             }
+        }else {
+            self.movieOutput.startRecording(to: outputURL, recordingDelegate: self)
         }
     }
     
@@ -219,13 +270,21 @@ class FrameHandler: NSObject, ObservableObject {
     }
     
     // Set flash (torch) on/off
-    func setFlash(on: Bool) {
-        guard let videoDevice = self.videoDevice, videoDevice.hasTorch else { return }
+    func setFlash(on: Bool, intensity: Float? = nil) {
+        guard let videoDevice = self.videoDevice, videoDevice.hasTorch else {
+            print("Flash not available on this device.")
+            return
+        }
         do {
             try videoDevice.lockForConfiguration()
             defer { videoDevice.unlockForConfiguration() }
             
-            videoDevice.torchMode = on ? .on : .off
+            if on {
+                let torchIntensity = intensity ?? 0
+                try videoDevice.setTorchModeOn(level: torchIntensity)
+            } else {
+                videoDevice.torchMode = .off
+            }
         } catch {
             print("Failed to set flash: \(error.localizedDescription)")
         }
@@ -261,7 +320,36 @@ class FrameHandler: NSObject, ObservableObject {
                             self.boundingBox = box
                         }
                     }
-                    return
+                    else if topLabel.identifier == "Iris" && self.isRecordingVideo {
+                        if topLabel.confidence >= 0.9 {
+                            DispatchQueue.main.async {
+                                self.irisBoundingBoxes.append(box)
+                            }
+                        } else {
+                            DispatchQueue.main.async {
+                                if !self.irisBoundingBoxes.isEmpty {
+                                    self.irisBoundingBoxes.append(self.irisBoundingBoxes[self.irisBoundingBoxes.count - 1])
+                                } else {
+                                    self.irisBoundingBoxes.append(CGRect.zero)
+                                }
+                            }
+                        }
+                    }
+                    else if topLabel.identifier == "Pupil" && self.isRecordingVideo {
+                        if topLabel.confidence >= 0.9 {
+                            DispatchQueue.main.async {
+                                self.pupilBoundingBoxes.append(box)
+                            }
+                        } else {
+                            DispatchQueue.main.async {
+                                if !self.pupilBoundingBoxes.isEmpty {
+                                    self.pupilBoundingBoxes.append(self.pupilBoundingBoxes[self.pupilBoundingBoxes.count - 1])
+                                } else {
+                                    self.pupilBoundingBoxes.append(CGRect.zero)
+                                }
+                            }
+                        }
+                    }
                 }
             }
             
@@ -270,7 +358,7 @@ class FrameHandler: NSObject, ObservableObject {
             }
         }
         
-        let handler = VNImageRequestHandler(ciImage: ciImage,orientation: .downMirrored, options: [:])
+        let handler = VNImageRequestHandler(ciImage: ciImage, orientation: .downMirrored, options: [:])
         do {
             try handler.perform([request])
         } catch {

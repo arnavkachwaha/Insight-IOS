@@ -102,28 +102,12 @@ class CameraViewController: UIViewController {
     private func updateBoundingBox(_ boundingBox: CGRect?) {
         // Remove the previous bounding box layer
         boundingBoxLayer?.removeFromSuperlayer()
-        
-//        guard let boundingBox = boundingBox,
-//              let previewLayer = previewLayer else { return }
-        
-                guard let boundingBox = boundingBox else { return }
+        guard let boundingBox = boundingBox else { return }
         
         // Convert the normalized bounding box to the view's coordinate space.
         let convertedRect = convertRectFromNormalizedCoordinates(boundingBox, in: self.view)
         
         boundingBoxStore.boundingBox = convertedRect
-        
-        // Create a new bounding box layer
-//        let boxLayer = CAShapeLayer()
-//        boxLayer.frame = convertedRect
-//        boxLayer.borderColor = UIColor.green.cgColor
-//        boxLayer.borderWidth = 2.0
-//        boxLayer.backgroundColor = UIColor.clear.cgColor
-//        
-//        // Add the bounding box layer to the preview layer
-//        previewLayer.addSublayer(boxLayer)
-//        // Store the bounding box layer for future removal
-//        boundingBoxLayer = boxLayer
     }
     
     private var cancellables = Set<AnyCancellable>()
