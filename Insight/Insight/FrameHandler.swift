@@ -365,53 +365,6 @@ class FrameHandler: NSObject, ObservableObject {
             print("Failed to perform vision request: \(error)")
         }
     }
-}
-
-// Handle video output sample buffer (frame processing)
-extension FrameHandler: AVCaptureVideoDataOutputSampleBufferDelegate {
-    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-        let ciImage = CIImage(cvPixelBuffer: imageBuffer)
-        self.detectEyes(in: ciImage)
-        
-        DispatchQueue.global(qos: .userInitiated).async {
-            guard let cgImage = self.context.createCGImage(ciImage, from: ciImage.extent) else { return }
-            DispatchQueue.main.async {
-                self.frame = cgImage
-            }
-        }
-    }
-}
-
-// Handle video recording delegate
-extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
-    
-    //Handle recorded video before uploading to server
-    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
-        if let error = error {
-            print("Error recording video: \(error.localizedDescription)")
-        } else {
-            if self.currentView == "VOMS"{
-                self.recordedVideoURL = outputFileURL
-                NotificationCenter.default.post(name: .videoRecorded, object: nil)
-                self.saveVideo(url: outputFileURL)
-            }
-            else{
-                // Crop the video after recording for PLR
-                cropVideo(at: outputFileURL) { [weak self] croppedURL in
-                    guard let self = self else { return }
-                    print("cropVideo finished")
-                    if let croppedURL = croppedURL {
-                        self.recordedVideoURL = croppedURL
-                        NotificationCenter.default.post(name: .videoRecorded, object: nil)
-                        self.saveVideo(url: croppedURL)
-                    } else {
-                        print("Failed to crop video")
-                    }
-                }
-            }
-        }
-    }
     
     // Crop video
     func cropVideo(at url: URL, completion: @escaping (URL?) -> Void) {
@@ -659,6 +612,53 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
         } catch {
             print("Error moving file to documents directory: \(error)")
             return nil
+        }
+    }
+}
+
+// Handle video output sample buffer (frame processing)
+extension FrameHandler: AVCaptureVideoDataOutputSampleBufferDelegate {
+    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+        let ciImage = CIImage(cvPixelBuffer: imageBuffer)
+        self.detectEyes(in: ciImage)
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            guard let cgImage = self.context.createCGImage(ciImage, from: ciImage.extent) else { return }
+            DispatchQueue.main.async {
+                self.frame = cgImage
+            }
+        }
+    }
+}
+
+// Handle video recording delegate
+extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
+    
+    //Handle recorded video before uploading to server
+    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
+        if let error = error {
+            print("Error recording video: \(error.localizedDescription)")
+        } else {
+            if self.currentView == "VOMS"{
+                self.recordedVideoURL = outputFileURL
+                NotificationCenter.default.post(name: .videoRecorded, object: nil)
+            }
+            else{
+                // Post Process the video after recording for PLR
+                postProcessing(at: outputFileURL) { [weak self] processedVidURL in
+                    guard let self = self else { return }
+                    print("Post Processing of Video Finished")
+                    if let processedVidURL = processedVidURL {
+                        self.recordedVideoURL = processedVidURL
+                        NotificationCenter.default.post(name: .videoRecorded, object: nil)
+                        self.saveVideo(url: processedVidURL)
+                    } else {
+                        print("Failed to Post Process video")
+                    }
+                }
+            }
+            self.saveVideo(url: outputFileURL)
         }
     }
     
