@@ -28,43 +28,45 @@ struct OutputView: View {
         ZStack {
             Color(red: 250/255, green: 250/255, blue: 250/255).edgesIgnoringSafeArea(.all)
             
-            VStack {
-                HeaderView()
-                Spacer()
-                
-                VideoPlayerView(videoUrl: self.videoUrl, shouldRotate: shouldRotate)
-                ImageView(imageUrl: self.graphUrl)
-                
-                Spacer()
-                HStack {
-                    Button(action: {
-                        onRedo()
-                    }) {
-                        Text("Redo")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.red)
-                            .cornerRadius(20)
-                    }.padding(.leading, 40)
-                        .padding(.top, 5)
-                        .padding(.bottom, 10)
-                    
+            ScrollView {
+                VStack {
+                    HeaderView()
                     Spacer()
                     
-                    Button(action: {
-                        onProceed()
-                    }) {
-                        Text("Proceed")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Color.green)
-                            .cornerRadius(20)
-                    }.padding(.trailing, 40)
-                        .padding(.top, 5)
-                        .padding(.bottom, 10)
+                    VideoPlayerView(videoUrl: self.videoUrl, shouldRotate: shouldRotate)
+                    ImageView(imageUrl: self.graphUrl)
                     
+                    Spacer()
+                    HStack {
+                        Button(action: {
+                            onRedo()
+                        }) {
+                            Text("Redo")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .padding()
+                                .background(Color.red)
+                                .cornerRadius(20)
+                        }.padding(.leading, 40)
+                            .padding(.top, 5)
+                            .padding(.bottom, 10)
+                        
+                        Spacer()
+                        
+                        Button(action: {
+                            onProceed()
+                        }) {
+                            Text("Proceed")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .padding()
+                                .background(Color.green)
+                                .cornerRadius(20)
+                        }.padding(.trailing, 40)
+                            .padding(.top, 5)
+                            .padding(.bottom, 10)
+                        
+                    }
                 }
             }
         }

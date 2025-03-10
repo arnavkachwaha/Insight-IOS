@@ -16,12 +16,12 @@ struct VideoPlayerView: View {
         ZStack {
             Rectangle()
                 .fill(Color.gray.opacity(0.5))
-                .frame(width: 390, height: shouldRotate ? 400 : 300)
+                .frame(width: 390, height: 500)
                 .cornerRadius(20)
             
             if let videoUrl = videoUrl {
                 VideoPlayer(videoURL: videoUrl, zoomLevel: AVLayerVideoGravity.resizeAspectFill)
-                    .frame(width: 380, height: shouldRotate ? 380 : 280)
+                    .frame(width: 380, height: 480)
                     .cornerRadius(20)
             }
         }
