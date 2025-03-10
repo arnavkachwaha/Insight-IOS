@@ -366,8 +366,37 @@ class FrameHandler: NSObject, ObservableObject {
         }
     }
     
-    // Crop video
-    func cropVideo(at url: URL, completion: @escaping (URL?) -> Void) {
+    //overlay Bounding Box for current Image
+    func overlayBoundingBox(on image: CIImage, boundingBox: CGRect) -> CIImage {
+        var finalImage = image
+        
+        // Get full image dimensions (should be 1920x1080 in your case).
+        let imageWidth = image.extent.width
+        let imageHeight = image.extent.height
+        
+        // Convert normalized boundingBox to pixel coordinates, flipping the y-axis.
+        let scaledX = boundingBox.origin.x * imageWidth
+        let scaledWidth = boundingBox.size.width * imageWidth
+        let scaledHeight = boundingBox.size.height * imageHeight
+        let scaledY = imageHeight - (boundingBox.origin.y * imageHeight + scaledHeight)
+        
+        let overlayRect = CGRect(
+            x: scaledX,
+            y: scaledY,
+            width: scaledWidth,
+            height: scaledHeight)
+        
+        // Create a semi-transparent green overlay for the pupil.
+        let overlayColor = CIColor(red: 0, green: 1, blue: 0, alpha: 0.3)
+        let boxOverlay = CIImage(color: overlayColor).cropped(to: overlayRect)
+        
+        // Composite the overlay on top of the original image.
+        finalImage = boxOverlay.composited(over: finalImage)
+        
+        return finalImage
+    }
+    
+    func postProcessing(at url: URL, cropFlag: Bool, completion: @escaping (URL?) -> Void) {
         let asset = AVAsset(url: url)
         
         guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else {
@@ -382,30 +411,22 @@ class FrameHandler: NSObject, ObservableObject {
         exportSession.outputURL = outputURL
         exportSession.outputFileType = .mov
         exportSession.timeRange = CMTimeRange(start: .zero, duration: asset.duration)
+        var frameIndex = 0
         
         // Create a video composition that crops each frame.
         let composition = AVMutableVideoComposition(asset: asset) { request in
             let ciImage = request.sourceImage
-            let ciWidth = ciImage.extent.width
-            let ciHeight = ciImage.extent.height
-            
-            // Define the crop rectangle:- Horizontally centered, Vertically: skip the top 100 pixels
-            let cropRect = CGRect(x: (ciWidth - 640) / 2,
-                                  y: ciHeight - 100 - 640,
-                                  width: 640,
-                                  height: 640)
-            
-            // Crop the image.
-            let croppedImage = ciImage.cropped(to: cropRect)
-            
-            // Shift the cropped image so that its origin is (0,0).
-            let shiftedImage = croppedImage.transformed(by: CGAffineTransform(translationX: -cropRect.origin.x, y: -cropRect.origin.y))
-            
-            request.finish(with: shiftedImage, context: nil)
+            let croppedImage = self.cropImage(on: ciImage)
+            let outputImage = self.overlayBoundingBox(on: cropFlag ? croppedImage : ciImage, boundingBox: self.pupilBoundingBoxes[frameIndex])
+            frameIndex += 1
+//            request.finish(with: outputImage, context: nil)
+            request.finish(with: croppedImage, context: nil)
         }
         
         // Set the render size to match the cropped output.
-        composition.renderSize = CGSize(width: 640, height: 640)
+        if cropFlag{
+            composition.renderSize = CGSize(width: 640, height: 640)
+        }
         composition.frameDuration = CMTime(value: 1, timescale: 30)
         
         exportSession.videoComposition = composition
@@ -425,6 +446,30 @@ class FrameHandler: NSObject, ObservableObject {
                 }
             }
         }
+    }
+
+    // Crop Image
+    func cropImage(on image: CIImage) -> CIImage {
+        let ciWidth = image.extent.width
+        let ciHeight = image.extent.height
+        
+        // Calculate the center of the image.
+        let centerX = ciWidth / 2
+        let centerY = ciHeight / 2
+        
+        // Define a 640x640 crop rectangle centered on the image.
+        let cropRect = CGRect(x: centerX - 320,
+                              y: centerY - 320,
+                              width: 640,
+                              height: 640)
+        
+        // Crop the image to the defined rectangle.
+        let croppedImage = image.cropped(to: cropRect)
+        
+        // Shift the cropped image so that its origin is (0,0).
+        let shiftedImage = croppedImage.transformed(by: CGAffineTransform(translationX: -cropRect.origin.x, y: -cropRect.origin.y))
+        
+        return shiftedImage
     }
     
     // Upload video to server
@@ -646,7 +691,7 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
             }
             else{
                 // Post Process the video after recording for PLR
-                postProcessing(at: outputFileURL) { [weak self] processedVidURL in
+                postProcessing(at: outputFileURL, cropFlag: true) { [weak self] processedVidURL in
                     guard let self = self else { return }
                     print("Post Processing of Video Finished")
                     if let processedVidURL = processedVidURL {
