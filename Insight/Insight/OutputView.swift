@@ -68,7 +68,7 @@ struct OutputView: View {
                         
                     }
                 }
-            }
+            }.padding(.all, 1)
         }
         
     }
