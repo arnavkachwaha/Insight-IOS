@@ -144,9 +144,9 @@ class FrameHandler: NSObject, ObservableObject {
                 if videoDevice.isLowLightBoostSupported {
                     videoDevice.automaticallyEnablesLowLightBoostWhenAvailable = true
                 }
-//                if videoDevice.isExposureModeSupported(.continuousAutoExposure) {
-//                    videoDevice.exposureMode = .continuousAutoExposure
-//                }
+                //                if videoDevice.isExposureModeSupported(.continuousAutoExposure) {
+                //                    videoDevice.exposureMode = .continuousAutoExposure
+                //                }
                 videoDevice.automaticallyAdjustsVideoHDREnabled = true
                 videoDevice.unlockForConfiguration()
                 videoOutput.connection(with: .video)?.videoRotationAngle = 90.0
@@ -163,7 +163,7 @@ class FrameHandler: NSObject, ObservableObject {
             }
         }
     }
-
+    
     func saveCurrentExposure() {
         guard let device = videoDevice else { return }
         do {
@@ -176,7 +176,7 @@ class FrameHandler: NSObject, ObservableObject {
             print("Error saving exposure: \(error.localizedDescription)")
         }
     }
-
+    
     func restoreExposure() {
         guard let device = videoDevice,
               let duration = savedExposureDuration,
@@ -190,7 +190,7 @@ class FrameHandler: NSObject, ObservableObject {
             print("Error restoring exposure: \(error.localizedDescription)")
         }
     }
-
+    
     // Start video recording
     func startRecording() {
         self.irisBoundingBoxes = []
@@ -314,14 +314,14 @@ class FrameHandler: NSObject, ObservableObject {
             for observation in results {
                 if let topLabel = observation.labels.first {
                     let box = observation.boundingBox
-                    if topLabel.identifier == "Eye", topLabel.confidence >= 0.95 {
+                    if topLabel.identifier == "Eye", topLabel.confidence >= 0.95 && self.currentView == "PLR"{
                         // Update the Eye bounding box on the main thread.
                         DispatchQueue.main.async {
                             self.boundingBox = box
                         }
                     }
-                    else if topLabel.identifier == "Iris" && self.isRecordingVideo {
-                        if topLabel.confidence >= 0.9 {
+                    else if topLabel.identifier == "Iris" && self.isRecordingVideo && self.currentView == "VOMS"{
+                        if topLabel.confidence > 0.95 {
                             DispatchQueue.main.async {
                                 self.irisBoundingBoxes.append(box)
                             }
@@ -335,7 +335,7 @@ class FrameHandler: NSObject, ObservableObject {
                             }
                         }
                     }
-                    else if topLabel.identifier == "Pupil" && self.isRecordingVideo {
+                    else if topLabel.identifier == "Pupil" && self.isRecordingVideo && self.currentView == "PLR"{
                         if topLabel.confidence >= 0.9 {
                             DispatchQueue.main.async {
                                 self.pupilBoundingBoxes.append(box)
@@ -367,9 +367,14 @@ class FrameHandler: NSObject, ObservableObject {
     }
     
     //overlay Bounding Box for current Image
-    func overlayBoundingBox(on image: CIImage, boundingBox: CGRect) -> CIImage {
+    func overlayBoundingBox(on image: CIImage, frameIndex: Int, testType: String) -> CIImage {
         var finalImage = image
-        
+        var boundingBox: CGRect
+        if testType == "PLR"{
+            boundingBox = frameIndex < self.pupilBoundingBoxes.count ? self.pupilBoundingBoxes[frameIndex] : CGRect.zero
+        }else{
+            boundingBox = frameIndex < self.irisBoundingBoxes.count ? self.irisBoundingBoxes[frameIndex] : CGRect.zero
+        }
         // Get full image dimensions (should be 1920x1080 in your case).
         let imageWidth = image.extent.width
         let imageHeight = image.extent.height
@@ -396,8 +401,9 @@ class FrameHandler: NSObject, ObservableObject {
         return finalImage
     }
     
-    func postProcessing(at url: URL, cropFlag: Bool, completion: @escaping (URL?) -> Void) {
+    func postProcessing(at url: URL, testType : String, completion: @escaping (URL?) -> Void) {
         let asset = AVAsset(url: url)
+        let cropFlag: Bool = testType == "VOMS"
         
         guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else {
             completion(nil)
@@ -416,11 +422,10 @@ class FrameHandler: NSObject, ObservableObject {
         // Create a video composition that crops each frame.
         let composition = AVMutableVideoComposition(asset: asset) { request in
             let ciImage = request.sourceImage
-            let croppedImage = self.cropImage(on: ciImage)
-            let outputImage = self.overlayBoundingBox(on: cropFlag ? croppedImage : ciImage, boundingBox: self.pupilBoundingBoxes[frameIndex])
+            let croppedImage = cropFlag ? self.cropImage(on: ciImage.oriented(.right)) : ciImage
+            let outputImage = self.overlayBoundingBox(on: croppedImage , frameIndex: frameIndex, testType: testType)
             frameIndex += 1
-//            request.finish(with: outputImage, context: nil)
-            request.finish(with: croppedImage, context: nil)
+            request.finish(with: outputImage, context: nil)
         }
         
         // Set the render size to match the cropped output.
@@ -447,19 +452,19 @@ class FrameHandler: NSObject, ObservableObject {
             }
         }
     }
-
+    
     // Crop Image
     func cropImage(on image: CIImage) -> CIImage {
         let ciWidth = image.extent.width
         let ciHeight = image.extent.height
         
         // Calculate the center of the image.
-        let centerX = ciWidth / 2
+        _ = ciWidth / 2
         let centerY = ciHeight / 2
         
         // Define a 640x640 crop rectangle centered on the image.
-        let cropRect = CGRect(x: centerX - 320,
-                              y: centerY - 320,
+        let cropRect = CGRect(x: 400,
+                              y: centerY - 150,
                               width: 640,
                               height: 640)
         
@@ -665,7 +670,10 @@ class FrameHandler: NSObject, ObservableObject {
 extension FrameHandler: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-        let ciImage = CIImage(cvPixelBuffer: imageBuffer)
+        var ciImage = CIImage(cvPixelBuffer: imageBuffer)
+        if self.currentView == "VOMS"{
+            ciImage = cropImage(on: ciImage.oriented(.right))
+        }
         self.detectEyes(in: ciImage)
         
         DispatchQueue.global(qos: .userInitiated).async {
@@ -685,22 +693,15 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
         if let error = error {
             print("Error recording video: \(error.localizedDescription)")
         } else {
-            if self.currentView == "VOMS"{
-                self.recordedVideoURL = outputFileURL
-                NotificationCenter.default.post(name: .videoRecorded, object: nil)
-            }
-            else{
-                // Post Process the video after recording for PLR
-                postProcessing(at: outputFileURL, cropFlag: true) { [weak self] processedVidURL in
-                    guard let self = self else { return }
-                    print("Post Processing of Video Finished")
-                    if let processedVidURL = processedVidURL {
-                        self.recordedVideoURL = processedVidURL
-                        NotificationCenter.default.post(name: .videoRecorded, object: nil)
-                        self.saveVideo(url: processedVidURL)
-                    } else {
-                        print("Failed to Post Process video")
-                    }
+            postProcessing(at: outputFileURL, testType : self.currentView) { [weak self] processedVidURL in
+                guard let self = self else { return }
+                print("Post Processing of Video Finished")
+                if let processedVidURL = processedVidURL {
+                    self.recordedVideoURL = processedVidURL
+                    NotificationCenter.default.post(name: .videoRecorded, object: nil)
+                    self.saveVideo(url: processedVidURL)
+                } else {
+                    print("Failed to Post Process video")
                 }
             }
             self.saveVideo(url: outputFileURL)
