@@ -46,7 +46,7 @@ struct CombinedResultsView: View {
                             Text("VOMS")
                                 .font(.title2)
                                 .fontWeight(.bold)
-                            VideoPlayerView(videoUrl: videoResults.vomsResults?.videoURL, shouldRotate: true)
+                            VideoPlayerView(videoUrl: videoResults.vomsResults?.videoURL)
                             ImageView(imageUrl: videoResults.vomsResults?.graphURL)
                         }.padding(.all, 10)
                         

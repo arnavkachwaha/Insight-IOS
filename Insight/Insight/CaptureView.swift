@@ -45,7 +45,6 @@ struct CaptureView: View {
             case .playback(let videoURL):
                 PlaybackView(
                     videoUrl: videoURL,
-                    shouldRotate: viewModel.currentView == "VOMS",
                     onRedo: {
                         viewModel.restartSession()
                         self.shouldStartTrackerAnimation = false
@@ -59,7 +58,6 @@ struct CaptureView: View {
                 OutputView(
                     videoUrl: videoURL,
                     graphUrl: graphURL,
-                    shouldRotate: viewModel.currentView == "VOMS",
                     onRedo: {
                         viewModel.restartSession()
                         self.shouldStartTrackerAnimation = false

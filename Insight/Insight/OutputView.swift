@@ -14,14 +14,12 @@ struct OutputView: View {
     var graphUrl: URL?
     var onRedo: () -> Void
     var onProceed: () -> Void
-    var shouldRotate: Bool = false
     
-    init(videoUrl: URL?, graphUrl: URL?, shouldRotate: Bool = false, onRedo: @escaping () -> Void, onProceed: @escaping () -> Void) {
+    init(videoUrl: URL?, graphUrl: URL?, onRedo: @escaping () -> Void, onProceed: @escaping () -> Void) {
         self.onRedo = onRedo
         self.videoUrl = videoUrl
         self.graphUrl = graphUrl
         self.onProceed = onProceed
-        self.shouldRotate = shouldRotate
     }
     
     var body: some View {
@@ -33,7 +31,7 @@ struct OutputView: View {
                     HeaderView()
                     Spacer()
                     
-                    VideoPlayerView(videoUrl: self.videoUrl, shouldRotate: shouldRotate)
+                    VideoPlayerView(videoUrl: self.videoUrl)
                     ImageView(imageUrl: self.graphUrl)
                     
                     Spacer()
@@ -78,7 +76,6 @@ struct OutputView: View {
     OutputView(
         videoUrl: URL(string: "https://example.com/video.mov"),
         graphUrl: URL(string: "https://example.com/graph.png"),
-        shouldRotate: false,
         onRedo: {
             print("Redo pressed")
         },

@@ -10,7 +10,6 @@ import AVFoundation
 
 struct VideoPlayerView: View {
     var videoUrl: URL?
-    var shouldRotate: Bool = false 
     
     var body: some View {
         ZStack {
@@ -25,13 +24,12 @@ struct VideoPlayerView: View {
                     .cornerRadius(20)
             }
         }
-        .rotationEffect(shouldRotate ? .degrees(90) : .degrees(0))
         .padding(2.5)
     }
 }
 
 #Preview {
     Group {
-        VideoPlayerView(videoUrl: URL(string: "https://example.com/video.mov"), shouldRotate: false)
+        VideoPlayerView(videoUrl: URL(string: "https://example.com/video.mov"))
     }
 }

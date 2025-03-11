@@ -12,13 +12,11 @@ struct PlaybackView: View {
     var videoUrl: URL?
     var onUse: () -> Void
     var onRedo: () -> Void
-    var shouldRotate: Bool = false
     
-    init(videoUrl: URL?, shouldRotate: Bool = false, onRedo: @escaping () -> Void, onUse: @escaping () -> Void) {
+    init(videoUrl: URL?, onRedo: @escaping () -> Void, onUse: @escaping () -> Void) {
         self.onRedo = onRedo
         self.onUse = onUse
         self.videoUrl = videoUrl
-        self.shouldRotate = shouldRotate
     }
     
     var body: some View {
@@ -29,7 +27,7 @@ struct PlaybackView: View {
                 HeaderView()
                 Spacer()
                 
-                VideoPlayerView(videoUrl: self.videoUrl, shouldRotate: shouldRotate)
+                VideoPlayerView(videoUrl: self.videoUrl)
                 
                 Spacer()
                 HStack {
@@ -66,7 +64,6 @@ struct PlaybackView: View {
 #Preview {
     PlaybackView(
         videoUrl: URL(string: "https://example.com/video.mov"),
-        shouldRotate: false,
         onRedo: {
             print("Redo pressed")
         },
