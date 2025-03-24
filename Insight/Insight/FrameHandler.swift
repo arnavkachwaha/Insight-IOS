@@ -270,7 +270,7 @@ class FrameHandler: NSObject, ObservableObject {
             }
         }
         
-        let handler = VNImageRequestHandler(ciImage: ciImage,orientation: .downMirrored, options: [:])
+        let handler = VNImageRequestHandler(ciImage: ciImage, options: [:])
         do {
             try handler.perform([request])
         } catch {
