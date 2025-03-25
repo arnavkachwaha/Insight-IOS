@@ -19,6 +19,7 @@ class ContentViewModel: ObservableObject {
     @Published var captureState: CaptureState = .loading
     @Published var currentView: String
     @Published var recordedVideoURL: URL?
+    @Published var processedVideoURL: URL?
     @Published var fetchedVideoURL: URL?
     @Published var fetchedGraphURL: URL?
     @Published var showAlert: Bool = false
@@ -39,7 +40,8 @@ class ContentViewModel: ObservableObject {
             }
             .store(in: &cancellables)
         startRecording()
-        setupRecordingFinishedListener()
+        recordingFinishedListener()
+        postProcessingFinishedListener()
         fetchingVideoFinishedListener()
         setupTimeoutListener()
     }
@@ -69,12 +71,23 @@ class ContentViewModel: ObservableObject {
         captureState = .loading
     }
     
-    private func setupRecordingFinishedListener() {
+    private func recordingFinishedListener() {
         NotificationCenter.default.publisher(for: .videoRecorded)
             .sink { [weak self] _ in
                 if let recordedURL = self?.frameHandler.recordedVideoURL {
                     self?.recordedVideoURL = recordedURL
-                    self?.captureState = .playback(videoURL: recordedURL)
+                    self?.captureState = .loading
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func postProcessingFinishedListener() {
+        NotificationCenter.default.publisher(for: .videoProcessed)
+            .sink { [weak self] _ in
+                if let processedVidURL = self?.frameHandler.processedVideoURL {
+                    self?.processedVideoURL = processedVidURL
+                    self?.captureState = .playback(videoURL: processedVidURL)
                 }
             }
             .store(in: &cancellables)

@@ -34,7 +34,6 @@ struct OutputView: View {
                     VideoPlayerView(videoUrl: self.videoUrl)
                     ImageView(imageUrl: self.graphUrl)
                     
-                    Spacer()
                     HStack {
                         Button(action: {
                             onRedo()
@@ -63,7 +62,6 @@ struct OutputView: View {
                         }.padding(.trailing, 40)
                             .padding(.top, 5)
                             .padding(.bottom, 10)
-                        
                     }
                 }
             }.padding(.all, 1)

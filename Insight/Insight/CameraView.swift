@@ -92,7 +92,7 @@ class CameraViewController: UIViewController {
     
     private func convertRectFromNormalizedCoordinates(_ rect: CGRect, in view: UIView) -> CGRect {
         let x = rect.origin.x * view.bounds.width
-        let y = rect.origin.y * view.bounds.height
+        let y = (1 - rect.origin.y - rect.height) * view.bounds.height
         let width = rect.size.width * view.bounds.width
         let height = rect.size.height * view.bounds.height
         return CGRect(x: x, y: y, width: width, height: height)

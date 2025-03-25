@@ -27,6 +27,7 @@ class FrameHandler: NSObject, ObservableObject {
     @Published var fetchedVideoURL: URL?
     @Published var fetchedGraphURL: URL?
     @Published var recordedVideoURL: URL?
+    @Published var processedVideoURL: URL?
     @Published var isSessionReady = false
     @Published var currentView: String = ""
     @Published var captureSession: AVCaptureSession?
@@ -270,7 +271,7 @@ class FrameHandler: NSObject, ObservableObject {
     }
     
     // Set flash (torch) on/off
-    func setFlash(on: Bool, intensity: Float? = nil) {
+    func setFlash(on: Bool, intensity: Float? = 1.0) {
         guard let videoDevice = self.videoDevice, videoDevice.hasTorch else {
             print("Flash not available on this device.")
             return
@@ -358,7 +359,7 @@ class FrameHandler: NSObject, ObservableObject {
             }
         }
         
-        let handler = VNImageRequestHandler(ciImage: ciImage, orientation: .downMirrored, options: [:])
+        let handler = VNImageRequestHandler(ciImage: ciImage, options: [:])
         do {
             try handler.perform([request])
         } catch {
@@ -375,28 +376,29 @@ class FrameHandler: NSObject, ObservableObject {
         }else{
             boundingBox = frameIndex < self.irisBoundingBoxes.count ? self.irisBoundingBoxes[frameIndex] : CGRect.zero
         }
-        // Get full image dimensions (should be 1920x1080 in your case).
+        // Get full image dimensions (should be 1920x1080 in our case).
         let imageWidth = image.extent.width
         let imageHeight = image.extent.height
+        let width = boundingBox.width * imageWidth
+        let height = boundingBox.height * imageHeight
         
-        // Convert normalized boundingBox to pixel coordinates, flipping the y-axis.
-        let scaledX = boundingBox.origin.x * imageWidth
-        let scaledWidth = boundingBox.size.width * imageWidth
-        let scaledHeight = boundingBox.size.height * imageHeight
-        let scaledY = imageHeight - (boundingBox.origin.y * imageHeight + scaledHeight)
-        
-        let overlayRect = CGRect(
-            x: scaledX,
-            y: scaledY,
-            width: scaledWidth,
-            height: scaledHeight)
-        
-        // Create a semi-transparent green overlay for the pupil.
-        let overlayColor = CIColor(red: 0, green: 1, blue: 0, alpha: 0.3)
-        let boxOverlay = CIImage(color: overlayColor).cropped(to: overlayRect)
-        
-        // Composite the overlay on top of the original image.
-        finalImage = boxOverlay.composited(over: finalImage)
+        // Convert normalized bounding box to pixel coordinates
+        let xCenter = (boundingBox.origin.x + boundingBox.width / 2) * imageWidth
+        let yCenter = (boundingBox.origin.y + boundingBox.height / 2) * imageHeight
+
+        let radius = (width + height) / 4
+
+        // Create a circular mask
+        let circle = CIFilter(name: "CIRadialGradient", parameters: [
+            "inputCenter": CIVector(x: xCenter, y: yCenter),
+            "inputRadius0": radius,
+            "inputRadius1": radius + 1,  // Slight gradient to avoid hard edge
+            "inputColor0": CIColor(red: 0, green: 1, blue: 0, alpha: 0.2),  // 20% opacity
+            "inputColor1": CIColor(red: 0, green: 1, blue: 0, alpha: 0.0)
+        ])?.outputImage ?? image
+
+        // Composite the circular overlay onto the original image
+        finalImage = circle.composited(over: finalImage)
         
         return finalImage
     }
@@ -693,18 +695,21 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
         if let error = error {
             print("Error recording video: \(error.localizedDescription)")
         } else {
+            self.recordedVideoURL = outputFileURL
+            self.saveVideo(url: outputFileURL)
+            NotificationCenter.default.post(name: .videoRecorded, object: outputFileURL)
+            
             postProcessing(at: outputFileURL, testType : self.currentView) { [weak self] processedVidURL in
                 guard let self = self else { return }
                 print("Post Processing of Video Finished")
                 if let processedVidURL = processedVidURL {
-                    self.recordedVideoURL = processedVidURL
-                    NotificationCenter.default.post(name: .videoRecorded, object: nil)
+                    self.processedVideoURL = processedVidURL
                     self.saveVideo(url: processedVidURL)
+                    NotificationCenter.default.post(name: .videoProcessed, object: processedVidURL)
                 } else {
                     print("Failed to Post Process video")
                 }
             }
-            self.saveVideo(url: outputFileURL)
         }
     }
     
@@ -714,5 +719,6 @@ extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
 extension Notification.Name {
     static let videoFetched = Notification.Name("videoFetched")
     static let videoRecorded = Notification.Name("videoRecorded")
+    static let videoProcessed = Notification.Name("videoProcessed")
     static let uploadTimeoutOccurred = Notification.Name("uploadTimeoutOccurred")
 }
