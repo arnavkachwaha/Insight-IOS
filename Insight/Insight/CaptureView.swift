@@ -13,6 +13,7 @@ struct CaptureView: View {
     
     @State private var detectedBox: CGRect? = nil
     @State private var shouldStartTrackerAnimation = false
+    @State private var showFooter = true  // Control Footer visibility
     
     var body: some View {
         ZStack {
@@ -36,10 +37,21 @@ struct CaptureView: View {
                             }
                         }
                     )
-                VStack {
-                    FooterView(frameHandler: viewModel.frameHandler, onRecordingStateChanged: { isRecording in
-                        shouldStartTrackerAnimation = isRecording
-                    })
+                
+                // Display FooterView only if `showFooter` is true
+                if showFooter {
+                    VStack {
+                        FooterView(frameHandler: viewModel.frameHandler, onRecordingStateChanged: { isRecording in
+                            shouldStartTrackerAnimation = isRecording
+                            
+                            if isRecording {
+                                // Hide the FooterView after 5ms
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.005) {
+                                    showFooter = false
+                                }
+                            }
+                        })
+                    }
                 }
                 
             case .playback(let videoURL):
@@ -48,6 +60,7 @@ struct CaptureView: View {
                     onRedo: {
                         viewModel.restartSession()
                         self.shouldStartTrackerAnimation = false
+                        showFooter = true  // Show Footer again on redo
                     },
                     onUse: {
                         viewModel.uploadAndFetchVideo()
@@ -61,6 +74,7 @@ struct CaptureView: View {
                     onRedo: {
                         viewModel.restartSession()
                         self.shouldStartTrackerAnimation = false
+                        showFooter = true  // Show Footer again on redo
                     },
                     onProceed: {
                         navigationPath.removeLast(navigationPath.count)
@@ -80,10 +94,10 @@ struct CaptureView: View {
                 message: Text(viewModel.alertMessage),
                 dismissButton: .default(Text("OK"), action: {
                     viewModel.restartSession()
+                    showFooter = true  // Reset footer visibility on restart
                 })
             )
         }
-        
     }
 }
 
