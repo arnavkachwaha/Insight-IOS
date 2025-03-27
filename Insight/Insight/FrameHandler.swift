@@ -382,23 +382,42 @@ class FrameHandler: NSObject, ObservableObject {
         let width = boundingBox.width * imageWidth
         let height = boundingBox.height * imageHeight
         
-        // Convert normalized bounding box to pixel coordinates
+        // Calculate center in pixel coordinates
         let xCenter = (boundingBox.origin.x + boundingBox.width / 2) * imageWidth
         let yCenter = (boundingBox.origin.y + boundingBox.height / 2) * imageHeight
-
-        let radius = (width + height) / 4
-
-        // Create a circular mask
-        let circle = CIFilter(name: "CIRadialGradient", parameters: [
-            "inputCenter": CIVector(x: xCenter, y: yCenter),
-            "inputRadius0": radius,
-            "inputRadius1": radius + 1,  // Slight gradient to avoid hard edge
-            "inputColor0": CIColor(red: 0, green: 1, blue: 0, alpha: 0.2),  // 20% opacity
-            "inputColor1": CIColor(red: 0, green: 1, blue: 0, alpha: 0.0)
-        ])?.outputImage ?? image
-
-        // Composite the circular overlay onto the original image
-        finalImage = circle.composited(over: finalImage)
+        
+        let radius =  (width + height) / 4
+        
+        // Define stroke properties
+        let strokeWidth: CGFloat = 3.5
+        let strokeColor = UIColor.green.withAlphaComponent(1) // Adjust as needed
+        
+        // Create an overlay image using Core Graphics
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: imageWidth, height: imageHeight), false, 1.0)
+        guard let context = UIGraphicsGetCurrentContext() else { return finalImage }
+        
+        // Clear the context (transparent background)
+        context.clear(CGRect(x: 0, y: 0, width: imageWidth, height: imageHeight))
+        
+        // Set stroke parameters
+        context.setStrokeColor(strokeColor.cgColor)
+        context.setLineWidth(strokeWidth)
+        
+        // Adjust for Core Graphics coordinate system (flipped vertically compared to CIImage)
+        let cgYCenter = imageHeight - yCenter
+        
+        // Draw the stroked circle (ellipse in a square)
+        let circleRect = CGRect(x: xCenter - radius, y: cgYCenter - radius, width: radius * 2, height: radius * 2)
+        context.strokeEllipse(in: circleRect)
+        
+        // Get the overlay image and convert it to a CIImage
+        let overlayUIImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        if let overlayUIImage = overlayUIImage, let overlayCIImage = CIImage(image: overlayUIImage) {
+            // Composite the overlay (stroked circle) over the original image
+            finalImage = overlayCIImage.composited(over: finalImage)
+        }
         
         return finalImage
     }

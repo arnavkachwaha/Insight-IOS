@@ -50,21 +50,13 @@ struct TrackerView_1: View {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
             withAnimation(
-                Animation.linear(duration: 1.5).repeatCount(3, autoreverses: true)
+                Animation.linear(duration: 1.5).repeatCount(4, autoreverses: true)
             ) {
                 offset = 0
             }
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5.20) {
-            withAnimation(
-                Animation.linear(duration: 0.75).repeatCount(1)
-            ) {
-                offset = screenHeight / 2.1
-            }
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 6) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5.75) {
             onAnimationEnd?()
         }
     }
