@@ -47,7 +47,7 @@ struct TestMenuView: View {
                         .background(isTestCompleted(testName: test.0) ? Color.gray.opacity(0.2) : Color.blue.opacity(0.2))
                         .cornerRadius(10)
                     }
-                    .disabled(isTestCompleted(testName: test.0))
+                    .disabled(test.0 == "VOMS" || isTestCompleted(testName: test.0))
                     .padding(10)
                 }
                 
@@ -89,7 +89,7 @@ struct TestMenuView: View {
         case "PLR":
             return VideoResults.plrResults != nil
         case "VOMS":
-            return VideoResults.vomsResults != nil
+            return true
         case "SCAT6":
             return Scat6Results.isSCAT6Completed
         default:
