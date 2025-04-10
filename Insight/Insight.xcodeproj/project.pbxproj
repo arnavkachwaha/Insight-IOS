@@ -9,6 +9,10 @@
 /* Begin PBXBuildFile section */
 		050EADE62C42FF7F00C949A6 /* EyeCutoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 050EADE52C42FF7F00C949A6 /* EyeCutoutView.swift */; };
 		0513AE582D18ACB7009BA031 /* TrackerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0513AE572D18ACB7009BA031 /* TrackerView.swift */; };
+		052C08D72D9CE37500390640 /* LocalOutputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 052C08D62D9CE37500390640 /* LocalOutputView.swift */; };
+		052CD9532D9598470094CD57 /* NetworkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 052CD9522D9598470094CD57 /* NetworkService.swift */; };
+		052CD9552D96F9FD0094CD57 /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 052CD9542D96F9FD0094CD57 /* Helper.swift */; };
+		052CD9572D970DB30094CD57 /* ServerEndpoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 052CD9562D970DB30094CD57 /* ServerEndpoints.swift */; };
 		053F2FDF2C42ECD1007A9BF5 /* InsightApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053F2FDE2C42ECD1007A9BF5 /* InsightApp.swift */; };
 		053F2FE12C42ECD1007A9BF5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053F2FE02C42ECD1007A9BF5 /* ContentView.swift */; };
 		053F2FE32C42ECD2007A9BF5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 053F2FE22C42ECD2007A9BF5 /* Assets.xcassets */; };
@@ -21,6 +25,8 @@
 		053F66512D3AF1B8008380E9 /* NeuroScreenResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053F66502D3AF1B8008380E9 /* NeuroScreenResultView.swift */; };
 		053F66532D3AF66C008380E9 /* NeuroScreenResults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 053F66522D3AF66C008380E9 /* NeuroScreenResults.swift */; };
 		055264C82D750BA400FA7EDC /* EyeDetector.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 055264C72D750BA400FA7EDC /* EyeDetector.mlpackage */; };
+		0552AFF52DA6F70100FDFD0E /* VomsGraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0552AFF42DA6F70100FDFD0E /* VomsGraphView.swift */; };
+		057BB4B32D9CD7AC00C51868 /* PlrGraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 057BB4B22D9CD7AC00C51868 /* PlrGraphView.swift */; };
 		058D009F2D4C035E00E53342 /* VideoTestResults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 058D009E2D4C035E00E53342 /* VideoTestResults.swift */; };
 		058D00A12D4C0AE600E53342 /* CombinedResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 058D00A02D4C0AE600E53342 /* CombinedResultsView.swift */; };
 		05A648472CACDAAD00ABF8F6 /* VideoPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05A648462CACDAAD00ABF8F6 /* VideoPlayer.swift */; };
@@ -36,6 +42,7 @@
 		05B67FE72D3AE63A003B8C02 /* SectionContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05B67FE62D3AE63A003B8C02 /* SectionContainer.swift */; };
 		05C2ECB42CB999EF0086C260 /* SCAT6View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05C2ECB32CB999EF0086C260 /* SCAT6View.swift */; };
 		05C2ECB62CB9DC0C0086C260 /* CaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05C2ECB52CB9DC0C0086C260 /* CaptureView.swift */; };
+		05C8E8AF2D9CC74100FF92D7 /* RadiusDataProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05C8E8AE2D9CC74100FF92D7 /* RadiusDataProcessor.swift */; };
 		05D2B11C2D4EC9D8009C81DF /* VideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D2B11B2D4EC9D8009C81DF /* VideoPlayerView.swift */; };
 		05D2B11E2D4ECAF1009C81DF /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D2B11D2D4ECAF1009C81DF /* ImageView.swift */; };
 		05DFAFDE2D389A3C0097753B /* TrackerView_1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05DFAFDD2D389A3C0097753B /* TrackerView_1.swift */; };
@@ -51,6 +58,10 @@
 /* Begin PBXFileReference section */
 		050EADE52C42FF7F00C949A6 /* EyeCutoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EyeCutoutView.swift; sourceTree = "<group>"; };
 		0513AE572D18ACB7009BA031 /* TrackerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerView.swift; sourceTree = "<group>"; };
+		052C08D62D9CE37500390640 /* LocalOutputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalOutputView.swift; sourceTree = "<group>"; };
+		052CD9522D9598470094CD57 /* NetworkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkService.swift; sourceTree = "<group>"; };
+		052CD9542D96F9FD0094CD57 /* Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
+		052CD9562D970DB30094CD57 /* ServerEndpoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerEndpoints.swift; sourceTree = "<group>"; };
 		053F2FDB2C42ECD1007A9BF5 /* Insight.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Insight.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		053F2FDE2C42ECD1007A9BF5 /* InsightApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightApp.swift; sourceTree = "<group>"; };
 		053F2FE02C42ECD1007A9BF5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -64,6 +75,8 @@
 		053F66502D3AF1B8008380E9 /* NeuroScreenResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeuroScreenResultView.swift; sourceTree = "<group>"; };
 		053F66522D3AF66C008380E9 /* NeuroScreenResults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeuroScreenResults.swift; sourceTree = "<group>"; };
 		055264C72D750BA400FA7EDC /* EyeDetector.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = EyeDetector.mlpackage; sourceTree = "<group>"; };
+		0552AFF42DA6F70100FDFD0E /* VomsGraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VomsGraphView.swift; sourceTree = "<group>"; };
+		057BB4B22D9CD7AC00C51868 /* PlrGraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlrGraphView.swift; sourceTree = "<group>"; };
 		058D009E2D4C035E00E53342 /* VideoTestResults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoTestResults.swift; sourceTree = "<group>"; };
 		058D00A02D4C0AE600E53342 /* CombinedResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombinedResultsView.swift; sourceTree = "<group>"; };
 		059A88712CD6F0D800CA9C2E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -80,6 +93,7 @@
 		05B67FE62D3AE63A003B8C02 /* SectionContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionContainer.swift; sourceTree = "<group>"; };
 		05C2ECB32CB999EF0086C260 /* SCAT6View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SCAT6View.swift; sourceTree = "<group>"; };
 		05C2ECB52CB9DC0C0086C260 /* CaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureView.swift; sourceTree = "<group>"; };
+		05C8E8AE2D9CC74100FF92D7 /* RadiusDataProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadiusDataProcessor.swift; sourceTree = "<group>"; };
 		05D2B11B2D4EC9D8009C81DF /* VideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerView.swift; sourceTree = "<group>"; };
 		05D2B11D2D4ECAF1009C81DF /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
 		05DFAFDD2D389A3C0097753B /* TrackerView_1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerView_1.swift; sourceTree = "<group>"; };
@@ -126,12 +140,19 @@
 				053F2FDE2C42ECD1007A9BF5 /* InsightApp.swift */,
 				053F2FE02C42ECD1007A9BF5 /* ContentView.swift */,
 				05E63DE22D48003F002520EA /* TestMenuView.swift */,
+				05C2ECB52CB9DC0C0086C260 /* CaptureView.swift */,
 				05F110442C9906C1007B16A0 /* ContentViewModel.swift */,
 				053F2FEC2C42ED1C007A9BF5 /* FrameHandler.swift */,
-				05C2ECB52CB9DC0C0086C260 /* CaptureView.swift */,
+				052CD9522D9598470094CD57 /* NetworkService.swift */,
+				052CD9562D970DB30094CD57 /* ServerEndpoints.swift */,
+				052CD9542D96F9FD0094CD57 /* Helper.swift */,
+				05C8E8AE2D9CC74100FF92D7 /* RadiusDataProcessor.swift */,
+				057BB4B22D9CD7AC00C51868 /* PlrGraphView.swift */,
+				0552AFF42DA6F70100FDFD0E /* VomsGraphView.swift */,
 				053F2FF82C42F1BB007A9BF5 /* CameraView.swift */,
 				05F110412C990245007B16A0 /* PlaybackView.swift */,
 				05A648482CACDADF00ABF8F6 /* OutputView.swift */,
+				052C08D62D9CE37500390640 /* LocalOutputView.swift */,
 				05D2B11B2D4EC9D8009C81DF /* VideoPlayerView.swift */,
 				05D2B11D2D4ECAF1009C81DF /* ImageView.swift */,
 				05A648462CACDAAD00ABF8F6 /* VideoPlayer.swift */,
@@ -272,18 +293,22 @@
 				05B67FCD2D3A0598003B8C02 /* ScatHeaderView.swift in Sources */,
 				058D00A12D4C0AE600E53342 /* CombinedResultsView.swift in Sources */,
 				050EADE62C42FF7F00C949A6 /* EyeCutoutView.swift in Sources */,
+				0552AFF52DA6F70100FDFD0E /* VomsGraphView.swift in Sources */,
 				058D009F2D4C035E00E53342 /* VideoTestResults.swift in Sources */,
 				053F2FF92C42F1BB007A9BF5 /* CameraView.swift in Sources */,
 				05DFAFE82D39FEB50097753B /* QuestionToggleView.swift in Sources */,
+				05C8E8AF2D9CC74100FF92D7 /* RadiusDataProcessor.swift in Sources */,
 				05DFAFDE2D389A3C0097753B /* TrackerView_1.swift in Sources */,
 				05B67FDF2D3A1C29003B8C02 /* SingleSelectResponseSection.swift in Sources */,
 				053F2FE12C42ECD1007A9BF5 /* ContentView.swift in Sources */,
 				05A742082CA254CE00C5FEC2 /* LoadingView.swift in Sources */,
+				057BB4B32D9CD7AC00C51868 /* PlrGraphView.swift in Sources */,
 				05F828822D626EF100682C79 /* CustomNavigationTitle .swift in Sources */,
 				05A648492CACDADF00ABF8F6 /* OutputView.swift in Sources */,
 				05B67FCF2D3A06B9003B8C02 /* ScrollableQuestionsView.swift in Sources */,
 				05F828802D62646800682C79 /* CustomBackButton.swift in Sources */,
 				05B67FE72D3AE63A003B8C02 /* SectionContainer.swift in Sources */,
+				052C08D72D9CE37500390640 /* LocalOutputView.swift in Sources */,
 				05D2B11C2D4EC9D8009C81DF /* VideoPlayerView.swift in Sources */,
 				053F664D2D3AEDE1008380E9 /* MemoryAssessmentView.swift in Sources */,
 				055264C82D750BA400FA7EDC /* EyeDetector.mlpackage in Sources */,
@@ -291,9 +316,11 @@
 				053F2FDF2C42ECD1007A9BF5 /* InsightApp.swift in Sources */,
 				05DFAFE52D39F0650097753B /* ObservableSignsView.swift in Sources */,
 				053F66532D3AF66C008380E9 /* NeuroScreenResults.swift in Sources */,
+				052CD9552D96F9FD0094CD57 /* Helper.swift in Sources */,
 				05D2B11E2D4ECAF1009C81DF /* ImageView.swift in Sources */,
 				053F2FED2C42ED1C007A9BF5 /* FrameHandler.swift in Sources */,
 				05F110452C9906C1007B16A0 /* ContentViewModel.swift in Sources */,
+				052CD9572D970DB30094CD57 /* ServerEndpoints.swift in Sources */,
 				0513AE582D18ACB7009BA031 /* TrackerView.swift in Sources */,
 				053F2FF32C42ED92007A9BF5 /* FooterView.swift in Sources */,
 				05B67FD72D3A0A92003B8C02 /* GlasgowComaScaleView.swift in Sources */,
@@ -302,6 +329,7 @@
 				05B67FE32D3AE1BA003B8C02 /* MotorScreenView.swift in Sources */,
 				05E63DE32D48003F002520EA /* TestMenuView.swift in Sources */,
 				05F110422C990245007B16A0 /* PlaybackView.swift in Sources */,
+				052CD9532D9598470094CD57 /* NetworkService.swift in Sources */,
 				05A648472CACDAAD00ABF8F6 /* VideoPlayer.swift in Sources */,
 				05B67FDD2D3A0AFF003B8C02 /* PrimaryButton1.swift in Sources */,
 				05B67FE12D3ADD21003B8C02 /* CervicalSpineAssessmentView.swift in Sources */,
