@@ -28,6 +28,7 @@ struct OutputView: View {
             
             ScrollView {
                 VStack {
+                    Spacer()
                     HeaderView()
                     Spacer()
                     
