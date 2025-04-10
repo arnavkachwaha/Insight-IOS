@@ -12,6 +12,7 @@ enum CaptureState {
     case recording
     case playback(videoURL: URL)
     case output(videoURL: URL, graphURL: URL)
+    case localOutput(testResults: VideoTestResults, testType: String)
     case loading
 }
 
@@ -20,7 +21,6 @@ class ContentViewModel: ObservableObject {
     @Published var currentView: String
     @Published var recordedVideoURL: URL?
     @Published var processedVideoURL: URL?
-    @Published var fetchedVideoURL: URL?
     @Published var fetchedGraphURL: URL?
     @Published var showAlert: Bool = false
     @Published var alertMessage: String = "Internal Server Error: Restarting the current Session"
@@ -41,7 +41,7 @@ class ContentViewModel: ObservableObject {
             .store(in: &cancellables)
         startRecording()
         recordingFinishedListener()
-        postProcessingFinishedListener()
+        videoProcessingFinishedListener()
         fetchingVideoFinishedListener()
         setupTimeoutListener()
     }
@@ -66,9 +66,10 @@ class ContentViewModel: ObservableObject {
         restartSession()
     }
     
-    func uploadAndFetchVideo() {
-        frameHandler.uploadVideoToServer(videoURL: recordedVideoURL!, currentView: currentView)
-        captureState = .loading
+    func uploadDataToServer() {
+        DispatchQueue.global(qos: .background).async {
+            NetworkService.shared.uploadDataToServer(results: self.testResults, testType: self.currentView)
+        }
     }
     
     private func recordingFinishedListener() {
@@ -82,21 +83,38 @@ class ContentViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
-    private func postProcessingFinishedListener() {
+    private func videoProcessingFinishedListener() {
         NotificationCenter.default.publisher(for: .videoProcessed)
             .sink { [weak self] _ in
-                if let processedVidURL = self?.frameHandler.processedVideoURL {
-                    self?.processedVideoURL = processedVidURL
-                    self?.captureState = .playback(videoURL: processedVidURL)
+                if let processedVidURL = self?.frameHandler.processedVideoURL,
+                    let recordedVidURL = self?.frameHandler.recordedVideoURL,
+                    let plotData = self?.frameHandler.plotData,
+                    let irisBoundingBoxes = self?.frameHandler.irisBoundingBoxes,
+                    let pupilBoundingBoxes = self?.frameHandler.pupilBoundingBoxes {
+                    
+                    switch self?.currentView {
+                    case "PLR":
+                        let (maxPD, minPD, latency, maxConstriction, seventyFivePercentRecovery, adv, acv) =
+                        self?.frameHandler.getPlrMetrics(frameRadius: plotData) ?? (0.0, 0.0, "0", 0.0, "0", 0.0, 0.0)
+                        self?.testResults.plrResults = VideoTestResults.PLRResults(videoURL: recordedVidURL, processedVideoURL: processedVidURL, plotData: plotData, maxPD: maxPD, minPD: minPD, latency: latency, maxConstriction: maxConstriction, seventyFivePercentRecovery: seventyFivePercentRecovery, adv: adv, acv: acv, irisData : irisBoundingBoxes, pupilData: pupilBoundingBoxes)
+                        
+                    case "VOMS":
+                        self?.testResults.vomsResults = VideoTestResults.VOMSResults(videoURL: recordedVidURL, processedVideoURL: processedVidURL, plotData: plotData, irisData : irisBoundingBoxes, pupilData: pupilBoundingBoxes)
+                        
+                    default:
+                        break
+                    }
+                    
+                    self?.captureState = .localOutput(testResults : self?.testResults ?? VideoTestResults(), testType: self?.currentView ?? "PLR")
                 }
             }
             .store(in: &cancellables)
     }
     
     private func fetchingVideoFinishedListener() {
-        NotificationCenter.default.publisher(for: .videoFetched)
+        NotificationCenter.default.publisher(for: .graphFetched)
             .sink { [weak self] _ in
-                if let videoURL = self?.frameHandler.fetchedVideoURL, let graphURL = self?.frameHandler.fetchedGraphURL {
+                if let videoURL = self?.processedVideoURL, let graphURL = NetworkService.shared.fetchedGraphURL {
                     switch self?.currentView {
                     case "PLR":
                         self?.testResults.plrResults = VideoTestResults.PLRResults(videoURL: videoURL, graphURL: graphURL)
