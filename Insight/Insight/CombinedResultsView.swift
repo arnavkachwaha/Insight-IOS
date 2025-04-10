@@ -33,8 +33,24 @@ struct CombinedResultsView: View {
                             Text("PLR")
                                 .font(.title2)
                                 .fontWeight(.bold)
-                            VideoPlayerView(videoUrl: videoResults.plrResults?.videoURL)
-                            ImageView(imageUrl: videoResults.plrResults?.graphURL)
+                            VideoPlayerView(videoUrl: videoResults.plrResults?.processedVideoURL)
+                            PlrGraphView(radii: videoResults.plrResults?.plotData ?? [], fps: videoResults.plrResults?.fps ?? 30)
+                            
+                            Text("PLR METRICS").font(.title3).fontWeight(.bold).padding(.top, 10)
+                            Text("""
+                            maxPD: \(String(format: "%.3f", videoResults.plrResults?.maxPD ?? 0))
+                            minPD: \(String(format: "%.3f", videoResults.plrResults?.minPD ?? 0))
+                            max Constriction: \(String(format: "%.3f", videoResults.plrResults?.maxConstriction ?? 0))
+                            75% Recovery Time: \(videoResults.plrResults?.seventyFivePercentRecovery ?? "0")
+                            latency: \(videoResults.plrResults?.latency ?? "0")
+                            adv: \(String(format: "%.3f", videoResults.plrResults?.adv ?? 0))
+                            acv: \(String(format: "%.3f", videoResults.plrResults?.acv ?? 0))
+                            """)
+                            .multilineTextAlignment(.leading)
+                            .font(.subheadline)
+                            .padding(.all, 10)
+
+
                         }.padding(.all, 10)
                         
                         Divider()
@@ -46,8 +62,8 @@ struct CombinedResultsView: View {
                             Text("VOMS")
                                 .font(.title2)
                                 .fontWeight(.bold)
-                            VideoPlayerView(videoUrl: videoResults.vomsResults?.videoURL)
-                            ImageView(imageUrl: videoResults.vomsResults?.graphURL)
+                            VideoPlayerView(videoUrl: videoResults.vomsResults?.processedVideoURL)
+                            VomsGraphView(plotData: videoResults.vomsResults?.plotData ?? [], fps: videoResults.vomsResults?.fps ?? 30)
                         }.padding(.all, 10)
                         
                         Divider()
