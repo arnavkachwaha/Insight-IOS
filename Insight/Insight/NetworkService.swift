@@ -90,6 +90,34 @@ class NetworkService {
                 body.append("Content-Disposition: form-data; name=\"acv\"\r\n\r\n".data(using: .utf8)!)
                 body.append("\(acv)\r\n".data(using: .utf8)!)
             }
+            if let irisBoundingBoxes = plr.irisBoundingBoxes {
+                let irisBoxesArray = irisBoundingBoxes.map { box in
+                    return ["x": box.origin.x,
+                            "y": box.origin.y,
+                            "width": box.size.width,
+                            "height": box.size.height]
+                }
+                if let irisDataJSON = try? JSONSerialization.data(withJSONObject: irisBoxesArray, options: []),
+                   let irisJSONString = String(data: irisDataJSON, encoding: .utf8) {
+                    body.append("--\(boundary)\r\n".data(using: .utf8)!)
+                    body.append("Content-Disposition: form-data; name=\"irisBoundingBoxes\"\r\n\r\n".data(using: .utf8)!)
+                    body.append("\(irisJSONString)\r\n".data(using: .utf8)!)
+                }
+            }
+            if let pupilBoundingBoxes = plr.pupilBoundingBoxes {
+                let pupilBoxesArray = pupilBoundingBoxes.map { box in
+                    return ["x": box.origin.x,
+                            "y": box.origin.y,
+                            "width": box.size.width,
+                            "height": box.size.height]
+                }
+                if let pupilDataJSON = try? JSONSerialization.data(withJSONObject: pupilBoxesArray, options: []),
+                   let pupilJSONString = String(data: pupilDataJSON, encoding: .utf8) {
+                    body.append("--\(boundary)\r\n".data(using: .utf8)!)
+                    body.append("Content-Disposition: form-data; name=\"pupilBoundingBoxes\"\r\n\r\n".data(using: .utf8)!)
+                    body.append("\(pupilJSONString)\r\n".data(using: .utf8)!)
+                }
+            }
         } else if testType == "VOMS", let voms = results.vomsResults {
             // Append video file for VOMS
             if let videoURL = voms.videoURL, let videoData = try? Data(contentsOf: videoURL) {
@@ -110,6 +138,20 @@ class NetworkService {
                 body.append("--\(boundary)\r\n".data(using: .utf8)!)
                 body.append("Content-Disposition: form-data; name=\"fps\"\r\n\r\n".data(using: .utf8)!)
                 body.append("\(fps)\r\n".data(using: .utf8)!)
+            }
+            if let irisBoundingBoxes = voms.irisBoundingBoxes {
+                let irisBoxesArray = irisBoundingBoxes.map { box in
+                    return ["x": box.origin.x,
+                            "y": box.origin.y,
+                            "width": box.size.width,
+                            "height": box.size.height]
+                }
+                if let irisDataJSON = try? JSONSerialization.data(withJSONObject: irisBoxesArray, options: []),
+                   let irisJSONString = String(data: irisDataJSON, encoding: .utf8) {
+                    body.append("--\(boundary)\r\n".data(using: .utf8)!)
+                    body.append("Content-Disposition: form-data; name=\"irisBoundingBoxes\"\r\n\r\n".data(using: .utf8)!)
+                    body.append("\(irisJSONString)\r\n".data(using: .utf8)!)
+                }
             }
         }
         
