@@ -136,9 +136,7 @@ class NetworkService {
         task.resume()
     }
     
-    private func uploadVideo(videoURL: URL,
-                             currentView: String,
-                             id: String) {
+    private func uploadVideo(videoURL: URL, currentView: String, id: String) {
         // Select endpoint based on currentView.
         let endpoint: String = (currentView == "PLR") ?
             ServerEndpoints.uploadVideoPLR : ServerEndpoints.uploadVideoVOMS

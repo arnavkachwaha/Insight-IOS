@@ -96,10 +96,10 @@ class ContentViewModel: ObservableObject {
                     case "PLR":
                         let (maxPD, minPD, latency, maxConstriction, seventyFivePercentRecovery, adv, acv) =
                         self?.frameHandler.getPlrMetrics(frameRadius: plotData) ?? (0.0, 0.0, "0", 0.0, "0", 0.0, 0.0)
-                        self?.testResults.plrResults = VideoTestResults.PLRResults(videoURL: recordedVidURL, processedVideoURL: processedVidURL, plotData: plotData, maxPD: maxPD, minPD: minPD, latency: latency, maxConstriction: maxConstriction, seventyFivePercentRecovery: seventyFivePercentRecovery, adv: adv, acv: acv, irisData : irisBoundingBoxes, pupilData: pupilBoundingBoxes)
+                        self?.testResults.plrResults = VideoTestResults.PLRResults(videoURL: recordedVidURL, processedVideoURL: processedVidURL, plotData: plotData, maxPD: maxPD, minPD: minPD, latency: latency, maxConstriction: maxConstriction, seventyFivePercentRecovery: seventyFivePercentRecovery, adv: adv, acv: acv, irisBoundingBoxes : irisBoundingBoxes, pupilBoundingBoxes: pupilBoundingBoxes)
                         
                     case "VOMS":
-                        self?.testResults.vomsResults = VideoTestResults.VOMSResults(videoURL: recordedVidURL, processedVideoURL: processedVidURL, plotData: plotData, irisData : irisBoundingBoxes, pupilData: pupilBoundingBoxes)
+                        self?.testResults.vomsResults = VideoTestResults.VOMSResults(videoURL: recordedVidURL, processedVideoURL: processedVidURL, plotData: plotData, irisBoundingBoxes : irisBoundingBoxes, pupilBoundingBoxes: pupilBoundingBoxes)
                         
                     default:
                         break

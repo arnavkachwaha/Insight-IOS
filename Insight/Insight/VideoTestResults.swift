@@ -24,8 +24,8 @@ class VideoTestResults: ObservableObject{
         var seventyFivePercentRecovery: String?
         var adv: Double?
         var acv: Double?
-        var irisData: [CGRect]?
-        var pupilData: [CGRect]?
+        var irisBoundingBoxes: [CGRect]?
+        var pupilBoundingBoxes: [CGRect]?
     }
     
     struct VOMSResults {
@@ -34,8 +34,8 @@ class VideoTestResults: ObservableObject{
         var graphURL: URL?
         var plotData: [Double]?
         var fps: Double?
-        var irisData: [CGRect]?
-        var pupilData: [CGRect]?
+        var irisBoundingBoxes: [CGRect]?
+        var pupilBoundingBoxes: [CGRect]?
     }
     
     func reset() {
