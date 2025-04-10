@@ -24,17 +24,15 @@ class FrameHandler: NSObject, ObservableObject {
     
     @Published var frame: CGImage?
     @Published var boundingBox: CGRect?
-    @Published var fetchedVideoURL: URL?
-    @Published var fetchedGraphURL: URL?
     @Published var recordedVideoURL: URL?
     @Published var processedVideoURL: URL?
     @Published var isSessionReady = false
+    @Published var imgSize: CGSize = .zero
     @Published var currentView: String = ""
-    @Published var captureSession: AVCaptureSession?
+    @Published var plotData: [Double] = []
     @Published var irisBoundingBoxes: [CGRect] = []
     @Published var pupilBoundingBoxes: [CGRect] = []
-    @Published var uRL = "http://a8a175088b809630c.awsglobalaccelerator.com:8000/cyclops/upload/"
-    //    @Published var uRL = "http://192.168.4.108:8000/cyclops/upload/" //local server
+    @Published var captureSession: AVCaptureSession?
     
     override init() {
         super.init()
@@ -42,17 +40,16 @@ class FrameHandler: NSObject, ObservableObject {
         checkPermission()
     }
     
-    func loadModel(){
-        do{
+    func loadModel() {
+        do {
             let model = try EyeDetector(configuration: MLModelConfiguration()).model
             visionModel = try VNCoreMLModel(for: model)
             print("Model loaded successfully")
-        }catch{
+        } catch {
             print("Failed to load model: \(error)")
         }
     }
     
-    // Check for camera permission
     func checkPermission() {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
@@ -61,9 +58,7 @@ class FrameHandler: NSObject, ObservableObject {
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { [unowned self] granted in
                 self.permissionGranted = granted
-                if granted {
-                    self.setupCaptureSession()
-                }
+                if granted { self.setupCaptureSession() }
             }
         default:
             permissionGranted = false
@@ -91,22 +86,9 @@ class FrameHandler: NSObject, ObservableObject {
             captureSession.beginConfiguration()
             captureSession.sessionPreset = .hd1920x1080 // Adjust recording resolution as needed
             do {
-                // Determine desired camera based on currentView
-                var deviceTypes: [AVCaptureDevice.DeviceType] = [
-                    .builtInUltraWideCamera,  // Highest priority for 0.5x zoom
-                    .builtInWideAngleCamera,
-                    .builtInDualWideCamera,
-                    .builtInDualCamera,
-                    .builtInTripleCamera,
-                    .builtInTelephotoCamera
-                ]
-                let position: AVCaptureDevice.Position
-                deviceTypes = [.builtInUltraWideCamera, .builtInWideAngleCamera, .builtInDualWideCamera, .builtInTelephotoCamera, .builtInDualCamera, .builtInTripleCamera]
-                if self.currentView == "VOMS"{
-                    position = .front
-                }else{
-                    position = .back
-                }
+                // Determine camera based on currentView
+                let deviceTypes: [AVCaptureDevice.DeviceType] = [.builtInUltraWideCamera, .builtInWideAngleCamera, .builtInDualWideCamera, .builtInTelephotoCamera, .builtInDualCamera, .builtInTripleCamera]
+                let position: AVCaptureDevice.Position = (self.currentView == "VOMS") ? .front : .back
                 
                 guard let videoDevice = self.bestDevice(deviceTypes: deviceTypes, position: position) else {
                     print("Desired camera not available")
@@ -131,14 +113,12 @@ class FrameHandler: NSObject, ObservableObject {
                     captureSession.addOutput(self.movieOutput)
                 }
                 
-                // Configure camera settings
+                // Configure device settings
                 try videoDevice.lockForConfiguration()
                 if self.currentView == "PLR" {
                     videoDevice.videoZoomFactor = 2.0
                 }
-                if videoDevice.hasTorch{
-                    videoDevice.torchMode = .off
-                }
+                if videoDevice.hasTorch { videoDevice.torchMode = .off }
                 if videoDevice.isFocusModeSupported(.continuousAutoFocus) {
                     videoDevice.focusMode = .continuousAutoFocus
                 }
@@ -155,9 +135,7 @@ class FrameHandler: NSObject, ObservableObject {
                 captureSession.commitConfiguration()
                 captureSession.startRunning()
                 
-                DispatchQueue.main.async {
-                    self.isSessionReady = true
-                }
+                DispatchQueue.main.async { self.isSessionReady = true }
                 
             } catch {
                 print("Failed to set up capture session: \(error)")
@@ -165,34 +143,6 @@ class FrameHandler: NSObject, ObservableObject {
         }
     }
     
-    func saveCurrentExposure() {
-        guard let device = videoDevice else { return }
-        do {
-            try device.lockForConfiguration()
-            savedExposureDuration = device.exposureDuration
-            savedISO = device.iso
-            device.unlockForConfiguration()
-            print("Exposure saved: duration \(String(describing: savedExposureDuration)) ISO \(String(describing: savedISO))")
-        } catch {
-            print("Error saving exposure: \(error.localizedDescription)")
-        }
-    }
-    
-    func restoreExposure() {
-        guard let device = videoDevice,
-              let duration = savedExposureDuration,
-              let iso = savedISO else { return }
-        do {
-            try device.lockForConfiguration()
-            device.setExposureModeCustom(duration: duration, iso: iso, completionHandler: nil)
-            device.unlockForConfiguration()
-            print("Exposure restored to: duration \(duration), ISO \(iso)")
-        } catch {
-            print("Error restoring exposure: \(error.localizedDescription)")
-        }
-    }
-    
-    // Start video recording
     func startRecording() {
         self.irisBoundingBoxes = []
         self.pupilBoundingBoxes = []
@@ -244,7 +194,6 @@ class FrameHandler: NSObject, ObservableObject {
         }
     }
     
-    // Stop video recording
     func stopRecording() {
         if movieOutput.isRecording {
             movieOutput.stopRecording()
@@ -254,14 +203,10 @@ class FrameHandler: NSObject, ObservableObject {
         stopSession()
     }
     
-    // Stop the capture session
     func stopSession() {
-        sessionQueue.async {
-            self.captureSession?.stopRunning()
-        }
+        sessionQueue.async { self.captureSession?.stopRunning() }
     }
     
-    // Start the capture session
     func startSession() {
         sessionQueue.async {
             if let captureSession = self.captureSession, !captureSession.isRunning {
@@ -270,7 +215,33 @@ class FrameHandler: NSObject, ObservableObject {
         }
     }
     
-    // Set flash (torch) on/off
+    func saveCurrentExposure() {
+        guard let device = videoDevice else { return }
+        do {
+            try device.lockForConfiguration()
+            savedExposureDuration = device.exposureDuration
+            savedISO = device.iso
+            device.unlockForConfiguration()
+            print("Exposure saved: duration \(String(describing: savedExposureDuration)) ISO \(String(describing: savedISO))")
+        } catch {
+            print("Error saving exposure: \(error.localizedDescription)")
+        }
+    }
+    
+    func restoreExposure() {
+        guard let device = videoDevice,
+              let duration = savedExposureDuration,
+              let iso = savedISO else { return }
+        do {
+            try device.lockForConfiguration()
+            device.setExposureModeCustom(duration: duration, iso: iso, completionHandler: nil)
+            device.unlockForConfiguration()
+            print("Exposure restored to: duration \(duration), ISO \(iso)")
+        } catch {
+            print("Error restoring exposure: \(error.localizedDescription)")
+        }
+    }
+    
     func setFlash(on: Bool, intensity: Float? = 1.0) {
         guard let videoDevice = self.videoDevice, videoDevice.hasTorch else {
             print("Flash not available on this device.")
@@ -279,7 +250,6 @@ class FrameHandler: NSObject, ObservableObject {
         do {
             try videoDevice.lockForConfiguration()
             defer { videoDevice.unlockForConfiguration() }
-            
             if on {
                 let torchIntensity = intensity ?? 0
                 try videoDevice.setTorchModeOn(level: torchIntensity)
@@ -291,7 +261,7 @@ class FrameHandler: NSObject, ObservableObject {
         }
     }
     
-    // Detect eyes in the frame using the CoreML model
+    // MARK: - Eye Detection
     func detectEyes(in ciImage: CIImage) {
         guard let visionModel = visionModel else {
             print("Vision model not loaded")
@@ -305,57 +275,28 @@ class FrameHandler: NSObject, ObservableObject {
             }
             
             guard let results = request.results as? [VNRecognizedObjectObservation] else {
-                print("No results found")
-                DispatchQueue.main.async {
-                    self.boundingBox = nil // Clear bounding box if no results
-                }
+                DispatchQueue.main.async { self.boundingBox = nil }
                 return
             }
-            // Filter results for the "Eye" class
             for observation in results {
                 if let topLabel = observation.labels.first {
                     let box = observation.boundingBox
-                    if topLabel.identifier == "Eye", topLabel.confidence >= 0.95 && self.currentView == "PLR"{
-                        // Update the Eye bounding box on the main thread.
-                        DispatchQueue.main.async {
-                            self.boundingBox = box
-                        }
+                    if topLabel.identifier == "Eye", topLabel.confidence >= 0.95 && self.currentView == "PLR" {
+                        DispatchQueue.main.async { self.boundingBox = box }
                     }
-                    else if topLabel.identifier == "Iris" && self.isRecordingVideo && self.currentView == "VOMS"{
-                        if topLabel.confidence > 0.95 {
-                            DispatchQueue.main.async {
-                                self.irisBoundingBoxes.append(box)
-                            }
-                        } else {
-                            DispatchQueue.main.async {
-                                if !self.irisBoundingBoxes.isEmpty {
-                                    self.irisBoundingBoxes.append(self.irisBoundingBoxes[self.irisBoundingBoxes.count - 1])
-                                } else {
-                                    self.irisBoundingBoxes.append(CGRect.zero)
-                                }
-                            }
-                        }
+                    else if topLabel.identifier == "Iris" && self.isRecordingVideo{
+                        let updatedBox = topLabel.confidence > 0.95 ? box : (self.irisBoundingBoxes.last ?? CGRect.zero)
+                        DispatchQueue.main.async { self.irisBoundingBoxes.append(updatedBox) }
                     }
-                    else if topLabel.identifier == "Pupil" && self.isRecordingVideo && self.currentView == "PLR"{
-                        if topLabel.confidence >= 0.9 {
-                            DispatchQueue.main.async {
-                                self.pupilBoundingBoxes.append(box)
-                            }
-                        } else {
-                            DispatchQueue.main.async {
-                                if !self.pupilBoundingBoxes.isEmpty {
-                                    self.pupilBoundingBoxes.append(self.pupilBoundingBoxes[self.pupilBoundingBoxes.count - 1])
-                                } else {
-                                    self.pupilBoundingBoxes.append(CGRect.zero)
-                                }
-                            }
-                        }
+                    else if topLabel.identifier == "Pupil" && self.isRecordingVideo && self.currentView == "PLR" {
+                        let updatedBox = topLabel.confidence >= 0.9 ? box : (self.pupilBoundingBoxes.last ?? CGRect.zero)
+                        DispatchQueue.main.async { self.pupilBoundingBoxes.append(updatedBox) }
                     }
                 }
             }
             
             DispatchQueue.main.async {
-                self.boundingBox = nil // Clear bounding box if no eye detected
+                self.boundingBox = nil // Clear if no eye detected
             }
         }
         
@@ -367,376 +308,91 @@ class FrameHandler: NSObject, ObservableObject {
         }
     }
     
-    //overlay Bounding Box for current Image
-    func overlayBoundingBox(on image: CIImage, frameIndex: Int, testType: String) -> CIImage {
-        var finalImage = image
-        var boundingBox: CGRect
-        if testType == "PLR"{
-            boundingBox = frameIndex < self.pupilBoundingBoxes.count ? self.pupilBoundingBoxes[frameIndex] : CGRect.zero
-        }else{
-            boundingBox = frameIndex < self.irisBoundingBoxes.count ? self.irisBoundingBoxes[frameIndex] : CGRect.zero
-        }
-        // Get full image dimensions (should be 1920x1080 in our case).
-        let imageWidth = image.extent.width
-        let imageHeight = image.extent.height
-        let width = boundingBox.width * imageWidth
-        let height = boundingBox.height * imageHeight
-        
-        // Calculate center in pixel coordinates
-        let xCenter = (boundingBox.origin.x + boundingBox.width / 2) * imageWidth
-        let yCenter = (boundingBox.origin.y + boundingBox.height / 2) * imageHeight
-        
-        let radius =  (width + height) / 4
-        
-        // Define stroke properties
-        let strokeWidth: CGFloat = 3.5
-        let strokeColor = UIColor.green.withAlphaComponent(1) // Adjust as needed
-        
-        // Create an overlay image using Core Graphics
-        UIGraphicsBeginImageContextWithOptions(CGSize(width: imageWidth, height: imageHeight), false, 1.0)
-        guard let context = UIGraphicsGetCurrentContext() else { return finalImage }
-        
-        // Clear the context (transparent background)
-        context.clear(CGRect(x: 0, y: 0, width: imageWidth, height: imageHeight))
-        
-        // Set stroke parameters
-        context.setStrokeColor(strokeColor.cgColor)
-        context.setLineWidth(strokeWidth)
-        
-        // Adjust for Core Graphics coordinate system (flipped vertically compared to CIImage)
-        let cgYCenter = imageHeight - yCenter
-        
-        // Draw the stroked circle (ellipse in a square)
-        let circleRect = CGRect(x: xCenter - radius, y: cgYCenter - radius, width: radius * 2, height: radius * 2)
-        context.strokeEllipse(in: circleRect)
-        
-        // Get the overlay image and convert it to a CIImage
-        let overlayUIImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        
-        if let overlayUIImage = overlayUIImage, let overlayCIImage = CIImage(image: overlayUIImage) {
-            // Composite the overlay (stroked circle) over the original image
-            finalImage = overlayCIImage.composited(over: finalImage)
-        }
-        
-        return finalImage
-    }
-    
-    func postProcessing(at url: URL, testType : String, completion: @escaping (URL?) -> Void) {
-        let asset = AVAsset(url: url)
-        let cropFlag: Bool = testType == "VOMS"
-        
-        guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else {
-            completion(nil)
-            return
-        }
-        
-        // Define the output URL.
-        let outputURL = URL(fileURLWithPath: NSTemporaryDirectory())
-            .appendingPathComponent(UUID().uuidString)
-            .appendingPathExtension("mov")
-        exportSession.outputURL = outputURL
-        exportSession.outputFileType = .mov
-        exportSession.timeRange = CMTimeRange(start: .zero, duration: asset.duration)
-        var frameIndex = 0
-        
-        // Create a video composition that crops each frame.
-        let composition = AVMutableVideoComposition(asset: asset) { request in
-            let ciImage = request.sourceImage
-            let croppedImage = cropFlag ? self.cropImage(on: ciImage.oriented(.right)) : ciImage
-            let outputImage = self.overlayBoundingBox(on: croppedImage , frameIndex: frameIndex, testType: testType)
-            frameIndex += 1
-            request.finish(with: outputImage, context: nil)
-        }
-        
-        // Set the render size to match the cropped output.
-        if cropFlag{
-            composition.renderSize = CGSize(width: 640, height: 640)
-        }
-        composition.frameDuration = CMTime(value: 1, timescale: 30)
-        
-        exportSession.videoComposition = composition
-        
-        exportSession.exportAsynchronously {
-            DispatchQueue.main.async {
-                if exportSession.status == .completed {
-                    print("Export completed successfully to \(outputURL)")
-                    completion(outputURL)
+    // MARK: -  Processing
+    func processRecordedVideo(at url: URL) {
+        // Convert normalized bounding boxes to pixel coordinates.
+        DispatchQueue.main.async {
+            self.irisBoundingBoxes = self.irisBoundingBoxes.map {
+                Helper.convertNormalizedBoxToPixel(boundingBox: $0, imageSize: self.imgSize)
+            }
+            self.pupilBoundingBoxes = self.pupilBoundingBoxes.map {
+                Helper.convertNormalizedBoxToPixel(boundingBox: $0, imageSize: self.imgSize)
+            }
+            
+            Helper.processRecordedVideo(
+                at: url,
+                testType: self.currentView,
+                imageSize: self.imgSize,
+                irisBoundingBoxes: self.irisBoundingBoxes,
+                pupilBoundingBoxes: self.pupilBoundingBoxes
+            ) { [weak self] processedVidURL, plotData in
+                guard let self = self else { return }
+                print("Post Processing of Video Finished")
+                if let processedVidURL = processedVidURL, let plotData = plotData {
+                    self.processedVideoURL = processedVidURL
+                    self.plotData = plotData
+                    
+                    Helper.saveVideo(url: processedVidURL)
+                    NotificationCenter.default.post(name: .videoProcessed, object: processedVidURL)
                 } else {
-                    if let error = exportSession.error {
-                        print("Error exporting video: \(error.localizedDescription)")
-                    } else {
-                        print("Export failed with status: \(exportSession.status.rawValue)")
-                    }
-                    completion(nil)
+                    print("Failed to post process video")
                 }
             }
         }
     }
     
-    // Crop Image
-    func cropImage(on image: CIImage) -> CIImage {
-        let ciWidth = image.extent.width
-        let ciHeight = image.extent.height
-        
-        // Calculate the center of the image.
-        _ = ciWidth / 2
-        let centerY = ciHeight / 2
-        
-        // Define a 640x640 crop rectangle centered on the image.
-        let cropRect = CGRect(x: 400,
-                              y: centerY - 150,
-                              width: 640,
-                              height: 640)
-        
-        // Crop the image to the defined rectangle.
-        let croppedImage = image.cropped(to: cropRect)
-        
-        // Shift the cropped image so that its origin is (0,0).
-        let shiftedImage = croppedImage.transformed(by: CGAffineTransform(translationX: -cropRect.origin.x, y: -cropRect.origin.y))
-        
-        return shiftedImage
+    func getPlrMetrics(frameRadius: [Double]) -> (maxPD: Double, minPD: Double, latency: String, maxConstriction: Double, seventyFivePercentRecovery: String, adv: Double, acv: Double) {
+        return RadiusDataProcessor.getPlrMetrics(frameRadius: frameRadius)
     }
-    
-    // Upload video to server
-    func uploadVideoToServer(videoURL: URL, currentView: String) {
-        let serverURL = URL(string: uRL)!
-        var request = URLRequest(url: serverURL)
-        request.httpMethod = "POST"
-        
-        let boundary = UUID().uuidString
-        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        
-        let body = NSMutableData()
-        
-        // Append videoType as a form field
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"videoType\"\r\n\r\n".data(using: .utf8)!)
-        body.append("\(currentView)\r\n".data(using: .utf8)!)
-        
-        // Append the file as multipart form data
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"videofile\"; filename=\"video.mov\"\r\n".data(using: .utf8)!)
-        body.append("Content-Type: video/quicktime\r\n\r\n".data(using: .utf8)!)
-        
-        // Append the video data
-        if let videoData = try? Data(contentsOf: videoURL) {
-            body.append(videoData)
-        }
-        body.append("\r\n".data(using: .utf8)!)
-        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
-        
-        request.httpBody = body as Data
-        
-        let sessionConfig = URLSessionConfiguration.default
-        sessionConfig.timeoutIntervalForRequest = 120
-        sessionConfig.timeoutIntervalForResource = 120
-        let session = URLSession(configuration: sessionConfig)
-        
-        let task = session.uploadTask(with: request, from: body as Data) { data, response, error in
-            if let error = error {
-                NotificationCenter.default.post(name: .uploadTimeoutOccurred, object: nil, userInfo: ["message": "\(error.localizedDescription)"])
-                print("Error uploading video: \(error)")
-            } else if let response = response as? HTTPURLResponse, response.statusCode == 200, let data = data {
-                print("Upload successful")
-                
-                // Parse the JSON response
-                do {
-                    if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                       let videoDownloadURL = jsonResponse["video_download_url"] as? String,
-                       let graphDownloadURL = jsonResponse["graph_download_url"] as? String {
-                        
-                        print("Video URL: \(videoDownloadURL)")
-                        print("Graph URL: \(graphDownloadURL)")
-                        
-                        self.handleBackendResponse(videoDownloadURL: videoDownloadURL, graphDownloadURL: graphDownloadURL)
-                    }
-                } catch {
-                    NotificationCenter.default.post(name: .uploadTimeoutOccurred, object: nil, userInfo: ["message": "\(error.localizedDescription)"])
-                    print("Failed to parse JSON response: \(error)")
-                }
-            } else {
-                NotificationCenter.default.post(name: .uploadTimeoutOccurred, object: nil, userInfo: ["message": "Upload failed with unexpected response"])
-                print("Upload failed with unexpected response")
-            }
-        }
-        task.resume()
-    }
-    
-    // Recieve output from server
-    func handleBackendResponse(videoDownloadURL: String, graphDownloadURL: String) {
-        if let graphUrl = URL(string: graphDownloadURL){
-            DispatchQueue.main.async {
-                self.fetchGraph(downloadURL: graphUrl)
-            }
-        }
-        if let videoURL = URL(string: videoDownloadURL) {
-            DispatchQueue.main.async {
-                self.fetchVideo(downloadURL: videoURL)
-            }
-        }
-    }
-    
-    // Fetch graph from O/P
-    func fetchGraph(downloadURL : URL) {
-        let task = URLSession.shared.downloadTask(with: downloadURL) { localURL, response, error in
-            if let error = error {
-                print("Error fetching graph: \(error.localizedDescription)")
-                return
-            }
-            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
-                print("Failed to fetch graph: Server returned status code \(httpResponse.statusCode)")
-                return
-            }
-            guard let localURL = localURL else {
-                print("No graph downloaded")
-                return
-            }
-            
-            if let movedURL = self.moveMediaToDocumentsDirectory(localURL, desiredFileName: "graph.png") {
-                DispatchQueue.main.async {
-                    self.fetchedGraphURL = movedURL
-                    print("Graph fetched and moved successfully: \(movedURL)")
-                    self.saveGraph(url: movedURL)
-                }
-            }
-        }
-        task.resume()
-    }
-    
-    // Fetch video from O/P
-    func fetchVideo(downloadURL : URL) {
-        let task = URLSession.shared.downloadTask(with: downloadURL) { localURL, response, error in
-            if let error = error {
-                print("Error fetching video: \(error.localizedDescription)")
-                return
-            }
-            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
-                print("Failed to fetch video: Server returned status code \(httpResponse.statusCode)")
-                return
-            }
-            guard let localURL = localURL else {
-                print("No video downloaded")
-                return
-            }
-            
-            if let movedURL = self.moveMediaToDocumentsDirectory(localURL, desiredFileName: "video.mp4") {
-                DispatchQueue.main.async {
-                    self.fetchedVideoURL = movedURL
-                    print("Video fetched and moved successfully: \(movedURL)")
-                    NotificationCenter.default.post(name: .videoFetched, object: nil)
-                    self.saveVideo(url: movedURL)
-                }
-            }
-        }
-        task.resume()
-    }
-    
-    // Save recorded video
-    func saveVideo(url: URL) {
-        PHPhotoLibrary.shared().performChanges({
-            PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
-        }) { success, error in
-            if let error = error {
-                print("Error saving video to photo library: \(error.localizedDescription)")
-            } else if success {
-                print("Video saved successfully!")
-            }
-        }
-    }
-    
-    // Save graph
-    func saveGraph(url: URL) {
-        PHPhotoLibrary.shared().performChanges({
-            PHAssetChangeRequest.creationRequestForAssetFromImage(atFileURL: url)
-        }) { success, error in
-            if let error = error {
-                print("Error saving graph to photo library: \(error.localizedDescription)")
-            } else if success {
-                print("Graph saved successfully!")
-            }
-        }
-    }
-    
-    // Save O/P media to photo library
-    func moveMediaToDocumentsDirectory(_ tempURL: URL, desiredFileName: String = "video.mp4") -> URL? {
-        
-        let fileManager = FileManager.default
-        
-        let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
-        
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyyMMdd_HHmmss"
-        let timestamp = dateFormatter.string(from: Date())
-        let uniqueFileName = "\(timestamp)_\(desiredFileName)"
-        
-        let destinationURL = documentsDirectory.appendingPathComponent(uniqueFileName)
-        
-        do {
-            if fileManager.fileExists(atPath: destinationURL.path) {
-                try fileManager.removeItem(at: destinationURL)
-            }
-            
-            try fileManager.moveItem(at: tempURL, to: destinationURL)
-            
-            return destinationURL
-        } catch {
-            print("Error moving file to documents directory: \(error)")
-            return nil
-        }
-    }
+
 }
 
-// Handle video output sample buffer (frame processing)
+// MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
 extension FrameHandler: AVCaptureVideoDataOutputSampleBufferDelegate {
-    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+    func captureOutput(_ output: AVCaptureOutput,
+                       didOutput sampleBuffer: CMSampleBuffer,
+                       from connection: AVCaptureConnection) {
         guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
         var ciImage = CIImage(cvPixelBuffer: imageBuffer)
-        if self.currentView == "VOMS"{
-            ciImage = cropImage(on: ciImage.oriented(.right))
+        if self.currentView == "VOMS" {
+            ciImage = Helper.cropImage(on: ciImage.oriented(.right))
         }
         self.detectEyes(in: ciImage)
+        if self.imgSize == .zero{
+            DispatchQueue.main.async {
+                self.imgSize = CGSize(width: ciImage.extent.width, height: ciImage.extent.height)
+            }
+        }
         
         DispatchQueue.global(qos: .userInitiated).async {
             guard let cgImage = self.context.createCGImage(ciImage, from: ciImage.extent) else { return }
-            DispatchQueue.main.async {
-                self.frame = cgImage
-            }
+            DispatchQueue.main.async { self.frame = cgImage }
         }
     }
 }
 
-// Handle video recording delegate
+// MARK: - AVCaptureFileOutputRecordingDelegate
 extension FrameHandler: AVCaptureFileOutputRecordingDelegate {
-    
-    //Handle recorded video before uploading to server
-    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
+    func fileOutput(_ output: AVCaptureFileOutput,
+                    didFinishRecordingTo outputFileURL: URL,
+                    from connections: [AVCaptureConnection],
+                    error: Error?) {
         if let error = error {
             print("Error recording video: \(error.localizedDescription)")
         } else {
             self.recordedVideoURL = outputFileURL
-            self.saveVideo(url: outputFileURL)
+            Helper.saveVideo(url: outputFileURL)
             NotificationCenter.default.post(name: .videoRecorded, object: outputFileURL)
             
-            postProcessing(at: outputFileURL, testType : self.currentView) { [weak self] processedVidURL in
-                guard let self = self else { return }
-                print("Post Processing of Video Finished")
-                if let processedVidURL = processedVidURL {
-                    self.processedVideoURL = processedVidURL
-                    self.saveVideo(url: processedVidURL)
-                    NotificationCenter.default.post(name: .videoProcessed, object: processedVidURL)
-                } else {
-                    print("Failed to Post Process video")
-                }
-            }
+            // Call the post-processing helper function.
+            self.processRecordedVideo(at: outputFileURL)
         }
     }
-    
 }
 
-// Notifications
+// MARK: - Notifications
 extension Notification.Name {
-    static let videoFetched = Notification.Name("videoFetched")
+    static let graphFetched = Notification.Name("graphFetched")
     static let videoRecorded = Notification.Name("videoRecorded")
     static let videoProcessed = Notification.Name("videoProcessed")
     static let uploadTimeoutOccurred = Notification.Name("uploadTimeoutOccurred")
