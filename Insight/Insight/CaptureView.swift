@@ -63,26 +63,29 @@ struct CaptureView: View {
                         showFooter = true  // Show Footer again on redo
                     },
                     onUse: {
-                        viewModel.uploadAndFetchVideo()
+                        viewModel.uploadDataToServer()
                     }
                 )
                 
-            case .output(let videoURL, let graphURL):
-                OutputView(
-                    videoUrl: videoURL,
-                    graphUrl: graphURL,
+            case .localOutput(let testResults, let testType):
+                LocalOutputView(
+                    testResults: testResults,
+                    testType: testType,
                     onRedo: {
                         viewModel.restartSession()
                         self.shouldStartTrackerAnimation = false
-                        showFooter = true  // Show Footer again on redo
+                        showFooter = true
                     },
                     onProceed: {
                         navigationPath.removeLast(navigationPath.count)
                         self.shouldStartTrackerAnimation = false
+                        viewModel.uploadDataToServer()
                     }
                 )
                 
             case .loading:
+                LoadingView()
+            case .output(videoURL: _, graphURL: _):
                 LoadingView()
             }
         
