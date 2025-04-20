@@ -32,7 +32,7 @@ class NetworkService {
         
         // We use a unique ID if needed – here omitted for brevity.
         // Determine which results to send based on testType.
-        if testType == "PLR", let plr = results.plrResults {
+        if testType == "PLR", let plr = results.plrResult {
             // Append video file
             if let videoURL = plr.videoURL, let videoData = try? Data(contentsOf: videoURL) {
                 body.append("--\(boundary)\r\n".data(using: .utf8)!)
@@ -118,7 +118,7 @@ class NetworkService {
                     body.append("\(pupilJSONString)\r\n".data(using: .utf8)!)
                 }
             }
-        } else if testType == "VOMS", let voms = results.vomsResults {
+        } else if testType == "VOMS", let voms = results.vomsResult {
             // Append video file for VOMS
             if let videoURL = voms.videoURL, let videoData = try? Data(contentsOf: videoURL) {
                 body.append("--\(boundary)\r\n".data(using: .utf8)!)

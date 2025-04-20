@@ -30,30 +30,43 @@ struct TestMenuView: View {
                     .padding(.top, 10)
                 
                 ForEach(tests, id: \.0) { test in
-                    Button(action: {
-                        navigationPath.append(test.0)
-                    }) {
-                        VStack {
-                            Image(systemName: test.1)
-                                .resizable()
-                                .frame(width: test.0 == "PLR" ? 160 : 80, height: 100)
-                                .padding(10)
-                                .foregroundColor(isTestCompleted(testName: test.0) ? .gray : .blue)
-                            Text(test.0)
-                                .font(.headline)
-                                .foregroundColor(isTestCompleted(testName: test.0) ? .gray : .black)
+                    ZStack(alignment: .topTrailing){
+                        Button(action: {
+                            navigationPath.append(test.0)
+                        }) {
+                            VStack {
+                                Image(systemName: test.1)
+                                    .resizable()
+                                    .frame(width: test.0 == "PLR" ? 160 : 80, height: 100)
+                                    .padding(10)
+                                    .foregroundColor(isTestCompleted(testName: test.0) ? .gray : .blue)
+                                Text(test.0)
+                                    .font(.headline)
+                                    .foregroundColor(isTestCompleted(testName: test.0) ? .gray : .black)
+                            }
+                            .frame(width: 290, height: 180)
+                            .background(isTestCompleted(testName: test.0) ? Color.gray.opacity(0.2) : Color.blue.opacity(0.2))
+                            .cornerRadius(10)
                         }
-                        .frame(width: 290, height: 180)
-                        .background(isTestCompleted(testName: test.0) ? Color.gray.opacity(0.2) : Color.blue.opacity(0.2))
-                        .cornerRadius(10)
+                        .disabled(isTestCompleted(testName: test.0))
+                        .padding(10)
+                        
+                        if isTestCompleted(testName: test.0) {
+                            Button {
+                                resetTest(named: test.0)
+                            } label: {
+                                Image(systemName: "arrow.clockwise.circle.fill")
+                                    .font(.title)
+                                    .foregroundColor(.blue)
+                                    .padding(8)
+                            }.offset(x: -12, y: 12)
+                        }
                     }
-                    .disabled(isTestCompleted(testName: test.0))
-                    .padding(10)
                 }
                 
                 HStack {
                     Button(action: {
-                        resetTests()
+                        resetTest(named: "ALL")
                     }) {
                         Text("Redo Tests")
                             .font(.headline)
@@ -71,14 +84,14 @@ struct TestMenuView: View {
                     }) {
                         Text("Test Results")
                             .font(.headline)
-                            .foregroundColor(allTestsCompleted ? Color.white : Color.accentColor)
+                            .foregroundColor(isAnyTestCompleted ? Color.white : Color.accentColor)
                             .padding()
                             .frame(width: 130)
-                            .background(allTestsCompleted ? Color.blue : Color.accentColor)
+                            .background(isAnyTestCompleted ? Color.blue : Color.accentColor)
                             .cornerRadius(10)
                     }
                     .padding(10)
-                    .disabled(!allTestsCompleted)
+                    .disabled(!isAnyTestCompleted)
                 }
             }
         }
@@ -87,9 +100,9 @@ struct TestMenuView: View {
     private func isTestCompleted(testName: String) -> Bool {
         switch testName {
         case "PLR":
-            return VideoResults.plrResults != nil
+            return VideoResults.plrCompleted
         case "VOMS":
-            return VideoResults.vomsResults != nil
+            return VideoResults.vomsCompleted
         case "SCAT6":
             return Scat6Results.isSCAT6Completed
         default:
@@ -101,14 +114,32 @@ struct TestMenuView: View {
         tests.allSatisfy { isTestCompleted(testName: $0.0) }
     }
     
+    private var isAnyTestCompleted: Bool {
+        return tests.contains { isTestCompleted(testName: $0.0) }
+    }
+    
     private func navigateToResults() {
         navigationPath.append("CombinedResults")
     }
     
-    private func resetTests() {
-        VideoResults.reset()
-        Scat6Results.reset()
+    private func resetTest(named testName: String) {
+        switch testName {
+        case "PLR":
+            VideoResults.plrResult = nil
+            VideoResults.plrCompleted = false
+        case "VOMS":
+            VideoResults.vomsResult = nil
+            VideoResults.vomsCompleted = false
+        case "SCAT6":
+            Scat6Results.reset()
+        case "ALL":
+            VideoResults.reset()
+            Scat6Results.reset()
+        default:
+            break
+        }
     }
+
 }
 
 #Preview {

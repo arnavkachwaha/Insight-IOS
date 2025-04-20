@@ -26,31 +26,29 @@ struct LocalOutputView: View {
             Color(red: 250/255, green: 250/255, blue: 250/255)
             ScrollView {
                 VStack {
-                    Spacer()
-                    HeaderView()
-                    Spacer()
+                    HeaderView().padding(.top, 30)
                 
                     if self.testType == "PLR"{
-                        VideoPlayerView(videoUrl: self.testResults.plrResults?.processedVideoURL)
-                        PlrGraphView(radii: self.testResults.plrResults?.plotData ?? [], fps: self.testResults.plrResults?.fps ?? 30)
+                        VideoPlayerView(videoUrl: self.testResults.plrResult?.processedVideoURL)
+                        PlrGraphView(radii: self.testResults.plrResult?.plotData ?? [], fps: self.testResults.plrResult?.fps ?? 30)
                         
                         Text("PLR METRICS").font(.title3).fontWeight(.bold).padding(.top, 10)
                         Text("""
-                        maxPD: \(String(format: "%.3f", self.testResults.plrResults?.maxPD ?? 0))
-                        minPD: \(String(format: "%.3f", self.testResults.plrResults?.minPD ?? 0))
-                        max Constriction: \(String(format: "%.3f", self.testResults.plrResults?.maxConstriction ?? 0))
-                        75% Recovery Time: \(self.testResults.plrResults?.seventyFivePercentRecovery ?? "0")
-                        latency: \(self.testResults.plrResults?.latency ?? "0")
-                        adv: \(String(format: "%.3f", self.testResults.plrResults?.adv ?? 0))
-                        acv: \(String(format: "%.3f", self.testResults.plrResults?.acv ?? 0))
+                        maxPD: \(String(format: "%.3f", self.testResults.plrResult?.maxPD ?? 0))
+                        minPD: \(String(format: "%.3f", self.testResults.plrResult?.minPD ?? 0))
+                        max Constriction: \(String(format: "%.3f", self.testResults.plrResult?.maxConstriction ?? 0))
+                        75% Recovery Time: \(self.testResults.plrResult?.seventyFivePercentRecovery ?? "0")
+                        latency: \(self.testResults.plrResult?.latency ?? "0")
+                        adv: \(String(format: "%.3f", self.testResults.plrResult?.adv ?? 0))
+                        acv: \(String(format: "%.3f", self.testResults.plrResult?.acv ?? 0))
                         """)
                         .multilineTextAlignment(.leading)
                         .font(.subheadline)
                         .padding(.all, 10)
                         
                     } else {
-                        VideoPlayerView(videoUrl: self.testResults.vomsResults?.processedVideoURL)
-                        VomsGraphView(plotData: self.testResults.vomsResults?.plotData ?? [], fps: self.testResults.vomsResults?.fps ?? 30)
+                        VideoPlayerView(videoUrl: self.testResults.vomsResult?.processedVideoURL)
+                        VomsGraphView(plotData: self.testResults.vomsResult?.plotData ?? [], fps: self.testResults.vomsResult?.fps ?? 30)
                     }
                     HStack {
                         Button(action: { onRedo() }) {
@@ -78,8 +76,7 @@ struct LocalOutputView: View {
                         .padding(.bottom, 10)
                     }
                 }
-            }
-            .padding(.all, 30)
+            }.padding(.all, 15)
         }
     }
 }

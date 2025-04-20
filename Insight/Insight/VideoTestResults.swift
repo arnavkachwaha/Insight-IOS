@@ -8,8 +8,10 @@
 import Foundation
 
 class VideoTestResults: ObservableObject{
-    var plrResults: PLRResults?
-    var vomsResults: VOMSResults?
+    var plrResult: PLRResults?
+    var vomsResult: VOMSResults?
+    @Published var plrCompleted: Bool = false
+    @Published var vomsCompleted: Bool = false
     
     struct PLRResults {
         var videoURL: URL?
@@ -39,7 +41,10 @@ class VideoTestResults: ObservableObject{
     }
     
     func reset() {
-        plrResults = nil
-        vomsResults = nil
+        plrCompleted.toggle()
+        vomsCompleted.toggle()
+        
+        plrResult = nil
+        vomsResult = nil
     }
 }

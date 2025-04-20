@@ -10,8 +10,8 @@ import Combine
 
 enum CaptureState {
     case recording
-    case playback(videoURL: URL)
-    case output(videoURL: URL, graphURL: URL)
+//    case playback(videoURL: URL)
+//    case output(videoURL: URL, graphURL: URL)
     case localOutput(testResults: VideoTestResults, testType: String)
     case loading
 }
@@ -42,7 +42,7 @@ class ContentViewModel: ObservableObject {
         startRecording()
         recordingFinishedListener()
         videoProcessingFinishedListener()
-        fetchingVideoFinishedListener()
+//        fetchingVideoFinishedListener()
         setupTimeoutListener()
     }
     
@@ -60,13 +60,14 @@ class ContentViewModel: ObservableObject {
         captureState = .recording
     }
     
-    func switchViews(view: String) {
-        currentView = view
-        frameHandler.currentView = view
-        restartSession()
-    }
+//    func switchViews(view: String) {
+//        currentView = view
+//        frameHandler.currentView = view
+//        restartSession()
+//    }
     
-    func uploadDataToServer() {
+    func uploadDataToServer(view: String) {
+        view == "PLR" ? self.testResults.plrCompleted.toggle() : self.testResults.vomsCompleted.toggle()
         DispatchQueue.global(qos: .background).async {
             NetworkService.shared.uploadDataToServer(results: self.testResults, testType: self.currentView)
         }
@@ -96,10 +97,10 @@ class ContentViewModel: ObservableObject {
                     case "PLR":
                         let (maxPD, minPD, latency, maxConstriction, seventyFivePercentRecovery, adv, acv) =
                         self?.frameHandler.getPlrMetrics(frameRadius: plotData) ?? (0.0, 0.0, "0", 0.0, "0", 0.0, 0.0)
-                        self?.testResults.plrResults = VideoTestResults.PLRResults(videoURL: recordedVidURL, processedVideoURL: processedVidURL, plotData: plotData, maxPD: maxPD, minPD: minPD, latency: latency, maxConstriction: maxConstriction, seventyFivePercentRecovery: seventyFivePercentRecovery, adv: adv, acv: acv, irisBoundingBoxes : irisBoundingBoxes, pupilBoundingBoxes: pupilBoundingBoxes)
+                        self?.testResults.plrResult = VideoTestResults.PLRResults(videoURL: recordedVidURL, processedVideoURL: processedVidURL, plotData: plotData, maxPD: maxPD, minPD: minPD, latency: latency, maxConstriction: maxConstriction, seventyFivePercentRecovery: seventyFivePercentRecovery, adv: adv, acv: acv, irisBoundingBoxes : irisBoundingBoxes, pupilBoundingBoxes: pupilBoundingBoxes)
                         
                     case "VOMS":
-                        self?.testResults.vomsResults = VideoTestResults.VOMSResults(videoURL: recordedVidURL, processedVideoURL: processedVidURL, plotData: plotData, irisBoundingBoxes : irisBoundingBoxes, pupilBoundingBoxes: pupilBoundingBoxes)
+                        self?.testResults.vomsResult = VideoTestResults.VOMSResults(videoURL: recordedVidURL, processedVideoURL: processedVidURL, plotData: plotData, irisBoundingBoxes : irisBoundingBoxes, pupilBoundingBoxes: pupilBoundingBoxes)
                         
                     default:
                         break
@@ -111,23 +112,23 @@ class ContentViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
-    private func fetchingVideoFinishedListener() {
-        NotificationCenter.default.publisher(for: .graphFetched)
-            .sink { [weak self] _ in
-                if let videoURL = self?.processedVideoURL, let graphURL = NetworkService.shared.fetchedGraphURL {
-                    switch self?.currentView {
-                    case "PLR":
-                        self?.testResults.plrResults = VideoTestResults.PLRResults(videoURL: videoURL, graphURL: graphURL)
-                    case "VOMS":
-                        self?.testResults.vomsResults = VideoTestResults.VOMSResults(videoURL: videoURL, graphURL: graphURL)
-                    default:
-                        break
-                    }
-                    self?.captureState = .output(videoURL: videoURL, graphURL: graphURL)
-                }
-            }
-            .store(in: &cancellables)
-    }
+//    private func fetchingVideoFinishedListener() {
+//        NotificationCenter.default.publisher(for: .graphFetched)
+//            .sink { [weak self] _ in
+//                if let videoURL = self?.processedVideoURL, let graphURL = NetworkService.shared.fetchedGraphURL {
+//                    switch self?.currentView {
+//                    case "PLR":
+//                        self?.testResults.plrResults = VideoTestResults.PLRResults(videoURL: videoURL, graphURL: graphURL)
+//                    case "VOMS":
+//                        self?.testResults.vomsResults = VideoTestResults.VOMSResults(videoURL: videoURL, graphURL: graphURL)
+//                    default:
+//                        break
+//                    }
+//                    self?.captureState = .output(videoURL: videoURL, graphURL: graphURL)
+//                }
+//            }
+//            .store(in: &cancellables)
+//    }
     
     func setupTimeoutListener() {
         NotificationCenter.default.publisher(for: .uploadTimeoutOccurred)
