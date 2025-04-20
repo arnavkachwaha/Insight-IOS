@@ -132,7 +132,7 @@ public struct RadiusDataProcessor {
         
         // Latency: first index (after maxPDIndex) where value falls to <=95% of maxPD.
         let indexAfterMax = frameRadius[maxPDIndex...].firstIndex { $0 <= maxPD * 0.95 } ?? maxPDIndex
-        let latencyValue = round(Double(abs(maxPDIndex - indexAfterMax)) / fps * 10000) / 10000.0
+        let latencyValue = round(Double(abs(maxPDIndex - indexAfterMax)) / fps * 10000) / 1000.0
         let latency = "\(latencyValue)msec"
         
         // Maximum constriction: difference between maxPD and minPD (rounded to 2 decimals).
@@ -148,8 +148,8 @@ public struct RadiusDataProcessor {
         // Dilation velocity (adv): from minPDIndex onward, the maximum dilated value.
         let subArray = Array(frameRadius[minPDIndex..<frameRadius.count])
         let maxDilatedDiameter = subArray.max() ?? minPD
-        let maxDilatedDiameterIndex = minPDIndex + (subArray.firstIndex(of: maxDilatedDiameter) ?? 0)
-        let maxDilationTime = Double(abs(maxDilatedDiameterIndex - minPDIndex)) / fps
+//        let maxDilatedDiameterIndex = minPDIndex + (subArray.firstIndex(of: maxDilatedDiameter) ?? 0)
+//        let maxDilationTime = Double(abs(maxDilatedDiameterIndex - minPDIndex)) / fps
         let adv: Double = maxConstrictionTime != 0 ? round((maxDilatedDiameter / maxConstrictionTime) * 100) / 100.0 : 0.0
         
         return (maxPD, minPD, latency, maxConstriction, seventyFivePercentRecovery, adv, acv)
