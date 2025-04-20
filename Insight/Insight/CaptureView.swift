@@ -54,18 +54,18 @@ struct CaptureView: View {
                     }
                 }
                 
-            case .playback(let videoURL):
-                PlaybackView(
-                    videoUrl: videoURL,
-                    onRedo: {
-                        viewModel.restartSession()
-                        self.shouldStartTrackerAnimation = false
-                        showFooter = true  // Show Footer again on redo
-                    },
-                    onUse: {
-                        viewModel.uploadDataToServer()
-                    }
-                )
+//            case .playback(let videoURL):
+//                PlaybackView(
+//                    videoUrl: videoURL,
+//                    onRedo: {
+//                        viewModel.restartSession()
+//                        self.shouldStartTrackerAnimation = false
+//                        showFooter = true  // Show Footer again on redo
+//                    },
+//                    onUse: {
+//                        viewModel.uploadDataToServer()
+//                    }
+//                )
                 
             case .localOutput(let testResults, let testType):
                 LocalOutputView(
@@ -79,18 +79,27 @@ struct CaptureView: View {
                     onProceed: {
                         navigationPath.removeLast(navigationPath.count)
                         self.shouldStartTrackerAnimation = false
-                        viewModel.uploadDataToServer()
+                        viewModel.uploadDataToServer(view: viewModel.currentView)
                     }
                 )
                 
             case .loading:
                 LoadingView()
-            case .output(videoURL: _, graphURL: _):
-                LoadingView()
+//            case .output(videoURL: _, graphURL: _):
+//                LoadingView()
             }
         
         }
         .ignoresSafeArea()
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+          if showFooter {
+            ToolbarItem(placement: .navigationBarLeading) {
+                CustomBackButton(label: "")
+            }
+          }
+        }
         .alert(isPresented: $viewModel.showAlert) {
             Alert(
                 title: Text("Error"),

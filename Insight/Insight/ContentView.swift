@@ -29,7 +29,7 @@ struct ContentView: View {
                         let viewModel = ContentViewModel(frameHandler: FrameHandler(), currentView: "PLR", testResults: videoResults)
                         CaptureView(viewModel: viewModel, navigationPath: $navigationPath)
                             .navigationBarTitleDisplayMode(.inline)
-                            .withCustomBackButton()
+//                            .withCustomBackButton()
                             .onDisappear {
                                 self.viewModel = nil
                             }
@@ -37,7 +37,7 @@ struct ContentView: View {
                         let viewModel = ContentViewModel(frameHandler: FrameHandler(), currentView: "VOMS", testResults: videoResults)
                         CaptureView(viewModel: viewModel, navigationPath: $navigationPath)
                             .navigationBarTitleDisplayMode(.inline)
-                            .withCustomBackButton()
+//                            .withCustomBackButton()
                             .onDisappear {
                                 self.viewModel = nil
                             }
