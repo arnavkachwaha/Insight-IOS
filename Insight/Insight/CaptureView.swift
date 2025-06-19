@@ -14,6 +14,7 @@ struct CaptureView: View {
     @State private var detectedBox: CGRect? = nil
     @State private var shouldStartTrackerAnimation = false
     @State private var showFooter = true  // Control Footer visibility
+    @State private var showTrackerAnaimation: Bool = false // Control Tracker Ball visibility
     
     var body: some View {
         ZStack {
@@ -26,14 +27,17 @@ struct CaptureView: View {
                     .overlay(
                         Group {
                             if viewModel.currentView == "PLR" {
-                                EyeCutoutView(yOffset: 250, detectedBox: detectedBox)
+                                EyeCutoutView(currentView: viewModel.currentView, yOffset: 250, detectedBox: detectedBox)
                             } else if viewModel.currentView == "VOMS" {
-                                TrackerView_1(
-                                    shouldAnimate: $shouldStartTrackerAnimation,
-                                    onAnimationEnd: {
-                                        viewModel.stopRecording()
-                                    }
-                                )
+                                if showTrackerAnaimation == false {
+                                    EyeCutoutView(currentView: viewModel.currentView, yOffset: 250, detectedBox: detectedBox)
+                                } else {
+                                    TrackerView_1(
+                                        onAnimationEnd: {
+                                            viewModel.stopRecording()
+                                        }
+                                    )
+                                }
                             }
                         }
                     )
@@ -74,6 +78,7 @@ struct CaptureView: View {
                     onRedo: {
                         viewModel.restartSession()
                         self.shouldStartTrackerAnimation = false
+                        self.showTrackerAnaimation = false
                         showFooter = true
                     },
                     onProceed: {

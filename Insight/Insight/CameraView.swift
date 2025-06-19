@@ -16,11 +16,11 @@ struct CameraView: View {
     var body: some View {
         ZStack {
             Color(.black).edgesIgnoringSafeArea(.all)
-            if frameHandler.isSessionReady && frameHandler.currentView == "PLR"{
+            if frameHandler.isSessionReady {
                 CameraFeedView(frameHandler: frameHandler, detectedBox: $detectedBox)
-            } else {
-                Text("Loading...")
-                    .foregroundColor(.white)
+//            } else {
+//                Text("Loading...")
+//                    .foregroundColor(.white)
             }
         }
         .ignoresSafeArea()
