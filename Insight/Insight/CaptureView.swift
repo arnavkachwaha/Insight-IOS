@@ -46,15 +46,21 @@ struct CaptureView: View {
                 if showFooter {
                     VStack {
                         FooterView(frameHandler: viewModel.frameHandler, onRecordingStateChanged: { isRecording in
-                            shouldStartTrackerAnimation = isRecording
                             
                             if isRecording {
+                                if viewModel.currentView == "VOMS" {
+                                    showTrackerAnaimation = true
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.9) {
+                                        shouldStartTrackerAnimation = true
+                                    }
+                                }
+                                
                                 // Hide the FooterView after 5ms
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.005) {
                                     showFooter = false
                                 }
                             }
-                        })
+                        }, currentView: viewModel.currentView)
                     }
                 }
                 

@@ -11,6 +11,7 @@ struct FooterView: View {
     @ObservedObject var frameHandler: FrameHandler
     @State private var isRecording = false
     var onRecordingStateChanged: (Bool) -> Void
+    var currentView: String
     
     var body: some View {
         VStack {
@@ -19,7 +20,13 @@ struct FooterView: View {
             Button(action: {
                 isRecording.toggle()
                 if isRecording {
-                    frameHandler.startRecording()
+                    if currentView == "PLR"{
+                        frameHandler.startRecording()
+                    } else {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                            frameHandler.startRecording()
+                        }
+                    }
                 } else {
                     frameHandler.stopRecording()
                 }
@@ -40,5 +47,5 @@ struct FooterView: View {
 }
 
 #Preview {
-    FooterView(frameHandler: FrameHandler(), onRecordingStateChanged: { _ in })
+    FooterView(frameHandler: FrameHandler(),onRecordingStateChanged: { _ in }, currentView: "PLR")
 }

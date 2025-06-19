@@ -16,7 +16,7 @@ struct Helper {
         let _ = image.extent.width
         let ciHeight = image.extent.height
         let centerY = ciHeight / 2
-        let cropRect = CGRect(x: 400, y: centerY - 150, width: 640, height: 640)
+        let cropRect = CGRect(x: 0, y: centerY - 145, width: 640, height: 640)
         let croppedImage = image.cropped(to: cropRect)
         let shiftedImage = croppedImage.transformed(by: CGAffineTransform(translationX: -cropRect.origin.x, y: -cropRect.origin.y))
         return shiftedImage

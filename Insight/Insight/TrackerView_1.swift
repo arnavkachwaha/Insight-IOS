@@ -6,10 +6,14 @@
 //
 
 import SwiftUI
+import Combine
 
 struct TrackerView_1: View {
     @State private var offset: CGFloat = 0
-    @Binding var shouldAnimate: Bool
+    @State private var countdown: Int = 3
+    @State private var showCountdownText: Bool = true
+    @State private var timerSubscription: AnyCancellable? = nil
+    @State var shouldAnimate: Bool = false
     var onAnimationEnd: (() -> Void)?
     
     var body: some View {
@@ -20,20 +24,70 @@ struct TrackerView_1: View {
                     Image(systemName: "circle.fill")
                         .font(.system(size: 50))
                         .offset(x: 175 , y: offset)
-                    
+                        .overlay(
+                            Group {
+                                if showCountdownText {
+                                    Text("Start Following the ball in:")
+                                        .font(.largeTitle)
+                                        .fixedSize(horizontal: true, vertical: false)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.blue)
+                                        .rotationEffect(.degrees(90))
+                                        .offset(x: 280, y: 380)
+                                        .transition(.opacity)
+
+                                    Text("\(countdown)")
+                                        .font(.largeTitle)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.white)
+                                        .rotationEffect(.degrees(90))
+                                        .offset(x: 175, y: offset)
+                                        .transition(.opacity)
+                                }
+                            }
+                        )
                 }
                 .onAppear {
                     // Set the initial offset to center
                     offset = (geometry.size.height / 2.1)
+                    startCountdownTimer(screenHeight: geometry.size.height)
+                }
+                .onDisappear {
+                    stopTimer()
                 }
                 .onChange(of: shouldAnimate) { oldValue, newValue in
-                    if newValue {
+                    if newValue && !showCountdownText {
                         startAnimation(screenHeight: geometry.size.height)
                     }
                 }
             }
             .background(Color.clear)
         }.ignoresSafeArea()
+    }
+    
+    private func startCountdownTimer(screenHeight: CGFloat) {
+        guard timerSubscription == nil else { return }
+
+        countdown = 3
+        showCountdownText = true
+
+        timerSubscription = Timer.publish(every: 1, on: .main, in: .common)
+            .autoconnect()
+            .sink { _ in
+                if self.countdown > 0 {
+                    self.countdown -= 1
+                } else {
+                    self.showCountdownText = false
+                    self.stopTimer()
+                    self.shouldAnimate = true
+                }
+            }
+    }
+
+    private func stopTimer() {
+        timerSubscription?.cancel()
+        timerSubscription = nil
+        print("Countdown Timer stopped.")
     }
     
     private func startAnimation(screenHeight: CGFloat) {
@@ -63,5 +117,5 @@ struct TrackerView_1: View {
 }
 
 #Preview {
-    TrackerView_1(shouldAnimate: .constant(false), onAnimationEnd: nil)
+    TrackerView_1(onAnimationEnd: nil)
 }

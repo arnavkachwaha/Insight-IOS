@@ -281,7 +281,7 @@ class FrameHandler: NSObject, ObservableObject {
             for observation in results {
                 if let topLabel = observation.labels.first {
                     let box = observation.boundingBox
-                    if topLabel.identifier == "Eye", topLabel.confidence >= 0.95 && self.currentView == "PLR" {
+                    if topLabel.identifier == "Eye", topLabel.confidence >= 0.95 {
                         DispatchQueue.main.async { self.boundingBox = box }
                     }
                     else if topLabel.identifier == "Iris" && self.isRecordingVideo{
