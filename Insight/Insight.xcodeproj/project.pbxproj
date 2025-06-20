@@ -53,6 +53,7 @@
 		05F110452C9906C1007B16A0 /* ContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F110442C9906C1007B16A0 /* ContentViewModel.swift */; };
 		05F828802D62646800682C79 /* CustomBackButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F8287F2D62646800682C79 /* CustomBackButton.swift */; };
 		05F828822D626EF100682C79 /* CustomNavigationTitle .swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F828812D626EF100682C79 /* CustomNavigationTitle .swift */; };
+		FBD698ED2E05CCF400398DA3 /* EyeCutoutProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBD698EC2E05CCF400398DA3 /* EyeCutoutProvider.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -104,6 +105,7 @@
 		05F110442C9906C1007B16A0 /* ContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewModel.swift; sourceTree = "<group>"; };
 		05F8287F2D62646800682C79 /* CustomBackButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomBackButton.swift; sourceTree = "<group>"; };
 		05F828812D626EF100682C79 /* CustomNavigationTitle .swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CustomNavigationTitle .swift"; sourceTree = "<group>"; };
+		FBD698EC2E05CCF400398DA3 /* EyeCutoutProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EyeCutoutProvider.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -136,6 +138,7 @@
 		053F2FDD2C42ECD1007A9BF5 /* Insight */ = {
 			isa = PBXGroup;
 			children = (
+				FBD698EC2E05CCF400398DA3 /* EyeCutoutProvider.swift */,
 				059A88712CD6F0D800CA9C2E /* Info.plist */,
 				053F2FDE2C42ECD1007A9BF5 /* InsightApp.swift */,
 				053F2FE02C42ECD1007A9BF5 /* ContentView.swift */,
@@ -294,6 +297,7 @@
 				058D00A12D4C0AE600E53342 /* CombinedResultsView.swift in Sources */,
 				050EADE62C42FF7F00C949A6 /* EyeCutoutView.swift in Sources */,
 				0552AFF52DA6F70100FDFD0E /* VomsGraphView.swift in Sources */,
+				FBD698ED2E05CCF400398DA3 /* EyeCutoutProvider.swift in Sources */,
 				058D009F2D4C035E00E53342 /* VideoTestResults.swift in Sources */,
 				053F2FF92C42F1BB007A9BF5 /* CameraView.swift in Sources */,
 				05DFAFE82D39FEB50097753B /* QuestionToggleView.swift in Sources */,
@@ -466,7 +470,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"Insight/Preview Content\"";
 				DEVELOPMENT_TEAM = AU5YKC8N9W;
 				ENABLE_PREVIEWS = YES;
@@ -487,7 +491,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = AU5YKC8N9W.com.Insight.Innovations.Insight;
+				PRODUCT_BUNDLE_IDENTIFIER = AU5YKC8N9W;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = NO;
@@ -509,7 +513,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"Insight/Preview Content\"";
 				DEVELOPMENT_TEAM = AU5YKC8N9W;
 				ENABLE_PREVIEWS = YES;
@@ -530,7 +534,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = AU5YKC8N9W.com.Insight.Innovations.Insight;
+				PRODUCT_BUNDLE_IDENTIFIER = AU5YKC8N9W;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = NO;
