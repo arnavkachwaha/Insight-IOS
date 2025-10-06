@@ -1,0 +1,19 @@
+{
+  "MLModelVersionStringKey" : "8.3.73",
+  "MLModelDescriptionKey" : "Ultralytics YOLOv8n-obb model trained on \/cluster\/tufts\/insight\/akachw01\/src\/Yolo\/yolov8\/data.yaml",
+  "MLModelCreatorDefinedKey" : {
+    "com.github.apple.coremltools.source" : "torch==2.4.1",
+    "stride" : "32",
+    "com.github.apple.coremltools.version" : "8.2",
+    "docs" : "https:\/\/docs.ultralytics.com",
+    "task" : "obb",
+    "com.github.apple.coremltools.source_dialect" : "TorchScript",
+    "date" : "2025-10-05T13:08:22.835341",
+    "imgsz" : "[640, 640]",
+    "args" : "{'batch': 1, 'half': False, 'int8': False, 'nms': True}",
+    "batch" : "1",
+    "names" : "{0: 'Eye', 1: 'Iris', 2: 'Pupil'}"
+  },
+  "MLModelAuthorKey" : "Ultralytics",
+  "MLModelLicenseKey" : "AGPL-3.0 License (https:\/\/ultralytics.com\/license)"
+}

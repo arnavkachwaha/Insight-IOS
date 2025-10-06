@@ -49,7 +49,6 @@
 		05DFAFE52D39F0650097753B /* ObservableSignsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05DFAFE42D39F0650097753B /* ObservableSignsView.swift */; };
 		05DFAFE82D39FEB50097753B /* QuestionToggleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05DFAFE72D39FEB50097753B /* QuestionToggleView.swift */; };
 		05E63DE32D48003F002520EA /* TestMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05E63DE22D48003F002520EA /* TestMenuView.swift */; };
-		05E6C7982E948A3B009D8610 /* best.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 05E6C7972E948A3B009D8610 /* best.mlpackage */; };
 		05F110422C990245007B16A0 /* PlaybackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F110412C990245007B16A0 /* PlaybackView.swift */; };
 		05F110452C9906C1007B16A0 /* ContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F110442C9906C1007B16A0 /* ContentViewModel.swift */; };
 		05F828802D62646800682C79 /* CustomBackButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F8287F2D62646800682C79 /* CustomBackButton.swift */; };
@@ -103,7 +102,6 @@
 		05DFAFE42D39F0650097753B /* ObservableSignsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableSignsView.swift; sourceTree = "<group>"; };
 		05DFAFE72D39FEB50097753B /* QuestionToggleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionToggleView.swift; sourceTree = "<group>"; };
 		05E63DE22D48003F002520EA /* TestMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestMenuView.swift; sourceTree = "<group>"; };
-		05E6C7972E948A3B009D8610 /* best.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = best.mlpackage; sourceTree = "<group>"; };
 		05F110412C990245007B16A0 /* PlaybackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackView.swift; sourceTree = "<group>"; };
 		05F110442C9906C1007B16A0 /* ContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewModel.swift; sourceTree = "<group>"; };
 		05F8287F2D62646800682C79 /* CustomBackButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomBackButton.swift; sourceTree = "<group>"; };
@@ -174,7 +172,6 @@
 				05A742072CA254CE00C5FEC2 /* LoadingView.swift */,
 				05F8287F2D62646800682C79 /* CustomBackButton.swift */,
 				05F828812D626EF100682C79 /* CustomNavigationTitle .swift */,
-				05E6C7972E948A3B009D8610 /* best.mlpackage */,
 				055264C72D750BA400FA7EDC /* EyeDetector.mlpackage */,
 				05DFAFE32D39E58E0097753B /* SCAT-6 */,
 				053F2FE22C42ECD2007A9BF5 /* Assets.xcassets */,
@@ -263,7 +260,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 053F2FD62C42ECD1007A9BF5 /* Build configuration list for PBXProject "Application supports iTunes file sharing" */;
+			buildConfigurationList = 053F2FD62C42ECD1007A9BF5 /* Build configuration list for PBXProject "Insight" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -337,7 +334,6 @@
 				05C2ECB62CB9DC0C0086C260 /* CaptureView.swift in Sources */,
 				053F2FEF2C42ED41007A9BF5 /* HeaderView.swift in Sources */,
 				05B67FE32D3AE1BA003B8C02 /* MotorScreenView.swift in Sources */,
-				05E6C7982E948A3B009D8610 /* best.mlpackage in Sources */,
 				05E63DE32D48003F002520EA /* TestMenuView.swift in Sources */,
 				05F110422C990245007B16A0 /* PlaybackView.swift in Sources */,
 				052CD9532D9598470094CD57 /* NetworkService.swift in Sources */,
@@ -559,7 +555,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		053F2FD62C42ECD1007A9BF5 /* Build configuration list for PBXProject "Application supports iTunes file sharing" */ = {
+		053F2FD62C42ECD1007A9BF5 /* Build configuration list for PBXProject "Insight" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				053F2FE72C42ECD2007A9BF5 /* Debug */,

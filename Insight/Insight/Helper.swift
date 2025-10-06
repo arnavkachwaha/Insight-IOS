@@ -98,6 +98,44 @@ struct Helper {
         }
     }
     
+    // Creates the string content for the PLR metrics file.
+    private static func createPLRMetricsContent(results: VideoTestResults.PLRResults, timestamp: String) -> String {
+        var content = "PLR Metrics\n"
+        content += "Timestamp: \(timestamp)\n"
+        content += "Max Pupil Diameter: \(results.maxPD ?? 0.0)\n"
+        content += "Min Pupil Diameter: \(results.minPD ?? 0.0)\n"
+        content += "Latency: \(results.latency ?? "N/A")\n"
+        content += "Max Constriction: \(results.maxConstriction ?? 0.0)\n"
+        content += "75% Recovery: \(results.seventyFivePercentRecovery ?? "N/A")\n"
+        content += "Average Dilation Velocity: \(results.adv ?? 0.0)\n"
+        content += "Average Constriction Velocity: \(results.acv ?? 0.0)\n"
+        return content
+    }
+    
+    // Saves the PLR metrics to a timestamped text file in the app's Documents directory.
+    static func savePLRMetrics(results: VideoTestResults.PLRResults) {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
+        let timestamp = dateFormatter.string(from: Date())
+        let fileName = "plr_metrics_\(timestamp).txt"
+        
+        let content = createPLRMetricsContent(results: results, timestamp: timestamp)
+        
+        guard let docFolder = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+                fatalError()
+        }
+        
+        let fileURL = docFolder.appendingPathComponent(fileName)
+        
+        do {
+            try content.write(to: fileURL, atomically: true, encoding: .utf8)
+            print("PLR metrics saved to: \(fileURL.path)")
+        }
+        catch {
+            fatalError(error.localizedDescription)
+        }
+    }
+    
     static func saveVideo(url: URL) {
         PHPhotoLibrary.shared().performChanges({
             PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)

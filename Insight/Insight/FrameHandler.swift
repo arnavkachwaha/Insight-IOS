@@ -278,21 +278,41 @@ class FrameHandler: NSObject, ObservableObject {
                 DispatchQueue.main.async { self.boundingBox = nil }
                 return
             }
-            for observation in results {
-                if let topLabel = observation.labels.first {
-                    let box = observation.boundingBox
-                    if topLabel.identifier == "Eye", topLabel.confidence >= 0.95 {
-                        DispatchQueue.main.async { self.boundingBox = box }
-                    }
-                    else if topLabel.identifier == "Iris" && self.isRecordingVideo{
-                        let updatedBox = topLabel.confidence > 0.95 ? box : (self.irisBoundingBoxes.last ?? CGRect.zero)
-                        DispatchQueue.main.async { self.irisBoundingBoxes.append(updatedBox) }
-                    }
-                    else if topLabel.identifier == "Pupil" && self.isRecordingVideo && self.currentView == "PLR" {
-                        let updatedBox = topLabel.confidence >= 0.9 ? box : (self.pupilBoundingBoxes.last ?? CGRect.zero)
-                        DispatchQueue.main.async { self.pupilBoundingBoxes.append(updatedBox) }
-                    }
+            
+            // Find the iris bounding box first for the current frame.
+            let irisObservation = results.first { obs in
+                obs.labels.first?.identifier == "Iris" && obs.labels.first?.confidence ?? 0 > 0.90
+            }
+            let currentIrisBox = irisObservation?.boundingBox ?? self.irisBoundingBoxes.last ?? .zero
+            
+            if self.isRecordingVideo {
+                DispatchQueue.main.async {
+                    self.irisBoundingBoxes.append(currentIrisBox)
                 }
+            }
+            
+            // Find the pupil and validate it against the iris box.
+            let pupilObservation = results.first { obs in
+                obs.labels.first?.identifier == "Pupil"
+            }
+            
+            if let pupilObs = pupilObservation, self.isRecordingVideo, self.currentView == "PLR" {
+                let pupilBox = pupilObs.boundingBox
+                let pupilConfidence = pupilObs.labels.first?.confidence ?? 0
+                
+                // A pupil detection is valid only if confidence is high AND it's inside the iris box.
+                let isPupilValid = pupilConfidence >= 0.87 && currentIrisBox.contains(pupilBox)
+                
+                let updatedPupilBox = isPupilValid ? pupilBox : (self.pupilBoundingBoxes.last ?? .zero)
+                
+                DispatchQueue.main.async {
+                    self.pupilBoundingBoxes.append(updatedPupilBox)
+                }
+            }
+            
+            // For visual feedback (the green box), find the "Eye".
+            let eyeObservation = results.first { obs in
+                obs.labels.first?.identifier == "Eye" && obs.labels.first?.confidence ?? 0 >= 0.95
             }
             
             DispatchQueue.main.async {

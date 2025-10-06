@@ -51,48 +51,48 @@ struct TestMenuView: View {
                         .disabled(isTestCompleted(testName: test.0))
                         .padding(10)
                         
-                        if isTestCompleted(testName: test.0) {
-                            Button {
-                                resetTest(named: test.0)
-                            } label: {
-                                Image(systemName: "arrow.clockwise.circle.fill")
-                                    .font(.title)
-                                    .foregroundColor(.blue)
-                                    .padding(8)
-                            }.offset(x: -12, y: 12)
-                        }
+//                        if isTestCompleted(testName: test.0) {
+//                            Button {
+//                                resetTest(named: test.0)
+//                            } label: {
+//                                Image(systemName: "arrow.clockwise.circle.fill")
+//                                    .font(.title)
+//                                    .foregroundColor(.blue)
+//                                    .padding(8)
+//                            }.offset(x: -12, y: 12)
+//                        }
                     }
                 }
                 
-                HStack {
-                    Button(action: {
-                        resetTest(named: "ALL")
-                    }) {
-                        Text("Redo Tests")
-                            .font(.headline)
-                            .foregroundColor(allTestsCompleted ? Color.white : Color.accentColor)
-                            .padding()
-                            .frame(width: 130)
-                            .background(allTestsCompleted ? Color.red : Color.accentColor)
-                            .cornerRadius(10)
-                    }
-                    .padding(10)
-                    .disabled(!allTestsCompleted)
-                    
-                    Button(action: {
-                        navigateToResults()
-                    }) {
-                        Text("Test Results")
-                            .font(.headline)
-                            .foregroundColor(isAnyTestCompleted ? Color.white : Color.accentColor)
-                            .padding()
-                            .frame(width: 130)
-                            .background(isAnyTestCompleted ? Color.blue : Color.accentColor)
-                            .cornerRadius(10)
-                    }
-                    .padding(10)
-                    .disabled(!isAnyTestCompleted)
-                }
+//                HStack {
+//                    Button(action: {
+//                        resetTest(named: "ALL")
+//                    }) {
+//                        Text("Redo Tests")
+//                            .font(.headline)
+//                            .foregroundColor(allTestsCompleted ? Color.white : Color.accentColor)
+//                            .padding()
+//                            .frame(width: 130)
+//                            .background(allTestsCompleted ? Color.red : Color.accentColor)
+//                            .cornerRadius(10)
+//                    }
+//                    .padding(10)
+//                    .disabled(true)
+//                    
+//                    Button(action: {
+//                        navigateToResults()
+//                    }) {
+//                        Text("Test Results")
+//                            .font(.headline)
+//                            .foregroundColor(isAnyTestCompleted ? Color.white : Color.accentColor)
+//                            .padding()
+//                            .frame(width: 130)
+//                            .background(isAnyTestCompleted ? Color.blue : Color.accentColor)
+//                            .cornerRadius(10)
+//                    }
+//                    .padding(10)
+//                    .disabled(true)
+//                }
             }
         }
     }
@@ -102,9 +102,9 @@ struct TestMenuView: View {
         case "PLR":
             return VideoResults.plrCompleted
         case "VOMS":
-            return VideoResults.vomsCompleted
+            return true
         case "SCAT6":
-            return Scat6Results.isSCAT6Completed
+            return true
         default:
             return false
         }

@@ -90,7 +90,10 @@ struct CaptureView: View {
                     onProceed: {
                         navigationPath.removeLast(navigationPath.count)
                         self.shouldStartTrackerAnimation = false
-                        viewModel.uploadDataToServer(view: viewModel.currentView)
+//                        viewModel.uploadDataToServer(view: viewModel.currentView)
+                        if let plrResult = testResults.plrResult {
+                            Helper.savePLRMetrics(results: plrResult)
+                        }
                     }
                 )
                 

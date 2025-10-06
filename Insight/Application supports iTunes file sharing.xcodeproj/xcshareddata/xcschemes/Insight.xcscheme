@@ -18,7 +18,7 @@
                BlueprintIdentifier = "053F2FDA2C42ECD1007A9BF5"
                BuildableName = "Insight.app"
                BlueprintName = "Insight"
-               ReferencedContainer = "container:Application supports iTunes file sharing.xcodeproj">
+               ReferencedContainer = "container:Insight.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -47,7 +47,7 @@
             BlueprintIdentifier = "053F2FDA2C42ECD1007A9BF5"
             BuildableName = "Insight.app"
             BlueprintName = "Insight"
-            ReferencedContainer = "container:Application supports iTunes file sharing.xcodeproj">
+            ReferencedContainer = "container:Insight.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <EnvironmentVariables>
@@ -71,7 +71,7 @@
             BlueprintIdentifier = "053F2FDA2C42ECD1007A9BF5"
             BuildableName = "Insight.app"
             BlueprintName = "Insight"
-            ReferencedContainer = "container:Application supports iTunes file sharing.xcodeproj">
+            ReferencedContainer = "container:Insight.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

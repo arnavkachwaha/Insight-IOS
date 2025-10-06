@@ -7,7 +7,7 @@
 
 import Foundation
 import CoreGraphics
-import SwiftUICore
+import SwiftUI
 
 public struct RadiusDataProcessor {
     
