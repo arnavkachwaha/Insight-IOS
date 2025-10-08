@@ -264,68 +264,66 @@ class FrameHandler: NSObject, ObservableObject {
     // MARK: - Eye Detection
     func detectEyes(in ciImage: CIImage) {
         guard let visionModel = visionModel else {
-            print("Vision model not loaded")
-            return
-        }
-        
-        let request = VNCoreMLRequest(model: visionModel) { request, error in
-            if let error = error {
-                print("Error detecting eyes: \(error.localizedDescription)")
-                return
-            }
-            
-            guard let results = request.results as? [VNRecognizedObjectObservation] else {
-                DispatchQueue.main.async { self.boundingBox = nil }
-                return
-            }
-            
-            // Find the iris bounding box first for the current frame.
-            let irisObservation = results.first { obs in
-                obs.labels.first?.identifier == "Iris" && obs.labels.first?.confidence ?? 0 > 0.90
-            }
-            let currentIrisBox = irisObservation?.boundingBox ?? self.irisBoundingBoxes.last ?? .zero
-            
-            if self.isRecordingVideo {
-                DispatchQueue.main.async {
-                    self.irisBoundingBoxes.append(currentIrisBox)
+                    print("Vision model not loaded")
+                    return
                 }
-            }
-            
-            // Find the pupil and validate it against the iris box.
-            let pupilObservation = results.first { obs in
-                obs.labels.first?.identifier == "Pupil"
-            }
-            
-            if let pupilObs = pupilObservation, self.isRecordingVideo, self.currentView == "PLR" {
-                let pupilBox = pupilObs.boundingBox
-                let pupilConfidence = pupilObs.labels.first?.confidence ?? 0
                 
-                // A pupil detection is valid only if confidence is high AND it's inside the iris box.
-                let isPupilValid = pupilConfidence >= 0.87 && currentIrisBox.contains(pupilBox)
-                
-                let updatedPupilBox = isPupilValid ? pupilBox : (self.pupilBoundingBoxes.last ?? .zero)
-                
-                DispatchQueue.main.async {
-                    self.pupilBoundingBoxes.append(updatedPupilBox)
+                let request = VNCoreMLRequest(model: visionModel) { request, error in
+                    if let error = error {
+                        print("Error detecting eyes: \(error.localizedDescription)")
+                        return
+                    }
+                    
+                    guard let results = request.results as? [VNRecognizedObjectObservation] else {
+                        DispatchQueue.main.async { self.boundingBox = nil }
+                        return
+                    }
+                    for observation in results {
+                        if let topLabel = observation.labels.first {
+                            let box = observation.boundingBox
+                            if topLabel.identifier == "Eye", topLabel.confidence >= 0.95 {
+                                DispatchQueue.main.async { self.boundingBox = box }
+                            }
+                            else if topLabel.identifier == "Iris" && self.isRecordingVideo{
+                                let updatedBox = topLabel.confidence > 0.95 ? box : (self.irisBoundingBoxes.last ?? CGRect.zero)
+                                DispatchQueue.main.async { self.irisBoundingBoxes.append(updatedBox) }
+                            }
+                            else if topLabel.identifier == "Pupil" && self.isRecordingVideo && self.currentView == "PLR" {
+                                let irisBoundingBox = self.irisBoundingBoxes.last ?? CGRect.zero
+                                let updatedBox = (topLabel.confidence >= 0.9 && irisBoundingBox.contains(box)) ? box : (self.pupilBoundingBoxes.last  ?? CGRect.zero)
+                                DispatchQueue.main.async { self.pupilBoundingBoxes.append(updatedBox) }
+                            }
+                        }
+                    }
+                    
+                    DispatchQueue.main.async {
+                        self.boundingBox = nil // Clear if no eye detected
+                    }
                 }
-            }
-            
-            // For visual feedback (the green box), find the "Eye".
-            let eyeObservation = results.first { obs in
-                obs.labels.first?.identifier == "Eye" && obs.labels.first?.confidence ?? 0 >= 0.95
-            }
-            
-            DispatchQueue.main.async {
-                self.boundingBox = nil // Clear if no eye detected
-            }
-        }
-        
-        let handler = VNImageRequestHandler(ciImage: ciImage, options: [:])
-        do {
-            try handler.perform([request])
-        } catch {
-            print("Failed to perform vision request: \(error)")
-        }
+                
+                let handler = VNImageRequestHandler(ciImage: ciImage, options: [:])
+                do {
+                    try handler.perform([request])
+                } catch {
+                    print("Failed to perform vision request: \(error)")
+                }
+
+
+//            if let pupilObs = pupilObservation, self.isRecordingVideo, self.currentView == "PLR" {
+//                let pupilBox = pupilObs.boundingBox
+//                let pupilConfidence = pupilObs.labels.first?.confidence ?? 0
+//                
+//                // A pupil detection is valid only if confidence is high AND it's inside the iris box.
+//                let isPupilValid = pupilConfidence >= 0.87 && currentIrisBox.contains(pupilBox)
+//                
+//                let updatedPupilBox = isPupilValid ? pupilBox : (self.pupilBoundingBoxes.last ?? .zero)
+//                
+//                DispatchQuetxtue.main.async {
+//                    self.pupilBoundingBoxes.append(updatedPupilBox)
+//                }
+//            }
+//        }
+
     }
     
     // MARK: -  Processing

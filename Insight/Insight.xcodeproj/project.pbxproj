@@ -49,13 +49,11 @@
 		05DFAFE52D39F0650097753B /* ObservableSignsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05DFAFE42D39F0650097753B /* ObservableSignsView.swift */; };
 		05DFAFE82D39FEB50097753B /* QuestionToggleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05DFAFE72D39FEB50097753B /* QuestionToggleView.swift */; };
 		05E63DE32D48003F002520EA /* TestMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05E63DE22D48003F002520EA /* TestMenuView.swift */; };
-		05E6C7982E948A3B009D8610 /* best.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 05E6C7972E948A3B009D8610 /* best.mlpackage */; };
 		05F110422C990245007B16A0 /* PlaybackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F110412C990245007B16A0 /* PlaybackView.swift */; };
 		05F110452C9906C1007B16A0 /* ContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F110442C9906C1007B16A0 /* ContentViewModel.swift */; };
 		05F828802D62646800682C79 /* CustomBackButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F8287F2D62646800682C79 /* CustomBackButton.swift */; };
 		05F828822D626EF100682C79 /* CustomNavigationTitle .swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F828812D626EF100682C79 /* CustomNavigationTitle .swift */; };
 		05FDF1DC2DF0D67000E6F4B2 /* EyeCutoutProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05FDF1DB2DF0D67000E6F4B2 /* EyeCutoutProvider.swift */; };
-		05FF7C072E92E27700DF5E30 /* OBBPostProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05FF7C062E92E27700DF5E30 /* OBBPostProcessor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -103,13 +101,11 @@
 		05DFAFE42D39F0650097753B /* ObservableSignsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableSignsView.swift; sourceTree = "<group>"; };
 		05DFAFE72D39FEB50097753B /* QuestionToggleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionToggleView.swift; sourceTree = "<group>"; };
 		05E63DE22D48003F002520EA /* TestMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestMenuView.swift; sourceTree = "<group>"; };
-		05E6C7972E948A3B009D8610 /* best.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = best.mlpackage; sourceTree = "<group>"; };
 		05F110412C990245007B16A0 /* PlaybackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackView.swift; sourceTree = "<group>"; };
 		05F110442C9906C1007B16A0 /* ContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewModel.swift; sourceTree = "<group>"; };
 		05F8287F2D62646800682C79 /* CustomBackButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomBackButton.swift; sourceTree = "<group>"; };
 		05F828812D626EF100682C79 /* CustomNavigationTitle .swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CustomNavigationTitle .swift"; sourceTree = "<group>"; };
 		05FDF1DB2DF0D67000E6F4B2 /* EyeCutoutProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EyeCutoutProvider.swift; sourceTree = "<group>"; };
-		05FF7C062E92E27700DF5E30 /* OBBPostProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OBBPostProcessor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -154,7 +150,6 @@
 				052CD9562D970DB30094CD57 /* ServerEndpoints.swift */,
 				052CD9542D96F9FD0094CD57 /* Helper.swift */,
 				05C8E8AE2D9CC74100FF92D7 /* RadiusDataProcessor.swift */,
-				05FF7C062E92E27700DF5E30 /* OBBPostProcessor.swift */,
 				057BB4B22D9CD7AC00C51868 /* PlrGraphView.swift */,
 				0552AFF42DA6F70100FDFD0E /* VomsGraphView.swift */,
 				05F110412C990245007B16A0 /* PlaybackView.swift */,
@@ -174,7 +169,6 @@
 				05A742072CA254CE00C5FEC2 /* LoadingView.swift */,
 				05F8287F2D62646800682C79 /* CustomBackButton.swift */,
 				05F828812D626EF100682C79 /* CustomNavigationTitle .swift */,
-				05E6C7972E948A3B009D8610 /* best.mlpackage */,
 				055264C72D750BA400FA7EDC /* EyeDetector.mlpackage */,
 				05DFAFE32D39E58E0097753B /* SCAT-6 */,
 				053F2FE22C42ECD2007A9BF5 /* Assets.xcassets */,
@@ -263,7 +257,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 053F2FD62C42ECD1007A9BF5 /* Build configuration list for PBXProject "Application supports iTunes file sharing" */;
+			buildConfigurationList = 053F2FD62C42ECD1007A9BF5 /* Build configuration list for PBXProject "Insight" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -337,13 +331,11 @@
 				05C2ECB62CB9DC0C0086C260 /* CaptureView.swift in Sources */,
 				053F2FEF2C42ED41007A9BF5 /* HeaderView.swift in Sources */,
 				05B67FE32D3AE1BA003B8C02 /* MotorScreenView.swift in Sources */,
-				05E6C7982E948A3B009D8610 /* best.mlpackage in Sources */,
 				05E63DE32D48003F002520EA /* TestMenuView.swift in Sources */,
 				05F110422C990245007B16A0 /* PlaybackView.swift in Sources */,
 				052CD9532D9598470094CD57 /* NetworkService.swift in Sources */,
 				05A648472CACDAAD00ABF8F6 /* VideoPlayer.swift in Sources */,
 				05B67FDD2D3A0AFF003B8C02 /* PrimaryButton1.swift in Sources */,
-				05FF7C072E92E27700DF5E30 /* OBBPostProcessor.swift in Sources */,
 				05B67FE12D3ADD21003B8C02 /* CervicalSpineAssessmentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -480,12 +472,13 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Insight/Preview Content\"";
-				DEVELOPMENT_TEAM = W9YCR2WTG7;
+				DEVELOPMENT_TEAM = L7745265ZX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Insight/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Insight;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Please allow Camera Access";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Allow Access to Photo Library";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -499,7 +492,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = Insight.Innovations;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.insight-innovations.Insight";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = NO;
@@ -523,12 +516,13 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Insight/Preview Content\"";
-				DEVELOPMENT_TEAM = W9YCR2WTG7;
+				DEVELOPMENT_TEAM = L7745265ZX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Insight/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Insight;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Please allow Camera Access";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Allow Access to Photo Library";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -542,7 +536,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = Insight.Innovations;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.insight-innovations.Insight";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = NO;
@@ -559,7 +553,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		053F2FD62C42ECD1007A9BF5 /* Build configuration list for PBXProject "Application supports iTunes file sharing" */ = {
+		053F2FD62C42ECD1007A9BF5 /* Build configuration list for PBXProject "Insight" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				053F2FE72C42ECD2007A9BF5 /* Debug */,
