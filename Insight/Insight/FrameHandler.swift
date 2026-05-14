@@ -360,7 +360,23 @@ class FrameHandler: NSObject, ObservableObject {
     }
     
     func getPlrMetrics(frameRadius: [Double]) -> (maxPD: Double, minPD: Double, latency: String, maxConstriction: Double, seventyFivePercentRecovery: String, adv: Double, acv: Double) {
-        return RadiusDataProcessor.getPlrMetrics(frameRadius: frameRadius)
+        // a fallback ratio just in case the iris wasn't detected
+        var dynamicMmPerPixel: Double = 0.108
+        
+        // Calculate the dynamic ratio based on 11.7mm average human iris
+        
+        if !self.irisBoundingBoxes.isEmpty {
+            // Get the sum of all detected iris widths
+            let totalIrisWidth = self.irisBoundingBoxes.reduce(0) { $0 + $1.width }
+            // Find the average pixel width of the iris across the video
+            let avgIrisWidthPx = totalIrisWidth / Double(self.irisBoundingBoxes.count)
+            // Divide standard anatomical iris size (11.7mm) by the pixel width
+            dynamicMmPerPixel = 11.7 / avgIrisWidthPx
+            print("Calculated Dynamic mm/pixel ratio: \(dynamicMmPerPixel)")
+        } else {
+            print("Warning: No iris bounding boxes found. Using fallback ratio.")
+        }
+        return RadiusDataProcessor.getPlrMetrics(frameRadius: frameRadius, fps: 30.0, mmPerPixel: dynamicMmPerPixel)
     }
 
 }
