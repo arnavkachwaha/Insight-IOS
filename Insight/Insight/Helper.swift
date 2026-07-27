@@ -13,11 +13,18 @@ import Photos
 struct Helper {
     
     static func cropImage(on image: CIImage) -> CIImage {
-        let _ = image.extent.width
-        let ciHeight = image.extent.height
-        let centerY = ciHeight / 2
-        let cropRect = CGRect(x: 0, y: centerY - 145, width: 640, height: 640)
+        let imageWidth = image.extent.width
+        let imageHeight = image.extent.height
+        let cropSize: CGFloat = 640.0
+        
+        // Center horizontally
+        let cropX = (imageWidth - cropSize) / 2.0
+        // Match the vertical alignment of the UI Eye Cutout
+        let cropY = (imageHeight / 2) - 145
+        let cropRect = CGRect(x: cropX, y: cropY, width: cropSize, height: cropSize)
         let croppedImage = image.cropped(to: cropRect)
+        
+        // Shift origin back to (0,0)
         let shiftedImage = croppedImage.transformed(by: CGAffineTransform(translationX: -cropRect.origin.x, y: -cropRect.origin.y))
         return shiftedImage
     }

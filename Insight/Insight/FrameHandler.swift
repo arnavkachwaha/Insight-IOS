@@ -21,6 +21,8 @@ class FrameHandler: NSObject, ObservableObject {
     private var savedExposureDuration: CMTime?
     private var movieOutput = AVCaptureMovieFileOutput()
     private let sessionQueue = DispatchQueue(label: "sessionQueue")
+    private var previousSmoothedRect: CGRect?
+    private let emaAlpha: CGFloat = 0.55
     
     @Published var frame: CGImage?
     @Published var boundingBox: CGRect?
@@ -143,7 +145,31 @@ class FrameHandler: NSObject, ObservableObject {
         }
     }
     
+    func applyEMASmoothing(to currentRect: CGRect) -> CGRect {
+    guard let prev = previousSmoothedRect else {
+            previousSmoothedRect = currentRect
+            return currentRect
+    }
+        // Smooth each component of the CGRect independently
+        let smoothedX = (currentRect.origin.x * emaAlpha) + (prev.origin.x * (1 - emaAlpha))
+        let smoothedY = (currentRect.origin.y * emaAlpha) + (prev.origin.y * (1 - emaAlpha))
+        let smoothedWidth = (currentRect.size.width * emaAlpha) + (prev.size.width * (1 - emaAlpha))
+        let smoothedHeight = (currentRect.size.height * emaAlpha) + (prev.size.height * (1 - emaAlpha))
+        
+        let smoothedRect = CGRect(x: smoothedX, y: smoothedY, width: smoothedWidth, height: smoothedHeight)
+        
+        // Save the state for the next frame
+        previousSmoothedRect = smoothedRect
+        
+        return smoothedRect
+    }
+    
+    func resetSmoothingState() {
+        previousSmoothedRect = nil
+    }
+    
     func startRecording() {
+        self.resetSmoothingState()
         self.irisBoundingBoxes = []
         self.pupilBoundingBoxes = []
         guard let captureSession = captureSession, captureSession.isRunning else {
@@ -263,51 +289,63 @@ class FrameHandler: NSObject, ObservableObject {
     
     // MARK: - Eye Detection
     func detectEyes(in ciImage: CIImage) {
-        guard let visionModel = visionModel else {
-                    print("Vision model not loaded")
+            guard let visionModel = visionModel else {
+                print("Vision model not loaded")
+                return
+            }
+            
+            let request = VNCoreMLRequest(model: visionModel) { request, error in
+                if let error = error {
+                    print("Error detecting eyes: \(error.localizedDescription)")
                     return
                 }
                 
-                let request = VNCoreMLRequest(model: visionModel) { request, error in
-                    if let error = error {
-                        print("Error detecting eyes: \(error.localizedDescription)")
-                        return
-                    }
-                    
-                    guard let results = request.results as? [VNRecognizedObjectObservation] else {
-                        DispatchQueue.main.async { self.boundingBox = nil }
-                        return
-                    }
-                    for observation in results {
-                        if let topLabel = observation.labels.first {
-                            let box = observation.boundingBox
-                            if topLabel.identifier == "Eye", topLabel.confidence >= 0.95 {
-                                DispatchQueue.main.async { self.boundingBox = box }
-                            }
-                            else if topLabel.identifier == "Iris" && self.isRecordingVideo{
-                                let updatedBox = topLabel.confidence > 0.95 ? box : (self.irisBoundingBoxes.last ?? CGRect.zero)
-                                DispatchQueue.main.async { self.irisBoundingBoxes.append(updatedBox) }
-                            }
-                            else if topLabel.identifier == "Pupil" && self.isRecordingVideo && self.currentView == "PLR" {
-                                let irisBoundingBox = self.irisBoundingBoxes.last ?? CGRect.zero
-                                let updatedBox = (topLabel.confidence >= 0.9 && irisBoundingBox.contains(box)) ? box : (self.pupilBoundingBoxes.last  ?? CGRect.zero)
-                                DispatchQueue.main.async { self.pupilBoundingBoxes.append(updatedBox) }
-                            }
+                guard let results = request.results as? [VNRecognizedObjectObservation] else {
+                    DispatchQueue.main.async { self.boundingBox = nil }
+                    return
+                }
+                
+                for observation in results {
+                    if let topLabel = observation.labels.first {
+                        let box = observation.boundingBox
+                        
+                        if topLabel.identifier == "Eye", topLabel.confidence >= 0.95 {
+                            DispatchQueue.main.async { self.boundingBox = box }
                         }
-                    }
-                    
-                    DispatchQueue.main.async {
-                        self.boundingBox = nil // Clear if no eye detected
+                        else if topLabel.identifier == "Iris" && self.isRecordingVideo {
+                            let updatedBox = topLabel.confidence > 0.95 ? box : (self.irisBoundingBoxes.last ?? CGRect.zero)
+                            DispatchQueue.main.async { self.irisBoundingBoxes.append(updatedBox) }
+                        }
+                        else if topLabel.identifier == "Pupil" && self.isRecordingVideo && self.currentView == "PLR" {
+                            let irisBoundingBox = self.irisBoundingBoxes.last ?? CGRect.zero
+                            
+                            let updatedBox: CGRect
+                            
+                            // Here is your exact logic from before, just expanded to allow smoothing
+                            if topLabel.confidence >= 0.9 && irisBoundingBox.contains(box) {
+                                // If confidence is good and it's inside the iris, smooth the new box
+                                updatedBox = self.applyEMASmoothing(to: box)
+                            } else {
+                                // If it fails either check, fallback to the last known box (without smoothing it again)
+                                updatedBox = self.pupilBoundingBoxes.last ?? CGRect.zero
+                            }
+                            
+                            DispatchQueue.main.async { self.pupilBoundingBoxes.append(updatedBox) }
+                        }
                     }
                 }
                 
-                let handler = VNImageRequestHandler(ciImage: ciImage, options: [:])
-                do {
-                    try handler.perform([request])
-                } catch {
-                    print("Failed to perform vision request: \(error)")
+                DispatchQueue.main.async {
+                    self.boundingBox = nil // Clear if no eye detected
                 }
-
+            }
+            
+            let handler = VNImageRequestHandler(ciImage: ciImage, options: [:])
+            do {
+                try handler.perform([request])
+            } catch {
+                print("Failed to perform vision request: \(error)")
+            }
 
 //            if let pupilObs = pupilObservation, self.isRecordingVideo, self.currentView == "PLR" {
 //                let pupilBox = pupilObs.boundingBox
@@ -360,22 +398,28 @@ class FrameHandler: NSObject, ObservableObject {
     }
     
     func getPlrMetrics(frameRadius: [Double]) -> (maxPD: Double, minPD: Double, latency: String, maxConstriction: Double, seventyFivePercentRecovery: String, adv: Double, acv: Double) {
-        // a fallback ratio just in case the iris wasn't detected
-        var dynamicMmPerPixel: Double = 0.108
-        
-        // Calculate the dynamic ratio based on 11.7mm average human iris
-        
-        if !self.irisBoundingBoxes.isEmpty {
-            // Get the sum of all detected iris widths
-            let totalIrisWidth = self.irisBoundingBoxes.reduce(0) { $0 + $1.width }
-            // Find the average pixel width of the iris across the video
-            let avgIrisWidthPx = totalIrisWidth / Double(self.irisBoundingBoxes.count)
-            // Divide standard anatomical iris size (11.7mm) by the pixel width
-            dynamicMmPerPixel = 11.7 / avgIrisWidthPx
-            print("Calculated Dynamic mm/pixel ratio: \(dynamicMmPerPixel)")
-        } else {
-            print("Warning: No iris bounding boxes found. Using fallback ratio.")
-        }
+        var dynamicMmPerPixel: Double = 0.108 // Fallback
+                
+                if !self.irisBoundingBoxes.isEmpty {
+                    // ONLY use the clean baseline frames before the flash hits at frame 15
+                    let baselineIrisBoxes = Array(self.irisBoundingBoxes.prefix(15))
+                    
+                    // Prevent divide-by-zero if somehow no boxes exist early on
+                    let validCount = max(1, baselineIrisBoxes.count)
+                    let totalIrisWidth = baselineIrisBoxes.reduce(0) { $0 + $1.width }
+                    let avgIrisWidthPx = totalIrisWidth / Double(validCount)
+                    
+                    // Base dynamic ratio
+                    let baseMmPerPixel = 11.7 / avgIrisWidthPx
+                    
+                    // The calibration factor we just established
+                    let yoloBoxCalibrationFactor: Double = 1.85
+                    
+                    dynamicMmPerPixel = baseMmPerPixel * yoloBoxCalibrationFactor
+                    
+                } else {
+                    print("Warning: No iris bounding boxes found. Using fallback ratio.")
+                }
         return RadiusDataProcessor.getPlrMetrics(frameRadius: frameRadius, fps: 30.0, mmPerPixel: dynamicMmPerPixel)
     }
 

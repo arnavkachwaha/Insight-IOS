@@ -20,8 +20,21 @@ public struct RadiusDataProcessor {
     public static func removeOutliers(_ data: [Double], threshold: Double = 2.0) -> [Double] {
         guard !data.isEmpty else { return data }
         let mean = data.reduce(0, +) / Double(data.count)
-        let std = sqrt(data.map { pow($0 - mean, 2) }.reduce(0, +) / Double(data.count))
-        return data.filter { abs($0 - mean) / std < threshold }
+        
+        // Prevent division by zero if all values happen to be identical
+        let variance = data.map { pow($0 - mean, 2) }.reduce(0, +) / Double(data.count)
+        let std = variance > 0 ? sqrt(variance) : 1.0
+        
+        var cleaned = data
+        for i in 0..<cleaned.count {
+            if abs(cleaned[i] - mean) / std >= threshold {
+                // CRUCIAL: Replace the outlier instead of deleting it.
+                // If it's the first frame, use the mean. Otherwise, hold the previous valid frame.
+                cleaned[i] = (i > 0) ? cleaned[i-1] : mean
+            }
+        }
+        
+        return cleaned
     }
     
     /// Applies a first-order exponential low-pass filter to the data.
@@ -107,53 +120,84 @@ public struct RadiusDataProcessor {
         return (denseTime, denseSpline)
     }
     
-    /// Computes a moving average for the given data.
-    static func movingAverage(data: [Double], windowSize: Int) -> [Double] {
-        guard data.count >= windowSize else { return data }
-        var result = [Double]()
-        for i in 0...(data.count - windowSize) {
-            let window = data[i..<(i + windowSize)]
-            let avg = window.reduce(0, +) / Double(windowSize)
-            result.append(avg)
+    /// Computes a centered moving average that preserves the array length
+        static func movingAverage(data: [Double], windowSize: Int) -> [Double] {
+            guard data.count >= windowSize else { return data }
+            var result = [Double]()
+            let halfWindow = windowSize / 2
+            
+            for i in 0..<data.count {
+                // Prevent out-of-bounds indexing at the edges
+                let start = max(0, i - halfWindow)
+                let end = min(data.count - 1, i + halfWindow)
+                
+                let window = data[start...end]
+                let avg = window.reduce(0, +) / Double(window.count)
+                result.append(avg)
+            }
+            return result
         }
-        return result
-    }
     
-    public static func getPlrMetrics(frameRadius: [Double], fps: Double = 30.0) -> (maxPD: Double, minPD: Double, latency: String, maxConstriction: Double, seventyFivePercentRecovery: String, adv: Double, acv: Double) {
-        let flashPoint = 40
-        guard frameRadius.count > flashPoint else { return (0, 0, "0", 0, "0", 0, 0) }
-        
-        let firstSegment = Array(frameRadius[0..<flashPoint])
-        let maxPD = firstSegment.max() ?? 0.0
-        let secondSegment = Array(frameRadius[flashPoint..<frameRadius.count])
-        let minPD = secondSegment.min() ?? 0.0
-        let maxPDIndex = frameRadius.firstIndex(of: maxPD) ?? 0
-        let minPDIndex = frameRadius.firstIndex(of: minPD) ?? 0
-        
-        // Latency: first index (after maxPDIndex) where value falls to <=95% of maxPD.
-        let indexAfterMax = frameRadius[maxPDIndex...].firstIndex { $0 <= maxPD * 0.95 } ?? maxPDIndex
-        let latencyValue = round(Double(abs(maxPDIndex - indexAfterMax)) / fps * 10000) / 1000.0
-        let latency = "\(latencyValue)msec"
-        
-        // Maximum constriction: difference between maxPD and minPD (rounded to 2 decimals).
-        let maxConstriction = round((maxPD - minPD) * 100) / 100.0
-        let maxConstrictionTime = Double(abs(maxPDIndex - minPDIndex)) / fps
-        let acv: Double = maxConstrictionTime != 0 ? round((maxConstriction / maxConstrictionTime) * 100) / 100.0 : 0.0
+    public static func getPlrMetrics(frameRadius: [Double], fps: Double = 30.0, mmPerPixel: Double) -> (maxPD: Double, minPD: Double, latency: String, maxConstriction: Double, seventyFivePercentRecovery: String, adv: Double, acv: Double) {
+            let flashPoint = 15
+            
+            guard frameRadius.count > flashPoint else { return (0, 0, "0 ms", 0, "0 s", 0, 0) }
+            
+            // 1. Find Baseline (Stable average just before flash)
+            let baselineSegment = Array(frameRadius[max(0, flashPoint - 15)..<flashPoint])
+            let baselineRadiusPx = baselineSegment.reduce(0, +) / Double(baselineSegment.count)
+            let maxPD = baselineRadiusPx * 2.0 * mmPerPixel
+            
 
-        // 75% Recovery: first index (after minPDIndex) where value >=75% of maxPD.
-        let seventyFivePercentIndex = frameRadius[minPDIndex...].firstIndex { $0 >= maxPD * 0.75 } ?? minPDIndex
-        let seventyFivePercentRecoveryValue = round(Double(seventyFivePercentIndex) / fps * 100) / 100.0
-        let seventyFivePercentRecovery = "\(seventyFivePercentRecoveryValue)msec"
-        
-        // Dilation velocity (adv): from minPDIndex onward, the maximum dilated value.
-        let subArray = Array(frameRadius[minPDIndex..<frameRadius.count])
-        let maxDilatedDiameter = subArray.max() ?? minPD
-//        let maxDilatedDiameterIndex = minPDIndex + (subArray.firstIndex(of: maxDilatedDiameter) ?? 0)
-//        let maxDilationTime = Double(abs(maxDilatedDiameterIndex - minPDIndex)) / fps
-        let adv: Double = maxConstrictionTime != 0 ? round((maxDilatedDiameter / maxConstrictionTime) * 100) / 100.0 : 0.0
-        
-        return (maxPD, minPD, latency, maxConstriction, seventyFivePercentRecovery, adv, acv)
-    }
+            // 2. Find Peak Constriction (Min PD)
+            let constrictionWindow = Array(frameRadius[flashPoint...])
+            let minRadiusPx = constrictionWindow.min() ?? 0.0
+            let minPD = minRadiusPx * 2.0 * mmPerPixel
+            
+            // Absolute index in the main array
+            let minPDIndex = flashPoint + (constrictionWindow.firstIndex(of: minRadiusPx) ?? 0)
+            
+            // 3. Find Onset (Latency Point)
+            // FIX A: Start searching EXACTLY at the flash point (remove the +6 frame blindfold)
+            // FIX B: Use a strict 0.15 mm physical drop so large pupils aren't penalized
+            let dropThresholdPx = baselineRadiusPx - (0.15 / (2.0 * mmPerPixel))
+            let onsetIndex = frameRadius[flashPoint...].firstIndex { $0 <= dropThresholdPx } ?? flashPoint
+            
+            let latencyValue = round(Double(abs(onsetIndex - flashPoint)) / fps * 1000.0)
+            let latency = "\(Int(latencyValue)) ms"
+            
+            // 4. Calculate ACV (Onset to Minimum)
+            let maxConstriction = round((maxPD - minPD) * 100) / 100.0
+            let constrictionFrames = max(1, minPDIndex - onsetIndex)
+            let constrictionTime = Double(constrictionFrames) / fps
+            let constrictionDistanceMm = (frameRadius[onsetIndex] - frameRadius[minPDIndex]) * 2.0 * mmPerPixel
+            let acv: Double = round((constrictionDistanceMm / constrictionTime) * 100) / 100.0
+
+            // 5. Calculate 75% Recovery Point
+            let recoveryThresholdPx = minRadiusPx + ((baselineRadiusPx - minRadiusPx) * 0.75)
+            
+            // Search for the recovery point, default to the very last frame if not found
+            let seventyFivePercentIndex = frameRadius[minPDIndex...].firstIndex { $0 >= recoveryThresholdPx } ?? (frameRadius.count - 1)
+            let recoveryFrames = max(1, seventyFivePercentIndex - minPDIndex)
+            
+            // FIX: If the index hit the end of the video, flag it so it doesn't log a false time
+            let seventyFivePercentRecovery: String
+            if seventyFivePercentIndex == frameRadius.count - 1 {
+                seventyFivePercentRecovery = "Incomplete"
+            } else {
+                let seventyFivePercentRecoveryValue = round((Double(recoveryFrames) / fps) * 100) / 100.0
+                seventyFivePercentRecovery = "\(seventyFivePercentRecoveryValue) s"
+            }
+            
+            // 6. Calculate ADV (Minimum to 75% Recovery or End of Video)
+            let dilationTime = Double(recoveryFrames) / fps
+            let dilationDistanceMm = (frameRadius[seventyFivePercentIndex] - frameRadius[minPDIndex]) * 2.0 * mmPerPixel
+            
+            // Added a safeguard to prevent dividing by zero if minPDIndex is exactly at the end
+            let adv: Double = dilationTime != 0 ? round((dilationDistanceMm / dilationTime) * 100) / 100.0 : 0.0
+            
+            return (maxPD, minPD, latency, maxConstriction, seventyFivePercentRecovery, adv, acv)
+        }
 
     
     public static func getProcessedPlrRadius(from boundingBoxes: [CGRect]) -> [Double] {
